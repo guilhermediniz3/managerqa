@@ -1,0 +1,14 @@
+/* Login.css */
+.image-wrapper {
+    background-color: transparent; /* Fundo transparente */
+  }
+  
+  .image-container {
+    background-color: transparent; /* Fundo transparente no container */
+  }
+  
+  img {
+    object-fit: cover;  /* Garante que a imagem cubra o espaço disponível */
+    width: 100%;
+    height: 100%;
+  }
