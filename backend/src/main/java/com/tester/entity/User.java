@@ -17,7 +17,7 @@ public class User {
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long id;
 
-	    @NotEmpty(message = "O nome é obrigatório")  
+	
 	    private String name;
 
 	    @NotNull(message = "O e-mail é obrigatório") 

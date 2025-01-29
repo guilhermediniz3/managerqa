@@ -5,8 +5,9 @@ import jakarta.validation.constraints.NotEmpty;
 
 public class UserDTO {
 
-	 @NotEmpty(message = "O nome é obrigatório")
+	
 	    private String name;
+	    
 
 	    @Email(message = "O e-mail deve ser válido")
 	    @NotEmpty(message = "O e-mail é obrigatório")

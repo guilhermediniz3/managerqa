@@ -20,7 +20,7 @@ public class UserService {
 	public UserDTO createUser(UserDTO userDTO) {
 		User user = new User(userDTO.getName(), userDTO.getEmail(), userDTO.getPassword());
 		User savedUser = userRepository.save(user);
-		return new UserDTO(savedUser.getName(), savedUser.getEmail(), null);
+		return new UserDTO(savedUser.getName(), savedUser.getEmail(), savedUser.getPassword());
 	}
 
 	public List<UserDTO> getAllUsers() {
@@ -43,7 +43,7 @@ public class UserService {
 			user.setEmail(userDTO.getEmail());
 			user.setPassword(userDTO.getPassword());
 			User updateUser = userRepository.save(user);
-			return new UserDTO(updateUser.getName(), updateUser.getEmail(), null);
+			return new UserDTO(updateUser.getName(), updateUser.getEmail(), updateUser.getPassword());
 		}).orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 	}
 
