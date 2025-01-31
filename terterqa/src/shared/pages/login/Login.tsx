@@ -16,13 +16,13 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       // Envia os dados para a API colcoar a porta do servidor spring backend
-      const response = await axios.post('http://localhost:9090/api/users', {
+      const response = await axios.post('http://localhost:9090/auth/login', {
         email,
         password,
       });
 
       // Verifica se a autenticação foi bem-sucedida
-      if (response.status === 201) {
+      if (response.status === 200) {
         // Redireciona para o Dashboard após login
         navigate('/dashboard');
       }

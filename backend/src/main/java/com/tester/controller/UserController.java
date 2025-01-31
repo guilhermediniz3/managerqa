@@ -22,7 +22,7 @@ import com.tester.service.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5173") // Porta do seu frontend!
+
 @RequestMapping("/api/users")
 
 public class UserController {

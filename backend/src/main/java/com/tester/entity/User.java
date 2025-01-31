@@ -11,9 +11,10 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "tb_user")  
+
 public class User {
 
-	 @Id
+	     @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long id;
 
