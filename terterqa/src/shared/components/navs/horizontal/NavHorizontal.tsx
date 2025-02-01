@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import './stlyless.css';
 import NavVertical from '../vertical/NavVertical';
+import ToggleThemeButton from '../../Buttons/ToggleThemeButton';
 
 interface DecodedToken {
   username: string;
@@ -23,22 +24,14 @@ const NavHorizontal: React.FC = () => {
     }
   }, []);
 
-  // Função para alternar entre temas dark e light
-  const toggleTheme = () => {
-    const htmlElement = document.documentElement;
-    const currentTheme = htmlElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    htmlElement.setAttribute('data-theme', newTheme);
-  };
-
+  
   return (
     <>
       <nav className="navHorizontal">
-        {/* Botão para alternar o tema */}
-        <button onClick={toggleTheme} className="themeButton">
-          Alternar Tema
-        </button>
-
+      
+        <div className="text-center mt-3">
+                <ToggleThemeButton />
+              </div>
         {/* Nome do usuário */}
         <div className="userInfo">
           <span>{username}</span>
