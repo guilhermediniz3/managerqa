@@ -1,11 +1,11 @@
-/* Estilos do NavVertical */
+/* NavVertical.css */
 .navVertical {
   position: fixed;
   top: 0;
   left: 0;
   width: 60px;
   height: 100vh;
-  background-color: #222;
+  background-color: #222; /* Cor de fundo do menu vertical */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16,6 +16,7 @@
 .navVertical.expanded {
   width: 200px;
 }
+
 .verticalHeader {
   display: flex;
   justify-content: center;
@@ -31,14 +32,14 @@
   width: 40px;
   height: 40px;
   border: none;
-  background-color: #444;
+  background-color: #222; /* Mesma cor do menu vertical */
   color: white;
   cursor: pointer;
   transition: background 0.3s;
 }
 
 .expandButton:hover {
-  background-color: #666;
+  background-color: #333; /* Cor de fundo ao passar o mouse */
 }
 
 /* Lista de navegação */
@@ -65,7 +66,7 @@
 }
 
 .navLink:hover {
-  background-color: #333;
+  background-color: #333; /* Cor de fundo ao passar o mouse */
 }
 
 .navIcon {
@@ -80,37 +81,4 @@
 /* Quando o menu estiver recolhido, esconde os textos */
 .navVertical:not(.expanded) .navText {
   display: none;
-}
-
-/* Estilos do NavHorizontal */
-.navHorizontal {
-  position: fixed;
-  top: 0;
-  left: 60px; /* Largura do menu vertical recolhido */
-  right: 0;
-  height: 50px;
-  background-color: #333;
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  transition: left 0.3s;
-  z-index: 999; /* Abaixo do menu vertical */
-}
-
-/* Ajusta a posição do NavHorizontal quando o NavVertical está expandido */
-.navVertical.expanded ~ .navHorizontal {
-  left: 200px; /* Largura do menu vertical expandido */
-}
-
-/* Estilos do conteúdo principal */
-.mainContent {
-  margin-top: 50px; /* Altura do NavHorizontal */
-  margin-left: 60px; /* Largura do menu vertical recolhido */
-  padding: 20px;
-  transition: margin-left 0.3s;
-}
-
-/* Ajusta a margem do conteúdo principal quando o NavVertical está expandido */
-.navVertical.expanded ~ .mainContent {
-  margin-left: 200px; /* Largura do menu vertical expandido */
 }
