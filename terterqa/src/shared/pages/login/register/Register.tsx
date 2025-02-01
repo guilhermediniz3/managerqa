@@ -18,7 +18,7 @@ function Register() {
     };
 
     try {
-      const response = await axios.post("http://localhost:9090/auth/register", payload, {
+      const response = await axios.post("http://localhost:8081/auth/register", payload, {
         headers: {
           "Content-Type": "application/json", // Cabeçalho correto para enviar dados em JSON
         },

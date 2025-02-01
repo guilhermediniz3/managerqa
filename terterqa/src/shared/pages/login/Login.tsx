@@ -15,14 +15,29 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Envia os dados para a API colcoar a porta do servidor spring backend
-      const response = await axios.post('http://localhost:9090/auth/login', {
+      // Envia os dados para a API
+      const response = await axios.post('http://localhost:8081/auth/login', {
         email,
         password,
       });
 
+      console.log('Resposta do backend:', response.data); // Log da resposta completa
+
       // Verifica se a autenticação foi bem-sucedida
       if (response.status === 200) {
+        // Extrai o token e os dados do usuário da resposta
+        const { token, user } = response.data;
+
+        // Armazena o token no localStorage
+        localStorage.setItem('token', token);
+        console.log('Token armazenado no localStorage:', token); // Log do token armazenado
+
+        // Armazena os dados do usuário no localStorage (opcional)
+        if (user) {
+          localStorage.setItem('user', JSON.stringify(user));
+          console.log('Dados do usuário armazenados no localStorage:', user); // Log dos dados do usuário
+        }
+
         // Redireciona para o Dashboard após login
         navigate('/dashboard');
       }

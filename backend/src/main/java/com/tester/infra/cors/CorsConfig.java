@@ -14,8 +14,9 @@ public class CorsConfig implements WebMvcConfigurer {
 	        registry.addMapping("/**") // Permite todas as rotas
 	                .allowedOrigins("http://localhost:5173") // Origem do seu frontend (ajuste para a porta correta)
 	                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Métodos permitidos
-	                .allowedHeaders("Content-Type", "Authorization") // Cabeçalhos permitidos
+	                .allowedHeaders("*") // Cabeçalhos permitidos
 	                .allowCredentials(true) // Permite cookies (se necessário)
 	                .maxAge(3600); // Cache de preflight OPTIONS por 1 hora
+	        
 	    }
 }

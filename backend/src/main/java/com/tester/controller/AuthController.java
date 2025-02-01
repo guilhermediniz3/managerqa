@@ -20,7 +20,7 @@ import com.tester.repository.UserRepository;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:5173") // Porta do seu frontend!
+
 
 public class AuthController {
 
