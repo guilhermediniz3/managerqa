@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Button, Form, Container, Row, Col, Card } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios'; // Importando o Axios
+import axios from 'axios'; 
 import ToggleThemeButton from '../../components/Buttons/ToggleThemeButton';
 import loginImage from '../../../assets/login.png';
-import './Login.css'; // Importe o arquivo CSS
+import './Login.css'; 
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -15,7 +15,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Envia os dados para a API
+    
       const response = await axios.post('http://localhost:8081/auth/login', {
         email,
         password,

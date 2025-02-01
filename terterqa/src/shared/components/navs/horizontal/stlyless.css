@@ -1,0 +1,40 @@
+.navHorizontal {
+  position: fixed;
+  top: 0;
+  left: 60px; /* Largura do menu vertical recolhido */
+  right: 0;
+  height: 50px;
+  background-color: #333;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  transition: left 0.3s;
+  z-index: 999; /* Abaixo do menu vertical */
+}
+
+/* Ajusta a posição do NavHorizontal quando o NavVertical está expandido */
+.navVertical.expanded ~ .navHorizontal {
+  left: 200px; /* Largura do menu vertical expandido */
+}
+
+
+.menuButton {
+  background: none;
+  border: none;
+  color: var(--nav-text-color);
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.themeButton {
+  background: none;
+  border: none;
+  color: var(--nav-text-color);
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 20px;
+}
+
+.userInfo {
+  font-size: 16px;
+}
