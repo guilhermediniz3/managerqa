@@ -77,12 +77,18 @@
   position: absolute;
   bottom: 40px;
   display: flex;
-  gap: 5px;
+  flex-wrap: wrap; /* Permite que as cores quebrem para a próxima linha */
+  gap: 5px; /* Espaçamento entre as cores */
+  width: 100px; /* Largura fixa para 4 cores por linha */
 }
 
 .colorOption {
-  width: 20px;
-  height: 20px;
+  width: 20px; /* Aumente o tamanho para 30px */
+  height: 20px; /* Aumente o tamanho para 30px */
   border-radius: 50%;
   cursor: pointer;
+  flex: 0 0 20px; /* Ajuste o tamanho fixo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
