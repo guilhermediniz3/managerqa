@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaBars, FaHome, FaUser, FaCog, FaPalette } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { FaBars, FaHome, FaUser, FaCog, FaPalette, FaUserPlus } from 'react-icons/fa';
 import './styless.css';
 
 const NavVertical: React.FC = () => {
@@ -8,6 +8,7 @@ const NavVertical: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState<string>(
     localStorage.getItem('selectedColor') || '#333333' // Recupera a cor salva ou usa a cor padrão
   );
+  const [isSubmenuOpen, setIsSubmenuOpen] = useState<boolean>(false); // Estado para controlar a visibilidade do submenu
 
   const toggleExpanded = () => {
     setIsExpanded((prev) => !prev);
@@ -15,6 +16,10 @@ const NavVertical: React.FC = () => {
 
   const toggleColorPicker = () => {
     setIsColorPickerVisible((prev) => !prev);
+  };
+
+  const toggleSubmenu = () => {
+    setIsSubmenuOpen((prev) => !prev); // Alterna a visibilidade do submenu
   };
 
   const handleColorChange = (color: string) => {
@@ -60,6 +65,28 @@ const NavVertical: React.FC = () => {
             {isExpanded && <span className="navText">Perfil</span>}
           </a>
         </li>
+
+        <li className="navItem">
+          <a href="#" className="navLink" onClick={toggleSubmenu}>
+            <FaUserPlus className="navIcon" />
+            {isExpanded && <span className="navText">Cadastro</span>}
+          </a>
+          {/* Submenu */}
+          {isSubmenuOpen && (
+            <ul className="submenu">
+              <li className="submenuItem">
+                <a href="#">Submenu Item 1</a>
+              </li>
+              <li className="submenuItem">
+                <a href="#">Submenu Item 2</a>
+              </li>
+              <li className="submenuItem">
+                <a href="#">Submenu Item 3</a>
+              </li>
+            </ul>
+          )}
+        </li>
+
         <li className="navItem">
           <a href="#" className="navLink">
             <FaCog className="navIcon" />

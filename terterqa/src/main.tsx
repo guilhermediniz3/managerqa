@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode';
+
 import './index.css';
 import Login from './shared/pages/login/Login';
 import ForgotPassword from './shared/pages/login/forgot-password/ForgotPassword';
@@ -11,12 +11,7 @@ import Dashboard from './shared/pages/login/dashboard/Dashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ProtectedRoute from './shared/Routes/ProtectedRoute';
 
-// Interface para o token decodificado
-interface DecodedToken {
-  exp: number;
-  userId: string;
-  username: string;
-}
+
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
