@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importe o useNavigate
 import { FaBars, FaHome, FaUser, FaCog, FaPalette, FaUserPlus } from 'react-icons/fa';
 import './styless.css';
 
 const NavVertical: React.FC = () => {
+  const navigate = useNavigate(); // Hook para navegação programática
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isColorPickerVisible, setIsColorPickerVisible] = useState<boolean>(false);
   const [selectedColor, setSelectedColor] = useState<string>(
@@ -26,6 +28,11 @@ const NavVertical: React.FC = () => {
     setSelectedColor(color);
     localStorage.setItem('selectedColor', color); // Salva a cor no localStorage
     setIsColorPickerVisible(false);
+  };
+
+  // Função para navegar para uma rota específica
+  const handleNavigation = (path: string) => {
+    navigate(path); // Navega para a rota especificada
   };
 
   // Lista de cores
@@ -54,20 +61,41 @@ const NavVertical: React.FC = () => {
       {/* Lista de navegação */}
       <ul className="navList">
         <li className="navItem">
-          <a href="#" className="navLink">
+          <a
+            href="#"
+            className="navLink"
+            onClick={(e) => {
+              e.preventDefault(); // Evita o comportamento padrão do link
+              handleNavigation('/dashboard'); // Navega para a rota inicial
+            }}
+          >
             <FaHome className="navIcon" />
             {isExpanded && <span className="navText">Início</span>}
           </a>
         </li>
         <li className="navItem">
-          <a href="#" className="navLink">
+          <a
+            href="#"
+            className="navLink"
+            onClick={(e) => {
+              e.preventDefault(); // Evita o comportamento padrão do link
+              handleNavigation('/perfil'); // Navega para a rota de perfil
+            }}
+          >
             <FaUser className="navIcon" />
             {isExpanded && <span className="navText">Perfil</span>}
           </a>
         </li>
 
         <li className="navItem">
-          <a href="#" className="navLink" onClick={toggleSubmenu}>
+          <a
+            href="#"
+            className="navLink"
+            onClick={(e) => {
+              e.preventDefault(); // Evita o comportamento padrão do link
+              toggleSubmenu(); // Alterna a visibilidade do submenu
+            }}
+          >
             <FaUserPlus className="navIcon" />
             {isExpanded && <span className="navText">Cadastro</span>}
           </a>
@@ -75,20 +103,73 @@ const NavVertical: React.FC = () => {
           {isSubmenuOpen && (
             <ul className="submenu">
               <li className="submenuItem">
-                <a href="#">Submenu Item 1</a>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/usuario'); // Navega para a rota de usuário
+                  }}
+                >
+                  Usuário
+                </a>
               </li>
               <li className="submenuItem">
-                <a href="#">Submenu Item 2</a>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/tester'); // Navega para a rota de tester
+                  }}
+                >
+                  Tester
+                </a>
               </li>
               <li className="submenuItem">
-                <a href="#">Submenu Item 3</a>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/desenvolvedor'); // Navega para a rota de desenvolvedor
+                  }}
+                >
+                  Desenvolvedor
+                </a>
+              </li>
+              <li className="submenuItem">
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/tecnologias'); // Navega para a rota de tecnologias
+                  }}
+                >
+                  Tecnologias
+                </a>
+              </li>
+              <li className="submenuItem">
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/modulos'); // Navega para a rota de módulos
+                  }}
+                >
+                  Módulos
+                </a>
               </li>
             </ul>
           )}
         </li>
 
         <li className="navItem">
-          <a href="#" className="navLink">
+          <a
+            href="#"
+            className="navLink"
+            onClick={(e) => {
+              e.preventDefault(); // Evita o comportamento padrão do link
+              handleNavigation('/configuracoes'); // Navega para a rota de configurações
+            }}
+          >
             <FaCog className="navIcon" />
             {isExpanded && <span className="navText">Configurações</span>}
           </a>
@@ -99,7 +180,7 @@ const NavVertical: React.FC = () => {
       <div className="colorPickerContainer">
         <button onClick={toggleColorPicker} className="colorPickerButton">
           <FaPalette className="navIcon" />
-          {isExpanded && <span className="navText">Escolher Cor</span>}
+          {isExpanded && <span className="navText"></span>}
         </button>
         {isColorPickerVisible && (
           <div className="colorOptions">
