@@ -82,9 +82,7 @@ const Login: React.FC = () => {
               <div className="text-center">
                 <Link to="/forgot-password">Esqueceu a senha?</Link>
               </div>
-              <div className="text-center mt-2">
-                <Link to="/register">Ainda não tem uma conta? Registre-se</Link>
-              </div>
+           
               <div className="text-center mt-3">
                 <ToggleThemeButton />
               </div>

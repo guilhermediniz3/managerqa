@@ -107,7 +107,7 @@ const NavVertical: React.FC = () => {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    handleNavigation('/usuario'); // Navega para a rota de usuário
+                    handleNavigation('/register'); // Navega para a rota de usuário
                   }}
                 >
                   Usuário
