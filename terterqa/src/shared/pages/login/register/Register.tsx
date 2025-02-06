@@ -2,6 +2,13 @@ import axios from "axios";
 import { useState } from "react";
 import Toast from "react-bootstrap/Toast";
 import ToastContainer from "react-bootstrap/ToastContainer";
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
+import NavVertical from "../../../components/navs/vertical/NavVertical";
 
 function Register() {
   const [name, setName] = useState("");
@@ -9,8 +16,8 @@ function Register() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [showErrorToast, setShowErrorToast] = useState(false); // Estado para controlar o Toast de erro
-  const [showSuccessToast, setShowSuccessToast] = useState(false); // Estado para controlar o Toast de sucesso
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,86 +38,113 @@ function Register() {
 
       if (response.status === 200) {
         setSuccess("Usuário registrado com sucesso!");
-        setShowSuccessToast(true); // Mostra o Toast de sucesso
-        setShowErrorToast(false); // Esconde o Toast de erro, se estiver visível
+        setShowSuccessToast(true);
+        setShowErrorToast(false);
         console.log(response.data);
       }
     } catch (error) {
       setError("Usuário já existe na base de dados.");
-      setShowErrorToast(true); // Mostra o Toast de erro
-      setShowSuccessToast(false); // Esconde o Toast de sucesso, se estiver visível
+      setShowErrorToast(true);
+      setShowSuccessToast(false);
       console.error(error);
     }
   };
 
+  const handleBack = () => {
+    // Aqui você pode adicionar a lógica para navegar de volta
+    console.log("Voltar para a página anterior");
+    // Exemplo com React Router:
+    // navigate(-1); // Volta para a página anterior
+  };
+
   return (
-    <div>
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Register</button>
-      </form>
+    <>
+      <NavHorizontal /> {/* NavHorizontal no topo da página */}
+      <div style={{ display: "flex" }}>
+        <NavVertical /> {/* NavVertical no lado esquerdo */}
+        <Container className="d-flex justify-content-center align-items-center vh-100">
+          <Row>
+            <Col>
+              <h2 className="text-center mb-4">Register</h2>
+              <Form onSubmit={handleSubmit} className="p-4 border rounded shadow" style={{ maxWidth: "400px", width: "100%" }}>
+                <Form.Group controlId="formName" className="mb-3">
+                  <Form.Label>Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </Form.Group>
 
-      {/* Toast de Sucesso */}
-      <ToastContainer position="top-end" className="p-3">
-        <Toast
-          onClose={() => setShowSuccessToast(false)} // Fecha o Toast de sucesso
-          show={showSuccessToast}
-          delay={3000} // Fecha automaticamente após 3 segundos
-          autohide
-          bg="success" // Cor de fundo do Toast (verde)
-        >
-          <Toast.Header>
-            <strong className="me-auto">Success</strong>
-            <small>Now</small>
-          </Toast.Header>
-          <Toast.Body>{success}</Toast.Body>
-        </Toast>
-      </ToastContainer>
+                <Form.Group controlId="formEmail" className="mb-3">
+                  <Form.Label>Email</Form.Label>
+                  <Form.Control
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </Form.Group>
 
-      {/* Toast de Erro */}
-      <ToastContainer position="top-end" className="p-3">
-        <Toast
-          onClose={() => setShowErrorToast(false)} // Fecha o Toast de erro
-          show={showErrorToast}
-          delay={3000} // Fecha automaticamente após 3 segundos
-          autohide
-          bg="danger" // Cor de fundo do Toast (vermelho)
-        >
-          <Toast.Header>
-            <strong className="me-auto">Error</strong>
-            <small>Now</small>
-          </Toast.Header>
-          <Toast.Body>{error}</Toast.Body>
-        </Toast>
-      </ToastContainer>
-    </div>
+                <Form.Group controlId="formPassword" className="mb-3">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </Form.Group>
+
+                <div className="d-grid gap-2">
+                  <Button variant="success" type="submit">
+                    Salvar
+                  </Button>
+                  <Button variant="secondary" onClick={handleBack}>
+                    Voltar
+                  </Button>
+                </div>
+              </Form>
+            </Col>
+          </Row>
+
+          {/* Toast de Sucesso */}
+          <ToastContainer position="top-end" className="p-3">
+            <Toast
+              onClose={() => setShowSuccessToast(false)}
+              show={showSuccessToast}
+              delay={3000}
+              autohide
+              bg="success"
+            >
+              <Toast.Header>
+                <strong className="me-auto">Success</strong>
+                <small>Now</small>
+              </Toast.Header>
+              <Toast.Body>{success}</Toast.Body>
+            </Toast>
+          </ToastContainer>
+
+          {/* Toast de Erro */}
+          <ToastContainer position="top-end" className="p-3">
+            <Toast
+              onClose={() => setShowErrorToast(false)}
+              show={showErrorToast}
+              delay={3000}
+              autohide
+              bg="danger"
+            >
+              <Toast.Header>
+                <strong className="me-auto">Error</strong>
+                <small>Now</small>
+              </Toast.Header>
+              <Toast.Body>{error}</Toast.Body>
+            </Toast>
+          </ToastContainer>
+        </Container>
+      </div>
+    </>
   );
 }
 

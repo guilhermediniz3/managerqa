@@ -15,7 +15,7 @@ public class UserDTO {
 
 	    @NotEmpty(message = "A senha é obrigatória")
 	    private String password;
-
+	 
 	    // Construtores
 	    public UserDTO() {
 	    }
@@ -24,9 +24,10 @@ public class UserDTO {
 	        this.name = name;
 	        this.email = email;
 	        this.password = password;
+	       
 	    }
 
-	    // Getters e Setters
+	    // Getters e Setterss
 	    public String getName() {
 	        return name;
 	    }
@@ -50,4 +51,6 @@ public class UserDTO {
 	    public void setPassword(String password) {
 	        this.password = password;
 	    }
+
+
 }

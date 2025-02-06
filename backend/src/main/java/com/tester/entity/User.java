@@ -27,6 +27,7 @@ public class User {
 
 	    @NotEmpty(message = "A senha é obrigatória") 
 	    private String password;  
+	    
 	 
 	    public User() {
 	    }
@@ -35,6 +36,7 @@ public class User {
 	        this.name = name;
 	        this.email = email;
 	        this.password = password;
+	      
 	    }
 
 	    // Getters e Setters
@@ -69,4 +71,6 @@ public class User {
 	    public void setPassword(String password) {
 	        this.password = password;
 	    }
+
+
 }
