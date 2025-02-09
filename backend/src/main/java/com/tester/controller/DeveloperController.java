@@ -21,38 +21,42 @@ import com.tester.service.DeveloperService;
 @RequestMapping("/developers")
 public class DeveloperController {
 	
-	 @Autowired
+
+
+	    @Autowired
 	    private DeveloperService developerService;
 
-	 
 	    @GetMapping
 	    public ResponseEntity<List<DeveloperDTO>> getAllDevelopers() {
 	        List<DeveloperDTO> developers = developerService.getAllDevelopers();
 	        return ResponseEntity.ok(developers);
 	    }
 
-	   
 	    @GetMapping("/{id}")
 	    public ResponseEntity<DeveloperDTO> getDeveloperById(@PathVariable Long id) {
 	        DeveloperDTO developer = developerService.getDeveloperById(id);
 	        return ResponseEntity.ok(developer);
 	    }
 
-	  
 	    @PostMapping
 	    public ResponseEntity<DeveloperDTO> createDeveloper(@RequestBody DeveloperDTO developerDTO) {
 	        DeveloperDTO createdDeveloper = developerService.createDeveloper(developerDTO);
 	        return ResponseEntity.status(HttpStatus.CREATED).body(createdDeveloper);
 	    }
 
-	
 	    @PutMapping("/{id}")
 	    public ResponseEntity<DeveloperDTO> updateDeveloper(@PathVariable Long id, @RequestBody DeveloperDTO developerDTO) {
 	        DeveloperDTO updatedDeveloper = developerService.updateDeveloper(id, developerDTO);
 	        return ResponseEntity.ok(updatedDeveloper);
 	    }
+       // remove tecnolgia do dev
+	    @DeleteMapping("/{developerId}/technology/{technologyId}")
+	    public ResponseEntity<DeveloperDTO> removeTechnologyFromDeveloper(
+	            @PathVariable Long developerId, @PathVariable Long technologyId) {
+	        DeveloperDTO updatedDeveloper = developerService.removeTechnologyFromDeveloper(developerId, technologyId);
+	        return ResponseEntity.ok(updatedDeveloper); // Retorna o desenvolvedor atualizado
+	    }
 
-	   
 	    @DeleteMapping("/{id}")
 	    public ResponseEntity<Void> deleteDeveloper(@PathVariable Long id) {
 	        developerService.deleteDeveloper(id);

@@ -12,11 +12,11 @@ public class TechnologyDTO {
     // Construtor padrão
     public TechnologyDTO() {}
 
-    // Construtor com parâmetros
-    public TechnologyDTO(Long id, String name, boolean active) {
-        this.id = id;
-        this.name = name;
-        this.active = active;
+    // Construtor que recebe a entidade
+    public TechnologyDTO(Technology technology) {
+        this.id = technology.getId();
+        this.name = technology.getName();
+        this.active = technology.isActive();
     }
 
     // Getters e Setters
@@ -43,5 +43,4 @@ public class TechnologyDTO {
     public void setActive(boolean active) {
         this.active = active;
     }
-
 }

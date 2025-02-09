@@ -18,22 +18,14 @@ public class TechnologyService {
 
 	    public List<TechnologyDTO> getAllTechnologies() {
 	        return technologyRepository.findAll().stream()
-	                .map(technology -> new TechnologyDTO(
-	                        technology.getId(),
-	                        technology.getName(),
-	                        technology.isActive()
-	                ))
+	                .map(technology -> new TechnologyDTO(technology))  // Usando lambda
 	                .collect(Collectors.toList());
 	    }
 
 	    public TechnologyDTO getTechnologyById(Long id) {
 	        Technology technology = technologyRepository.findById(id)
 	                .orElseThrow(() -> new ResourceNotFoundException("Technology not found with id " + id));
-	        return new TechnologyDTO(
-	                technology.getId(),
-	                technology.getName(),
-	                technology.isActive()
-	        );
+	        return new TechnologyDTO(technology);  // Usando o construtor que recebe a entidade
 	    }
 
 	    public TechnologyDTO createTechnology(TechnologyDTO technologyDTO) {
@@ -42,11 +34,7 @@ public class TechnologyService {
 	        technology.setActive(technologyDTO.isActive());
 
 	        Technology savedTechnology = technologyRepository.save(technology);
-	        return new TechnologyDTO(
-	                savedTechnology.getId(),
-	                savedTechnology.getName(),
-	                savedTechnology.isActive()
-	        );
+	        return new TechnologyDTO(savedTechnology);  // Usando o construtor que recebe a entidade
 	    }
 
 	    public TechnologyDTO updateTechnology(Long id, TechnologyDTO technologyDTO) {
@@ -56,11 +44,7 @@ public class TechnologyService {
 	        existingTechnology.setActive(technologyDTO.isActive());
 
 	        Technology updatedTechnology = technologyRepository.save(existingTechnology);
-	        return new TechnologyDTO(
-	                updatedTechnology.getId(),
-	                updatedTechnology.getName(),
-	                updatedTechnology.isActive()
-	        );
+	        return new TechnologyDTO(updatedTechnology);  // Usando o construtor que recebe a entidade
 	    }
 
 	    public void deleteTechnology(Long id) {
