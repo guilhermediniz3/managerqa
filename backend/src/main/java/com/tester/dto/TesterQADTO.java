@@ -1,9 +1,6 @@
 package com.tester.dto;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotBlank;
+import com.tester.entity.TesterQA;
 
 public class TesterQADTO {
 
@@ -17,13 +14,19 @@ public class TesterQADTO {
 ;
 
 	public TesterQADTO(Long id, String name, boolean active) {
-		super();
+	
 		this.id = id;
 		this.name = name;
 		this.active = active;
 	}
-
+	
+	public TesterQADTO(TesterQA testerQA) {
+		this.id = testerQA.getId();
+		this.name = testerQA.getName();
+		this.active = testerQA.isActive();
 	}
+
+	
 	public Long getId() {
 		return id;
 	}
