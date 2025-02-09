@@ -1,48 +1,45 @@
 import React, { useState } from 'react';
 import { Button, Form, Container, Row, Col, Card } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios'; 
+import axios from 'axios';
 import ToggleThemeButton from '../../components/Buttons/ToggleThemeButton';
 import loginImage from '../../../assets/login.png';
-import './Login.css'; 
+import './Login.css';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState(''); // Para exibir mensagens de erro
+  const [errorMessage, setErrorMessage] = useState('');
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-    
       const response = await axios.post('http://localhost:8081/auth/login', {
         email,
         password,
       });
 
-      console.log('Resposta do backend:', response.data); // Log da resposta completa
+      console.log('Resposta do backend:', response.data);
 
-      // Verifica se a autenticação foi bem-sucedida
       if (response.status === 200) {
-        // Extrai o token e os dados do usuário da resposta
         const { token, user } = response.data;
 
         // Armazena o token no localStorage
         localStorage.setItem('token', token);
-        console.log('Token armazenado no localStorage:', token); // Log do token armazenado
+        console.log('Token armazenado no localStorage:', token);
 
         // Armazena os dados do usuário no localStorage (opcional)
         if (user) {
           localStorage.setItem('user', JSON.stringify(user));
-          console.log('Dados do usuário armazenados no localStorage:', user); // Log dos dados do usuário
+          console.log('Dados do usuário armazenados no localStorage:', user);
         }
 
-        // Redireciona para o Dashboard após login
-        navigate('/dashboard');
+        // Envia o token para a ProtectedRoute e navega para o dashboard
+        navigate('/dashboard', { state: { token } });
       }
     } catch (error) {
-      // Trata erros de autenticação
       setErrorMessage('Falha na autenticação. Verifique suas credenciais e tente novamente.');
       console.error('Erro ao fazer login:', error);
     }
@@ -82,7 +79,6 @@ const Login: React.FC = () => {
               <div className="text-center">
                 <Link to="/forgot-password">Esqueceu a senha?</Link>
               </div>
-           
               <div className="text-center mt-3">
                 <ToggleThemeButton />
               </div>

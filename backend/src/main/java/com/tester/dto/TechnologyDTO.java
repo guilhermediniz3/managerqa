@@ -5,36 +5,43 @@ import java.util.Set;
 import com.tester.entity.Technology;
 
 public class TechnologyDTO {
-	    private  Long id;
-	    private  String name;
-	    private  boolean active;
-	    private  Set<DeveloperDTO> developers;
-	    
+	private Long id;
+    private String name;
+    private boolean active;
 
-	    public TechnologyDTO(Technology technology) {
-	        this.id = technology.getId();
-	        this.name = technology.getName();
-	        this.active = technology.isActive();
-	    }
-	 
+    // Construtor padrão
+    public TechnologyDTO() {}
 
-	    // Getters only
-	    public Long getId() {
-	        return id;
-	    }
+    // Construtor com parâmetros
+    public TechnologyDTO(Long id, String name, boolean active) {
+        this.id = id;
+        this.name = name;
+        this.active = active;
+    }
 
-	    public String getName() {
-	        return name;
-	    }
+    // Getters e Setters
+    public Long getId() {
+        return id;
+    }
 
-	    public boolean isActive() {
-	        return active;
-	    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	    public Set<DeveloperDTO> getDevelopers() {
-	        return developers;
-	    }
-	
-	
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
 }

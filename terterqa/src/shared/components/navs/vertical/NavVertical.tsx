@@ -82,12 +82,7 @@ const NavVertical: React.FC = () => {
             {isExpanded && <span className="navText">Configurações</span>}
           </a>
         </li>
-        <li className="navItem">
-          <a href="#" className="navLink" onClick={() => handleNavigation('/chatgpt')}>
-            <FaRobot className="navIcon" />
-            {isExpanded && <span className="navText">ChatGPT</span>}
-          </a>
-        </li>
+        
       </ul>
 
       {/* Seletor de cor */}

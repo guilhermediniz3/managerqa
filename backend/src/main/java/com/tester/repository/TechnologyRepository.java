@@ -15,4 +15,6 @@ public interface TechnologyRepository extends JpaRepository<Technology, Long> {
     // Buscar tecnologias inativas
     List<Technology> findByActiveFalse();
 
+	boolean existsByName(String name);
+
 }

@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "tb_user")  
+@Table(name = "tb_user", schema = "people")  
 
 public class User {
 

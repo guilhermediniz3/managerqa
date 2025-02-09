@@ -7,13 +7,15 @@ import Login from './shared/pages/login/Login';
 import ForgotPassword from './shared/pages/login/forgot-password/ForgotPassword';
 import Register from './shared/pages/login/register/Register';
 import Dashboard from './shared/pages/login/dashboard/Dashboard';
-import ChatGPT from './shared/pages/chat/ChatGPT'; // Importe a página do ChatGPT
+
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ProtectedRoute from './shared/Routes/ProtectedRoute';
+import { TokenProvider } from './contexts/TokenContext ';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+        <TokenProvider>
     <Router>
       <Routes>
         {/* Rotas públicas */}
@@ -24,12 +26,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         {/* Rotas protegidas (todas as rotas dentro deste Route serão protegidas) */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/chat-gpt" element={<ChatGPT />} /> {/* Adicionando a rota do ChatGPT */}
+
         </Route>
 
         {/* Rota padrão (redireciona para o login) */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
+    </TokenProvider>
   </React.StrictMode>
 );
