@@ -47,6 +47,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/testers/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/testers/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/testers/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/modules").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/modules/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE,"/modules/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT,"/modules/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);

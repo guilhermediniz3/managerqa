@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tester.dto.DeveloperDTO;
 import com.tester.service.DeveloperService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/developers")
 public class DeveloperController {
@@ -39,13 +41,13 @@ public class DeveloperController {
 	    }
 
 	    @PostMapping
-	    public ResponseEntity<DeveloperDTO> createDeveloper(@RequestBody DeveloperDTO developerDTO) {
+	    public ResponseEntity<DeveloperDTO> createDeveloper( @Valid @RequestBody DeveloperDTO developerDTO) {
 	        DeveloperDTO createdDeveloper = developerService.createDeveloper(developerDTO);
 	        return ResponseEntity.status(HttpStatus.CREATED).body(createdDeveloper);
 	    }
 
 	    @PutMapping("/{id}")
-	    public ResponseEntity<DeveloperDTO> updateDeveloper(@PathVariable Long id, @RequestBody DeveloperDTO developerDTO) {
+	    public ResponseEntity<DeveloperDTO> updateDeveloper( @PathVariable Long id, @Valid @RequestBody DeveloperDTO developerDTO) {
 	        DeveloperDTO updatedDeveloper = developerService.updateDeveloper(id, developerDTO);
 	        return ResponseEntity.ok(updatedDeveloper);
 	    }

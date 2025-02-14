@@ -20,7 +20,7 @@ public class TesterQAService {
 	public TesterQADTO createTester (TesterQADTO testerQADTO) {
 		
 		TesterQA tester = new TesterQA();
-		tester.setId(testerQADTO.getId());
+	
 		tester.setName(testerQADTO.getName());
 		tester.setActive(testerQADTO.isActive());
 		TesterQA savedTester = testerQARepository.save(tester);
@@ -49,9 +49,7 @@ public class TesterQAService {
 	public TesterQADTO updateTesterQA(Long id , TesterQADTO testerQADTO) {
 		
 		TesterQA testerQA =	testerQARepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tester not found id"+id));
-		   if (testerQADTO.getName() == null || testerQADTO.getName().isEmpty()) {
-		        throw new IllegalArgumentException("Nome não pode ser vazio ou nullo");
-		    }
+	
 		testerQA.setName(testerQADTO.getName());
 		testerQA.setActive(testerQADTO.isActive());
 		TesterQA updateTesterQA = testerQARepository.save(testerQA);

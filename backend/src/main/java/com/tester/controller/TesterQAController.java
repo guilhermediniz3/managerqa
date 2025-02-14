@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tester.dto.TesterQADTO;
 import com.tester.service.TesterQAService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/testers")
 public class TesterQAController {
@@ -41,7 +43,7 @@ public class TesterQAController {
 	}
 	
     @PostMapping 
-    public ResponseEntity<TesterQADTO> createTesterQA(@RequestBody TesterQADTO testerQADTO){
+    public ResponseEntity<TesterQADTO> createTesterQA(@Valid @RequestBody TesterQADTO testerQADTO){
     	
     	TesterQADTO tester = testerQAService.createTester(testerQADTO);
     	
@@ -50,7 +52,7 @@ public class TesterQAController {
     
 
     @PutMapping("/{id}")
-    public ResponseEntity<TesterQADTO> updateTester(@PathVariable Long id, @RequestBody TesterQADTO testerQADTO) {
+    public ResponseEntity<TesterQADTO> updateTester(@PathVariable Long id,@Valid @RequestBody TesterQADTO testerQADTO) {
         TesterQADTO updatedTester = testerQAService.updateTesterQA(id, testerQADTO);
         return ResponseEntity.ok(updatedTester);
     }

@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name="tb_technology",schema="tech")
@@ -16,6 +17,7 @@ public class Technology {
 	  @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	    private Long id;
+	   @NotBlank(message = "O nome não pode ser vazio")
 	    private String name;
 	    private boolean active;
 
