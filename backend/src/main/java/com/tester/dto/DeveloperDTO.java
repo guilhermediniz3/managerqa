@@ -12,10 +12,10 @@ public class DeveloperDTO {
     private boolean active;
     private Set<Long> technologyIds;
 
-    // Construtor padrão
+
     public DeveloperDTO() {}
 
-    // Construtor com parâmetros
+
     public DeveloperDTO(Long id, String name, boolean active, Set<Long> technologyIds) {
         this.id = id;
         this.name = name;
@@ -23,17 +23,17 @@ public class DeveloperDTO {
         this.technologyIds = technologyIds;
     }
 
-    // Construtor que recebe a entidade Developer
+   
     public DeveloperDTO(Developer developer) {
         this.id = developer.getId();
         this.name = developer.getName();
         this.active = developer.isActive();
         this.technologyIds = developer.getTechnologies().stream()
-                .map(Technology::getId)
+                .map(technology -> technology.getId())  
                 .collect(Collectors.toSet());
     }
 
-    // Getters e Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
