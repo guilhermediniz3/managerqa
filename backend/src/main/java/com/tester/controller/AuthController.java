@@ -1,5 +1,8 @@
 package com.tester.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,15 +40,23 @@ public class AuthController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity login(@RequestBody LoginRequestDTO body) {
-		User user = this.repository.findByEmail(body.email()).orElseThrow(() -> new RuntimeException("User not found"));
-		if (passwordEncoder.matches(body.password(), user.getPassword())) {
-			String token = this.tokenService.generationToken(user);
-			return ResponseEntity.ok(new ResponseDTO(user.getName(), token));
-		}
-		return ResponseEntity.badRequest().build();
-	}
+	public ResponseEntity<?> login(@RequestBody LoginRequestDTO body) {
+	    User user = this.repository.findByEmail(body.email())
+	            .orElseThrow(() -> new RuntimeException("User not found"));
 
+	    // Verifica se o usuário está ativo
+	    if (!user.isActive()) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not active");
+	    }
+
+	    // Verifica se a senha está correta
+	    if (passwordEncoder.matches(body.password(), user.getPassword())) {
+	        String token = this.tokenService.generationToken(user);
+	        return ResponseEntity.ok(new ResponseDTO(user.getName(), token));
+	    }
+
+	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+	}
 	@PostMapping("/register")
 	public ResponseEntity register(@RequestBody RegisterRequestDTO body) {
 		Optional<User> user = this.repository.findByEmail(body.email());

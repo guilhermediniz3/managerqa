@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Importe o hook useNavigate
 import Toast from "react-bootstrap/Toast";
 import ToastContainer from "react-bootstrap/ToastContainer";
 import Form from "react-bootstrap/Form";
@@ -18,16 +19,20 @@ function Register() {
   const [success, setSuccess] = useState<string | null>(null);
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const navigate = useNavigate(); // Hook para navegação
+
+  // Função para voltar à listagem de usuários
+  const handleBack = () => {
+    navigate("/usuarios"); // Redireciona para a página de listagem
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const payload = {
       name: name,
       email: email,
       password: password,
     };
-
     try {
       const response = await axios.post("http://localhost:8081/auth/register", payload, {
         headers: {
@@ -35,7 +40,6 @@ function Register() {
         },
         withCredentials: true,
       });
-
       if (response.status === 200) {
         setSuccess("Usuário registrado com sucesso!");
         setShowSuccessToast(true);
@@ -48,13 +52,6 @@ function Register() {
       setShowSuccessToast(false);
       console.error(error);
     }
-  };
-
-  const handleBack = () => {
-    // Aqui você pode adicionar a lógica para navegar de volta
-    console.log("Voltar para a página anterior");
-    // Exemplo com React Router:
-    // navigate(-1); // Volta para a página anterior
   };
 
   return (
@@ -76,7 +73,6 @@ function Register() {
                     required
                   />
                 </Form.Group>
-
                 <Form.Group controlId="formEmail" className="mb-3">
                   <Form.Label>Email</Form.Label>
                   <Form.Control
@@ -86,7 +82,6 @@ function Register() {
                     required
                   />
                 </Form.Group>
-
                 <Form.Group controlId="formPassword" className="mb-3">
                   <Form.Label>Password</Form.Label>
                   <Form.Control
@@ -96,7 +91,6 @@ function Register() {
                     required
                   />
                 </Form.Group>
-
                 <div className="d-grid gap-2">
                   <Button variant="success" type="submit">
                     Salvar
@@ -108,7 +102,6 @@ function Register() {
               </Form>
             </Col>
           </Row>
-
           {/* Toast de Sucesso */}
           <ToastContainer position="top-end" className="p-3">
             <Toast
@@ -125,7 +118,6 @@ function Register() {
               <Toast.Body>{success}</Toast.Body>
             </Toast>
           </ToastContainer>
-
           {/* Toast de Erro */}
           <ToastContainer position="top-end" className="p-3">
             <Toast

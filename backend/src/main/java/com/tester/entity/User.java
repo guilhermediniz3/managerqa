@@ -10,67 +10,76 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-@Table(name = "tb_user", schema = "people")  
+@Table(name = "tb_user", schema = "people")
 
 public class User {
 
-	     @Id
-	    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	private String name;
+
+	@NotNull(message = "O e-mail é obrigatório")
+	@Email(message = "O e-mail deve ser válido")
+	private String email;
+
+	@NotEmpty(message = "A senha é obrigatória")
+	private String password;
+
+	private boolean active; 
 
 	
-	    private String name;
+	public User() {
+	}
 
-	    @NotNull(message = "O e-mail é obrigatório") 
-	    @Email(message = "O e-mail deve ser válido")  
-	    private String email;
+	public User(String name, String email, String password, boolean active) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.active = active; 
+	}
 
-	    @NotEmpty(message = "A senha é obrigatória") 
-	    private String password;  
-	    
-	 
-	    public User() {
-	    }
+	// Getters e Setters
+	public Long getId() {
+		return id;
+	}
 
-	    public User(String name, String email, String password) {
-	        this.name = name;
-	        this.email = email;
-	        this.password = password;
-	      
-	    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-	    // Getters e Setters
-	    public Long getId() {
-	        return id;
-	    }
+	public String getName() {
+		return name;
+	}
 
-	    public void setId(Long id) {
-	        this.id = id;
-	    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-	    public String getName() {
-	        return name;
-	    }
+	public String getEmail() {
+		return email;
+	}
 
-	    public void setName(String name) {
-	        this.name = name;
-	    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-	    public String getEmail() {
-	        return email;
-	    }
+	public String getPassword() {
+		return password;
+	}
 
-	    public void setEmail(String email) {
-	        this.email = email;
-	    }
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-	    public String getPassword() {
-	        return password;
-	    }
+	public boolean isActive() {
+		return active;
+	}
 
-	    public void setPassword(String password) {
-	        this.password = password;
-	    }
+	public void setActive(boolean active) {
+		this.active = active;
+	}
 
 
 }

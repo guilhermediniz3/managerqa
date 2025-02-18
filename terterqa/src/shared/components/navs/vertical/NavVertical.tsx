@@ -68,7 +68,7 @@ const NavVertical: React.FC = () => {
           </a>
           {isSubmenuOpen && (
             <ul className="submenu">
-              <li className="submenuItem"><a href="#" onClick={() => handleNavigation('/register')}>Usuário</a></li>
+              <li className="submenuItem"><a href="#" onClick={() => handleNavigation('/usuarios')}>Usuário</a></li>
               <li className="submenuItem"><a href="#" onClick={() => handleNavigation('/tester')}>Tester</a></li>
               <li className="submenuItem"><a href="#" onClick={() => handleNavigation('/desenvolvedor')}>Desenvolvedor</a></li>
               <li className="submenuItem"><a href="#" onClick={() => handleNavigation('/tecnologias')}>Tecnologias</a></li>
@@ -83,27 +83,45 @@ const NavVertical: React.FC = () => {
           </a>
         </li>
         
+        
       </ul>
 
       {/* Seletor de cor */}
       <div className="colorPickerContainer">
-        <button onClick={toggleColorPicker} className="colorPickerButton">
-          <FaPalette className="navIcon" />
-        </button>
-        {isColorPickerVisible && (
-          <div className="colorOptions">
-            {["#32cd32", "#333333", "#2E5CE6", "#2ED0E6", "#812EE6"].map((color, index) => (
-              <div
-                key={index}
-                className="colorOption"
-                style={{ background: color }}
-                onClick={() => handleColorChange(color)}
-              >
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+  <button onClick={toggleColorPicker} className="colorPickerButton">
+    <FaPalette className="navIcon" />
+  </button>
+  {isColorPickerVisible && (
+    <div className="colorOptions">
+      {[
+        "#32cd32",
+        "#333333",
+        "#2E5CE6",
+        "#2ED0E6",
+        "#812EE6",
+        // Gradiente 1
+        "linear-gradient(355deg, #da60fd 0%, #b249f0 25%, #802ddf 50%, #3e14ce 75%, #000bc1 100%)",
+        // Gradiente 2
+        "radial-gradient(circle at 56.16% 120.44%, #ff2dca 0%, #ff26d5 10%, #ff26dc 20%, #ff28df 30%, #ff2bdd 40%, #df2dd6 50%, #b72ecc 60%, #9130c3 70%, #6c31ba 80%, #4432b2 90%, #0033ab 100%)",
+        // Gradiente 3
+        "radial-gradient(circle at 56.16% 120.44%, #ff64db 0%, #ff57dd 16.67%, #fe45db 33.33%, #df2dd6 50%, #be12d1 66.67%, #9d03d0 83.33%, #7c0dd1 100%)"
+      ].map((color, index) => (
+        <div
+          key={index}
+          className="colorOption"
+          style={{
+            background: color,
+            cursor: "pointer", 
+          }}
+          onClick={() => handleColorChange(color)}
+        >
+        </div>
+      ))}
+    </div>
+  )}
+  
+</div>
+
     </nav>
   );
 };

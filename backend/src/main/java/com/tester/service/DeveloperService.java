@@ -2,6 +2,7 @@ package com.tester.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,93 +16,87 @@ import com.tester.repository.DeveloperRepository;
 import com.tester.repository.TechnologyRepository;
 
 import jakarta.transaction.Transactional;
+
 @Service
 public class DeveloperService {
-	 @Autowired
-	    private DeveloperRepository developerRepository;
+	@Autowired
+	private DeveloperRepository developerRepository;
 
-	    @Autowired
-	    private TechnologyRepository technologyRepository;
+	@Autowired
+	private TechnologyRepository technologyRepository;
 
-	    public List<DeveloperDTO> getAllDevelopers() {
-	        return developerRepository.findAll().stream()
-	                .map(developer -> new DeveloperDTO(developer)) // Usando lambda
-	                .collect(Collectors.toList());
-	    }
+	public DeveloperDTO createDeveloper(DeveloperDTO developerDTO) {
+		Developer developer = new Developer();
+		developer.setName(developerDTO.getName());
+		developer.setActive(developerDTO.isActive());
 
-	    public DeveloperDTO getDeveloperById(Long id) {
-	        Developer developer = developerRepository.findById(id)
-	                .orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + id));
-	        return new DeveloperDTO(developer);
-	    }
+		if (developerDTO.getTechnologyIds() != null && !developerDTO.getTechnologyIds().isEmpty()) {
+			Set<Technology> technologies = new HashSet<>(
+					technologyRepository.findAllById(developerDTO.getTechnologyIds()));
+			if (technologies.size() != developerDTO.getTechnologyIds().size()) {
+				throw new ResourceNotFoundException("Uma ou mais tecnologias não foram encontradas");
+			}
+			developer.setTechnologies(technologies);
+		}
 
-	    @Transactional
-	    public DeveloperDTO createDeveloper(DeveloperDTO developerDTO) {
-	        if (developerDTO.getTechnologyIds() == null || developerDTO.getTechnologyIds().isEmpty()) {
-	            throw new IllegalArgumentException("Technology IDs cannot be null or empty");
-	        }
+		Developer savedDeveloper = developerRepository.save(developer);
+		return new DeveloperDTO(savedDeveloper);
+	}
 
-	        Developer developer = new Developer();
-	        developer.setName(developerDTO.getName());
-	        developer.setActive(developerDTO.isActive());
+	@Transactional
+	public DeveloperDTO updateDeveloper(Long id, DeveloperDTO developerDTO) {
+		Developer existingDeveloper = developerRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + id));
 
-	        developerDTO.getTechnologyIds().forEach(techId -> {
-	            Technology technology = technologyRepository.findById(techId)
-	                    .orElseThrow(() -> new ResourceNotFoundException("Technology not found with id " + techId));
-	            developer.addTechnology(technology);
-	        });
+		existingDeveloper.setName(developerDTO.getName());
+		existingDeveloper.setActive(developerDTO.isActive());
 
-	        Developer savedDeveloper = developerRepository.save(developer);
-	        return new DeveloperDTO(savedDeveloper);
-	    }
+		if (developerDTO.getTechnologyIds() != null) {
+			Set<Technology> technologies = new HashSet<>(
+					technologyRepository.findAllById(developerDTO.getTechnologyIds()));
+			if (technologies.size() != developerDTO.getTechnologyIds().size()) {
+				throw new ResourceNotFoundException("One or more technologies not found");
+			}
+			existingDeveloper.setTechnologies(technologies);
+		}
 
-	    @Transactional
-	    public DeveloperDTO updateDeveloper(Long id, DeveloperDTO developerDTO) {
-	        if (developerDTO.getTechnologyIds() == null || developerDTO.getTechnologyIds().isEmpty()) {
-	            throw new IllegalArgumentException("Tecnologia não pode ser vazia ou nula");
-	        }
+		developerRepository.save(existingDeveloper);
+		return new DeveloperDTO(existingDeveloper);
+	}
 
-	        Developer existingDeveloper = developerRepository.findById(id)
-	                .orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + id));
+	public DeveloperDTO getDeveloperById(Long id) {
+		Developer developer = developerRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + id));
+		return new DeveloperDTO(developer);
+	}
 
-	        // Atualiza os dados do desenvolvedor
-	        existingDeveloper.setName(developerDTO.getName());
-	        existingDeveloper.setActive(developerDTO.isActive());
+	public List<DeveloperDTO> getAllDevelopers() {
+		return developerRepository.findAll().stream().map(developer -> new DeveloperDTO(developer))
+				.collect(Collectors.toList());
+	}
 
-	        // Adiciona as novas tecnologias sem remover as já existentes
-	        developerDTO.getTechnologyIds().forEach(techId -> {
-	            // Verifica se a tecnologia já não está associada ao desenvolvedor
-	            if (existingDeveloper.getTechnologies().stream().noneMatch(tech -> tech.getId().equals(techId))) {
-	                Technology technology = technologyRepository.findById(techId)
-	                        .orElseThrow(() -> new ResourceNotFoundException("Technology not found with id " + techId));
-	                existingDeveloper.addTechnology(technology); // Adiciona a nova tecnologia
-	            }
-	        });
+	@Transactional
+	public DeveloperDTO removeTechnologyFromDeveloper(Long developerId, Long technologyId) {
+		Developer developer = developerRepository.findById(developerId)
+				.orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + developerId));
 
-	        // Salva as alterações no desenvolvedor
-	        developerRepository.save(existingDeveloper);
+		Technology technology = technologyRepository.findById(technologyId)
+				.orElseThrow(() -> new ResourceNotFoundException("Technology not found with id " + technologyId));
 
-	        return new DeveloperDTO(existingDeveloper);
-	    }
-	    @Transactional
-	    public DeveloperDTO removeTechnologyFromDeveloper(Long developerId, Long technologyId) {
-	        Developer existingDeveloper = developerRepository.findById(developerId)
-	                .orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + developerId));
+		if (!developer.getTechnologies().contains(technology)) {
+			throw new IllegalStateException("Developer does not have this technology assigned");
+		}
 
-	        Technology technology = technologyRepository.findById(technologyId)
-	                .orElseThrow(() -> new ResourceNotFoundException("Technology not found with id " + technologyId));
+		developer.getTechnologies().remove(technology);
+		developerRepository.save(developer);
 
-	        existingDeveloper.removeTechnology(technology); // Remover tecnologia
+		return new DeveloperDTO(developer);
+	}
 
-	        developerRepository.save(existingDeveloper); // Salvar as alterações
-
-	        return new DeveloperDTO(existingDeveloper);
-	    }
-
-	    @Transactional
-	    public void deleteDeveloper(Long id) {
-	        Developer developer = developerRepository.findById(id)
-	                .orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + id));
-	        developerRepository.delete(developer);
-	    }
+	@Transactional
+	public void deleteDeveloper(Long id) {
+		Developer developer = developerRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + id));
+		developerRepository.delete(developer);
+	}
 }
