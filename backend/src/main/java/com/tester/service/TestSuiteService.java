@@ -101,6 +101,7 @@ public class TestSuiteService {
 	        testSuiteRepository.deleteById(id);
 	    }
 	    
+
 	    public TestSuiteDTO clone(Long id) {
 	        // Buscar o TestSuite original
 	        TestSuite originalTestSuite = testSuiteRepository.findById(id)
@@ -126,18 +127,16 @@ public class TestSuiteService {
 	            clonedTestCase.setVideoEvidence(testCase.getVideoEvidence());
 	            clonedTestCase.setStatus(testCase.getStatus());
 	            clonedTestCase.setData(testCase.getData());
+	            
 	            // Adicionar o TestCase à coleção de TestCases clonados
 	            clonedTestCases.add(clonedTestCase);
 	        }
 
-	        // Associar os TestCases clonados ao novo TestSuite
-	        clonedTestSuite.setCases(clonedTestCases);
-
 	        // Salvar o novo TestSuite
-	        TestSuite finalClonedTestSuite = testSuiteRepository.save(clonedTestSuite); // Variável efetivamente final
+	        TestSuite finalClonedTestSuite = testSuiteRepository.save(clonedTestSuite);
 
-	        // Atualizar TestCases para associá-los ao novo TestSuite
-	        clonedTestCases.forEach(testCase -> testCase.setTestSuite(finalClonedTestSuite)); // Usar a variável efetivamente final
+	        // Associar o TestSuite recém-criado aos TestCases clonados
+	        clonedTestCases.forEach(testCase -> testCase.setTestSuite(finalClonedTestSuite));
 
 	        // Salvar todos os TestCases clonados
 	        testCaseRepository.saveAll(clonedTestCases);
@@ -145,5 +144,7 @@ public class TestSuiteService {
 	        // Retornar o DTO do TestSuite clonado
 	        return new TestSuiteDTO(finalClonedTestSuite);
 	    }
+
+
 
 }
