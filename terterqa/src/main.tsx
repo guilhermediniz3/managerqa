@@ -12,6 +12,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import ProtectedRoute from './shared/Routes/ProtectedRoute';
 import { TokenProvider } from './contexts/TokenContext ';
 import EditarUsuarioPage from './shared/pages/usuarios/Editar/EditarUsuarioPage';
+import CadastrarDesenvolvedor from './shared/pages/desenvolvedores/cadastrar/CadastrarDesenvolvedor';
+import EditarDesenvolvedor from './shared/pages/desenvolvedores/editar/EditarDesenvolvedor';
+import ListaDesenvolvedores from './shared/pages/desenvolvedores/listagem/ListaDesenvolvedores';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -23,12 +26,17 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
 
+
         {/* Rotas protegidas (todas as rotas dentro deste Route serão protegidas) */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/usuarios" element={<ListaUsuarios/>} />
           <Route path="/usuarios/editar/:id" element={<EditarUsuarioPage />} />
           <Route path="/usuarios/register" element={<Register />} />
+          <Route path="/desenvolvedores" element={<CadastrarDesenvolvedor/>} />
+          <Route path="/desenvolvedores/editar/:id" element={<EditarDesenvolvedor/>} />
+          <Route path="/desenvolvedores/listagem" element={<ListaDesenvolvedores/>} />
+   
         </Route>
 
         {/* Rota padrão (redireciona para o login) */}

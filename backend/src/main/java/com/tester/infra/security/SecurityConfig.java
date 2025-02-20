@@ -40,11 +40,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT,"/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH,"/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/developers").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/developers").permitAll()
                         .requestMatchers(HttpMethod.GET,"/developers/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/developers/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/developers/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/technologies").permitAll()
+                        .requestMatchers(HttpMethod.PATCH,"/developers/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/technologies/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/technologies/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/technologies/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/technologies/**").permitAll()
@@ -68,6 +68,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/testcases/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/testcases/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/testcases/**").permitAll()
+                        
                         
                         .anyRequest().authenticated()
                 )

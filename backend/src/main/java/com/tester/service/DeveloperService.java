@@ -99,4 +99,25 @@ public class DeveloperService {
 				.orElseThrow(() -> new ResourceNotFoundException("Developer not found with id " + id));
 		developerRepository.delete(developer);
 	}
+	
+	@Transactional
+	public DeveloperDTO patchDeveloper(Long id, DeveloperDTO developerDTO) {
+	    // Cria um DTO temporário com apenas os campos que foram fornecidos
+	    DeveloperDTO updatedDeveloperDTO = new DeveloperDTO();
+	    updatedDeveloperDTO.setId(id); // Garante que o ID seja preservado
+
+	    // Atualiza apenas os campos presentes no DeveloperDTO recebido
+	    if (developerDTO.getName() != null) {
+	        updatedDeveloperDTO.setName(developerDTO.getName());
+	    }
+	    if (developerDTO.isActive() != null) {
+	        updatedDeveloperDTO.setActive(developerDTO.isActive());
+	    }
+	    if (developerDTO.getTechnologyIds() != null) {
+	        updatedDeveloperDTO.setTechnologyIds(developerDTO.getTechnologyIds());
+	    }
+
+	    // Chama o método updateDeveloper para realizar a atualização
+	    return updateDeveloper(id, updatedDeveloperDTO);
+	}
 }
