@@ -1,0 +1,93 @@
+/* Estilo geral da página */
+.container {
+    margin-top: 50px;
+  }
+  
+  /* Estilo do título */
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  /* Estilo do formulário */
+  form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  /* Estilo dos campos de entrada */
+  .form-control {
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  /* Estilo dos botões */
+  .btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+  }
+  
+  /* Estilo da mensagem de sucesso */
+  .alert-success {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  /* Estilo dos ícones de status */
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .technology-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  /* Estilo padrão para o tema claro */
+.technology-item {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #f9f9f9; /* Fundo claro */
+  color: black; /* Texto preto no modo claro */
+}
+
+.technology-item.selected {
+  background-color: #0d6efd; /* Azul quando selecionado */
+  color: white; /* Texto branco quando selecionado */
+  border-color: #0d6efd;
+}
+
+/* Estilo para o tema escuro */
+.dark-mode .technology-item {
+  background-color: #333; /* Fundo escuro */
+  color: white; /* Texto branco no modo escuro */
+}
+
+.dark-mode .technology-item.selected {
+  background-color: #0d6efd; /* Azul quando selecionado */
+  color: white; /* Texto branco quando selecionado */
+  border-color: #0d6efd;
+}
+
+/* Botões "Voltar" e "Criar" */
+.btn-secondary,
+.btn-primary {
+  color: white; /* Texto branco por padrão */
+}
+
+/* Ajuste para o tema claro */
+.light-mode .btn-secondary {
+  color: black; /* Texto preto no modo claro */
+}
+
+.light-mode .btn-primary {
+  color: black; /* Texto preto no modo claro */
+}
