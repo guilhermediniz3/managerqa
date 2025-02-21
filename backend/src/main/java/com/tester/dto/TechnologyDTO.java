@@ -7,12 +7,20 @@ import com.tester.entity.Technology;
 public class TechnologyDTO {
 	private Long id;
     private String name;
-    private boolean active;
+    private Boolean active;
 
     // Construtor padrão
     public TechnologyDTO() {}
 
-    // Construtor que recebe a entidade
+
+	public TechnologyDTO(Long id, String name, Boolean active) {
+	
+		this.id = id;
+		this.name = name;
+		this.active = active;
+	}
+
+	// Construtor que recebe a entidade
     public TechnologyDTO(Technology technology) {
         this.id = technology.getId();
         this.name = technology.getName();
@@ -40,7 +48,7 @@ public class TechnologyDTO {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 }

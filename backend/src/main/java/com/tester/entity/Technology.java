@@ -19,7 +19,7 @@ public class Technology {
 	    private Long id;
 	   @NotBlank(message = "O nome não pode ser vazio")
 	    private String name;
-	    private boolean active;
+	    private Boolean active;
 
 	    @ManyToMany(mappedBy = "technologies")
 	    private Set<Developer> developers = new HashSet<>();
@@ -28,7 +28,7 @@ public class Technology {
 	    public Technology() {}
 
 	    // Construtor com parâmetros
-	    public Technology(String name, boolean active) {
+	    public Technology(String name, Boolean active) {
 	        this.name = name;
 	        this.active = active;
 	    }
@@ -54,7 +54,7 @@ public class Technology {
 	        return active;
 	    }
 
-	    public void setActive(boolean active) {
+	    public void setActive(Boolean active) {
 	        this.active = active;
 	    }
 
