@@ -15,8 +15,11 @@ import EditarUsuarioPage from './shared/pages/usuarios/Editar/EditarUsuarioPage'
 import CadastrarDesenvolvedor from './shared/pages/desenvolvedores/cadastrar/CadastrarDesenvolvedor';
 import EditarDesenvolvedor from './shared/pages/desenvolvedores/editar/EditarDesenvolvedor';
 import ListaDesenvolvedores from './shared/pages/desenvolvedores/listagem/ListaDesenvolvedores';
-
+import ListaTester from './shared/pages/tester/listagem/ListaTester';
+import CadastrarTester from './shared/pages/tester/cadastrar/CadastrarTester';
+import EditarTester from './shared/pages/tester/editar/EditarTester';
 ReactDOM.createRoot(document.getElementById('root')!).render(
+
   <React.StrictMode>
         <TokenProvider>
     <Router>
@@ -33,9 +36,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/usuarios" element={<ListaUsuarios/>} />
           <Route path="/usuarios/editar/:id" element={<EditarUsuarioPage />} />
           <Route path="/usuarios/register" element={<Register />} />
-          <Route path="/desenvolvedores" element={<CadastrarDesenvolvedor/>} />
+          <Route path="/desenvolvedores/cadastrar" element={<CadastrarDesenvolvedor/>} />
           <Route path="/desenvolvedores/editar/:id" element={<EditarDesenvolvedor/>} />
           <Route path="/desenvolvedores/listagem" element={<ListaDesenvolvedores/>} />
+          <Route path="/tester/listagem" element={<ListaTester/>} />
+          <Route path="/tester/cadastrar" element={<CadastrarTester/>} />
+          <Route path="/tester/editar/:id" element={<EditarTester/>} />
    
         </Route>
 

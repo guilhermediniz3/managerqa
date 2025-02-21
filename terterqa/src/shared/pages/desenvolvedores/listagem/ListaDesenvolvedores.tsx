@@ -137,7 +137,7 @@ const ListagemDesenvolvedoresPage = () => {
           onChange={(e) => setTermoPesquisa(e.target.value)}
           className="search-bar"
         />
-        <button className="btn btn-primary mb-3 btn-novo-usuario" onClick={() => navigate("/desenvolvedores/register")}>
+        <button className="btn btn-primary mb-3 btn-novo-usuario" onClick={() => navigate("/desenvolvedores/cadastrar")}>
           <FaUserPlus /> Novo Desenvolvedor
         </button>
         <table className="table table-striped">

@@ -11,6 +11,8 @@ import com.tester.entity.TesterQA;
 import com.tester.exception.ResourceNotFoundException;
 import com.tester.repository.TesterQARepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class TesterQAService {
 	
@@ -65,6 +67,32 @@ public class TesterQAService {
 		testerQARepository.delete(testerQA);
 	
 	}
+	
+	public TesterQADTO patchTester(Long id, TesterQADTO testerDTO) {
+	    return testerQARepository.findById(id)
+	            .map(tester -> {
+	                // Atualiza apenas os campos não nulos do testerDTO
+	                if (testerDTO.getName() != null) {
+	                    tester.setName(testerDTO.getName());
+	                }
+	                
+	                if (testerDTO.isActive() != null) { // Verifica se o campo active foi enviado
+	                    tester.setActive(testerDTO.isActive());
+	                }
+
+	                // Salva o objeto atualizado no repositório
+	                TesterQA updatedTester = testerQARepository.save(tester);
+
+	                // Converte o Tester atualizado para TesterQADTO
+	                return new TesterQADTO(
+	                        updatedTester.getId(),
+	                        updatedTester.getName(),
+	                        updatedTester.isActive()
+	                );
+	            })
+	            .orElseThrow(() -> new EntityNotFoundException("Tester não encontrado com o ID: " + id));
+	}
+
 	
 }
 
