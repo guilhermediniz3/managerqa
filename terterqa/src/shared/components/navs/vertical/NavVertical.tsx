@@ -72,7 +72,7 @@ const NavVertical: React.FC = () => {
               <a href="#" onClick={(e) => handleNavigation("/desenvolvedores/listagem", e)}>Desenvolvedor</a>
               </li>
               <li className="submenuItem">
-                <a href="#" onClick={(e) => handleNavigation("/tecnologias", e)}>Tecnologias</a>
+                <a href="#" onClick={(e) => handleNavigation("/tecnologia/listagem", e)}>Tecnologias</a>
               </li>
               <li className="submenuItem">
                 <a href="#" onClick={(e) => handleNavigation("/modulo/listagem", e)}>Módulos</a>
