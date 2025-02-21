@@ -20,7 +20,7 @@ public class Developer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private boolean active;
+    private Boolean active;
 
     @ManyToMany
     @JoinTable(
@@ -34,7 +34,7 @@ public class Developer {
     public Developer() {}
 
     // Construtor com parâmetros
-    public Developer(String name, boolean active) {
+    public Developer(String name, Boolean active) {
         this.name = name;
         this.active = active;
     }
@@ -56,7 +56,7 @@ public class Developer {
         this.name = name;
     }
 
-    public boolean isActive() {
+    public Boolean isActive() {
         return active;
     }
 

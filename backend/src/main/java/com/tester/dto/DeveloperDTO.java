@@ -9,14 +9,14 @@ import com.tester.entity.Technology;
 public class DeveloperDTO {
     private Long id;
     private String name;
-    private boolean active;
+    private Boolean active;
     private Set<Long> technologyIds;
 
 
     public DeveloperDTO() {}
 
 
-    public DeveloperDTO(Long id, String name, boolean active, Set<Long> technologyIds) {
+    public DeveloperDTO(Long id, String name, Boolean active, Set<Long> technologyIds) {
         this.id = id;
         this.name = name;
         this.active = active;
@@ -40,8 +40,8 @@ public class DeveloperDTO {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public boolean isActive() { return active; }
-    public void setActive(boolean active) { this.active = active; }
+    public Boolean isActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
 
     public Set<Long> getTechnologyIds() { return technologyIds; }
     public void setTechnologyIds(Set<Long> technologyIds) { this.technologyIds = technologyIds; }
