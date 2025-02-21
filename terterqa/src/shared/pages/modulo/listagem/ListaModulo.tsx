@@ -4,23 +4,23 @@ import { FaEdit, FaUserPlus, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import NavVertical from "../../../components/navs/vertical/NavVertical";
 import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
-import "../Listagem/styless.css";
+import "../listagem/styless.css";
 
-interface Tester {
+interface Module {
   id: number;
   name: string;
   active: boolean;
 }
 
-const ListagemTesterPage = () => {
-  const [testers, setTesters] = useState<Tester[]>([]);
+const ListagemModuloPage = () => {
+  const [modulos, setModulos] = useState<Module[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [termoPesquisa, setTermoPesquisa] = useState("");
   const navigate = useNavigate();
 
-  // Buscar testers da API
-  const buscarTesters = async () => {
+  // Buscar módulos da API
+  const buscarModulos = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -28,26 +28,26 @@ const ListagemTesterPage = () => {
         setCarregando(false);
         return;
       }
-      const response = await axios.get("http://localhost:8081/testers", {
+      const response = await axios.get("http://localhost:8081/modules", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       if (response.status === 200 && Array.isArray(response.data)) {
-        setTesters(response.data); // Define a lista de testers
+        setModulos(response.data); // Define a lista de módulos
       } else {
-        setTesters([]); // Se não for array, define lista vazia
+        setModulos([]); // Se não for array, define lista vazia
       }
     } catch (error) {
-      console.error("Erro ao carregar testers:", error);
-      setErro("Erro ao carregar testers. Verifique o console para mais detalhes.");
+      console.error("Erro ao carregar módulos:", error);
+      setErro("Erro ao carregar módulos. Verifique o console para mais detalhes.");
     } finally {
       setCarregando(false); // Finaliza carregamento mesmo em caso de erro
     }
   };
 
-  // Filtrar testers com base no termo de pesquisa
-  const testersFiltrados = testers.filter((tester) => {
+  // Filtrar módulos com base no termo de pesquisa
+  const modulosFiltrados = modulos.filter((modulo) => {
     const termos = termoPesquisa
       .toLowerCase()
       .split(",")
@@ -55,38 +55,35 @@ const ListagemTesterPage = () => {
       .filter((termo) => termo.length > 0);
     return termos.every(
       (termo) =>
-        tester.name.toLowerCase().includes(termo) ||
-      String(tester.id).includes(termo) ||
-        (termo === "ativo" && tester.active) ||
-        (termo === "inativo" && !tester.active)
+        modulo.name.toLowerCase().includes(termo) ||
+        String(modulo.id).includes(termo) ||
+        (termo === "ativo" && modulo.active) ||
+        (termo === "inativo" && !modulo.active)
     );
   });
 
   useEffect(() => {
-    buscarTesters();
+    buscarModulos();
   }, []);
 
-  // Função para ativar/inativar tester
-  const inativarTester = async (id: number, active: boolean) => {
+  // Função para ativar/inativar módulo
+  const inativarModulo = async (id: number, active: boolean) => {
     if (!id || id <= 0) {
       alert("ID inválido para alteração de status.");
       return;
     }
-
-    if (window.confirm("Tem certeza que deseja alterar o status deste tester?")) {
+    if (window.confirm("Tem certeza que deseja alterar o status deste módulo?")) {
       try {
         const novoStatus = !active;
-
         // Configura o token no cabeçalho da requisição
         const token = localStorage.getItem("token");
         if (!token) {
           alert("Token de autenticação não encontrado.");
           return;
         }
-
         // Envia a requisição PATCH para o backend
         const response = await axios.patch(
-          `http://localhost:8081/testers/${id}`,
+          `http://localhost:8081/modules/${id}`,
           { active: novoStatus }, // Corpo da requisição com o novo status
           {
             headers: {
@@ -94,17 +91,14 @@ const ListagemTesterPage = () => {
             },
           }
         );
-
         console.log("Resposta da alteração de status:", response.data);
-
-        // Atualiza o estado dos testers localmente
-        setTesters((prevTesters) =>
-          prevTesters.map((tester) =>
-            tester.id === id ? { ...tester, active: novoStatus } : tester
+        // Atualiza o estado dos módulos localmente
+        setModulos((prevModulos) =>
+          prevModulos.map((modulo) =>
+            modulo.id === id ? { ...modulo, active: novoStatus } : modulo
           )
         );
-
-        alert(`Tester ${novoStatus ? "ativado" : "inativado"} com sucesso.`);
+        alert(`Módulo ${novoStatus ? "ativado" : "inativado"} com sucesso.`);
       } catch (error) {
         // Tratamento de erro com verificação de tipo
         if (axios.isAxiosError(error)) {
@@ -117,8 +111,7 @@ const ListagemTesterPage = () => {
               responseData !== null &&
               "message" in responseData
                 ? (responseData as { message: string }).message
-                : "Erro ao alterar o status do tester.";
-
+                : "Erro ao alterar o status do módulo.";
             console.error("Erro na resposta do servidor:", responseData);
             alert(`Erro: ${errorMessage}`);
           } else if (axiosError.request) {
@@ -136,9 +129,9 @@ const ListagemTesterPage = () => {
     }
   };
 
-  // Função para editar tester
-  const editarTester = (id: number) => {
-    navigate(`/testers/editar/${id}`);
+  // Função para editar módulo
+  const editarModulo = (id: number) => {
+    navigate(`/modules/editar/${id}`);
   };
 
   if (carregando) return <div>Carregando...</div>;
@@ -152,7 +145,7 @@ const ListagemTesterPage = () => {
       <br />
       <br />
       <div className="container mt-4">
-        <h1>Testers</h1>
+        <h1>Módulos</h1>
         {/* Campo de Pesquisa */}
         <input
           type="text"
@@ -161,14 +154,14 @@ const ListagemTesterPage = () => {
           onChange={(e) => setTermoPesquisa(e.target.value)}
           className="search-bar"
         />
-        {/* Botão Novo Tester */}
+        {/* Botão Novo Módulo */}
         <button
           className="btn btn-primary mb-3 btn-novo-usuario"
-          onClick={() => navigate("/tester/cadastrar")}
+          onClick={() => navigate("/modulo/cadastrar")}
         >
-          <FaUserPlus /> Novo Tester
+          <FaUserPlus /> Novo Módulo
         </button>
-        {/* Tabela de Testers */}
+        {/* Tabela de Módulos */}
         <table className="table table-striped">
           <thead>
             <tr>
@@ -179,33 +172,33 @@ const ListagemTesterPage = () => {
             </tr>
           </thead>
           <tbody>
-            {testersFiltrados.length === 0 ? (
+            {modulosFiltrados.length === 0 ? (
               <tr>
                 <td colSpan={4} className="text-center">
-                  Nenhum tester encontrado.
+                  Nenhum módulo encontrado.
                 </td>
               </tr>
             ) : (
-              testersFiltrados.map((tester) => (
-                <tr key={tester.id}>
-                  <td>{tester.id}</td>
-                  <td>{tester.name}</td>
-                  <td>{tester.active ? "Ativo" : "Inativo"}</td>
+              modulosFiltrados.map((modulo) => (
+                <tr key={modulo.id}>
+                  <td>{modulo.id}</td>
+                  <td>{modulo.name}</td>
+                  <td>{modulo.active ? "Ativo" : "Inativo"}</td>
                   <td>
                     <div className="action-icons">
                       <FaEdit
                         className="edit-icon"
-                        onClick={() => editarTester(tester.id)}
+                        onClick={() => editarModulo(modulo.id)}
                       />
-                      {tester.active ? (
+                      {modulo.active ? (
                         <FaToggleOn
                           className="active-icon"
-                          onClick={() => inativarTester(tester.id, tester.active)}
+                          onClick={() => inativarModulo(modulo.id, modulo.active)}
                         />
                       ) : (
                         <FaToggleOff
                           className="inactive-icon"
-                          onClick={() => inativarTester(tester.id, tester.active)}
+                          onClick={() => inativarModulo(modulo.id, modulo.active)}
                         />
                       )}
                     </div>
@@ -220,4 +213,4 @@ const ListagemTesterPage = () => {
   );
 };
 
-export default ListagemTesterPage;
+export default ListagemModuloPage;

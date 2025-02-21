@@ -52,10 +52,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/testers/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/testers/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/testers/**").permitAll()
-                        .requestMatchers(HttpMethod.POST,"/modules").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/modules/**").permitAll()
-                        .requestMatchers(HttpMethod.DELETE,"/modules/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT,"/modules/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/testplans").permitAll()
                         .requestMatchers(HttpMethod.GET,"/testplans/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/testplans/**").permitAll()
@@ -68,7 +64,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/testcases/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/testcases/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/testcases/**").permitAll()
-                        
+                        .requestMatchers(HttpMethod.POST,"/modules").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/modules/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE,"/modules/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT,"/modules/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH,"/modules/**").permitAll()
                         
                         .anyRequest().authenticated()
                 )
