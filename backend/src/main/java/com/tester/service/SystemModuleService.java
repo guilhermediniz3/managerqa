@@ -12,6 +12,8 @@ import com.tester.entity.SystemModule;
 import com.tester.exception.ResourceNotFoundException;
 import com.tester.repository.SystemModuleRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+
 
 
 
@@ -67,6 +69,33 @@ public class SystemModuleService {
 	    }
 	    moduleRepository.deleteById(id);
 	}
+	
+	@Transactional
+	public SystemModuleDTO patchModule(Long id, SystemModuleDTO moduleDTO) {
+	    return moduleRepository.findById(id)
+	            .map(modulo -> {
+	                // Atualiza apenas os campos não nulos do testerDTO
+	                if (moduleDTO.getName() != null) {
+	                    modulo.setName(moduleDTO.getName());
+	                }
+	                
+	                if (moduleDTO.isActive() != null) { // Verifica se o campo active foi enviado
+	                    modulo.setActive(moduleDTO.isActive());
+	                }
+
+	                // Salva o objeto atualizado no repositório
+	               SystemModule updatedModulo = moduleRepository.save(modulo);
+
+	                // Converte o Tester atualizado para TesterQADTO
+	                return new SystemModuleDTO(
+	                		updatedModulo.getId(),
+	                		updatedModulo.getName(),
+	                		updatedModulo.isActive()
+	                );
+	            })
+	            .orElseThrow(() -> new EntityNotFoundException("Tester não encontrado com o ID: " + id));
+	}
+
 
 
 

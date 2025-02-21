@@ -15,11 +15,11 @@ public class TesterQA {
 	    private Long id;
 	    @NotBlank(message = "O nome não pode ser vazio")
 	    private String name;
-	    private boolean active;
+	    private Boolean active;
 	    
 	    public TesterQA() {}
 
-		public TesterQA(Long id, String name, boolean active) {
+		public TesterQA(Long id, String name, Boolean active) {
 			super();
 			this.id = id;
 			this.name = name;
@@ -37,10 +37,10 @@ public class TesterQA {
 		public void setName(String name) {
 			this.name = name;
 		}
-		public boolean isActive() {
+		public Boolean isActive() {
 			return active;
 		}
-		public void setActive(boolean active) {
+		public void setActive(Boolean active) {
 			this.active = active;
 		}
 }

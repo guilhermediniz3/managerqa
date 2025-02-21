@@ -7,11 +7,12 @@ public class SystemModuleDTO {
     private Long id;
 
     private String name;
-    private boolean active;
+    private Boolean active;
 
 	public SystemModuleDTO() {}
 	
-	public SystemModuleDTO(Long id, String name, boolean active) {
+
+	public SystemModuleDTO(Long id, String name, Boolean active) {
 	
 		this.id = id;
 		this.name = name;
@@ -42,11 +43,11 @@ public class SystemModuleDTO {
 		this.name = name;
 	}
 
-	public boolean isActive() {
+	public Boolean isActive() {
 		return active;
 	}
 
-	public void setActive(boolean active) {
+	public void setActive(Boolean active) {
 		this.active = active;
 	}
     

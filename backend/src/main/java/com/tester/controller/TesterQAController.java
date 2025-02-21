@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tester.dto.TesterQADTO;
 import com.tester.service.TesterQAService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 @RestController
@@ -61,6 +63,20 @@ public class TesterQAController {
     public ResponseEntity<Void> deleteTesterQA(@PathVariable Long id) {
         testerQAService.deleteTesterQA(id);
         return ResponseEntity.noContent().build();
+    }
+    
+    
+    @PatchMapping("/{id}")
+    public ResponseEntity<TesterQADTO> patchTester(@PathVariable Long id, @RequestBody TesterQADTO testerDTO) {
+        try {
+          
+            TesterQADTO updatedTester = testerQAService.patchTester(id, testerDTO);
+            return ResponseEntity.ok(updatedTester); 
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build(); 
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build(); 
+        }
     }
 
 }

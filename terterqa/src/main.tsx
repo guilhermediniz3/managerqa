@@ -12,8 +12,17 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import ProtectedRoute from './shared/Routes/ProtectedRoute';
 import { TokenProvider } from './contexts/TokenContext ';
 import EditarUsuarioPage from './shared/pages/usuarios/Editar/EditarUsuarioPage';
-
+import CadastrarDesenvolvedor from './shared/pages/desenvolvedores/cadastrar/CadastrarDesenvolvedor';
+import EditarDesenvolvedor from './shared/pages/desenvolvedores/editar/EditarDesenvolvedor';
+import ListaDesenvolvedores from './shared/pages/desenvolvedores/listagem/ListaDesenvolvedores';
+import ListaTester from './shared/pages/tester/listagem/ListaTester';
+import CadastrarTester from './shared/pages/tester/cadastrar/CadastrarTester';
+import EditarTester from './shared/pages/tester/editar/EditarTester';
+import ListaModulo from './shared/pages/modulo/listagem/ListaModulo';
+import CadastrarModulo from './shared/pages/modulo/cadastrar/CadastrarModulo';
+import EditarModulo from './shared/pages/modulo/editar/EditarModulo';
 ReactDOM.createRoot(document.getElementById('root')!).render(
+
   <React.StrictMode>
         <TokenProvider>
     <Router>
@@ -23,12 +32,23 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
 
+
         {/* Rotas protegidas (todas as rotas dentro deste Route serão protegidas) */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/usuarios" element={<ListaUsuarios/>} />
           <Route path="/usuarios/editar/:id" element={<EditarUsuarioPage />} />
           <Route path="/usuarios/register" element={<Register />} />
+          <Route path="/desenvolvedores/cadastrar" element={<CadastrarDesenvolvedor/>} />
+          <Route path="/desenvolvedores/editar/:id" element={<EditarDesenvolvedor/>} />
+          <Route path="/desenvolvedores/listagem" element={<ListaDesenvolvedores/>} />
+          <Route path="/tester/listagem" element={<ListaTester/>} />
+          <Route path="/tester/cadastrar" element={<CadastrarTester/>} />
+          <Route path="/tester/editar/:id" element={<EditarTester/>} />
+          <Route path="/modulo/listagem" element={<ListaModulo/>} />
+          <Route path="/modulo/cadastrar" element={<CadastrarModulo/>} />
+          <Route path="/modulo/editar/:id" element={<EditarModulo/>} />
+   
         </Route>
 
         {/* Rota padrão (redireciona para o login) */}
