@@ -44,11 +44,15 @@ public class TechnologyDTO {
         this.name = name;
     }
 
-    public boolean isActive() {
-        return active;
-    }
 
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
+	public Boolean isActive() {
+		return active;
+	}
+
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+
 }

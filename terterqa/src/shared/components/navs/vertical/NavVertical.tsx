@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Hook para navegação programática
+import { useNavigate } from "react-router-dom";
 import { 
   FaBars, FaHome, FaUser, FaCog, FaPalette, FaUserPlus 
 } from "react-icons/fa";
+import { BiTransfer, BiBell, BiMessage } from "react-icons/bi";
 import "./styless.css";
 
 const NavVertical: React.FC = () => {
@@ -12,11 +13,13 @@ const NavVertical: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState(
     localStorage.getItem("selectedColor") || "#333333"
   );
-  const [isSubmenuOpen, setIsSubmenuOpen] = useState(false);
+  const [isCadastroSubmenuOpen, setIsCadastroSubmenuOpen] = useState(false); // Estado para o submenu de Cadastro
+  const [isMovimentacaoSubmenuOpen, setIsMovimentacaoSubmenuOpen] = useState(false); // Estado para o submenu de Movimentação
 
   const toggleExpanded = () => setIsExpanded((prev) => !prev);
   const toggleColorPicker = () => setIsColorPickerVisible((prev) => !prev);
-  const toggleSubmenu = () => setIsSubmenuOpen((prev) => !prev);
+  const toggleCadastroSubmenu = () => setIsCadastroSubmenuOpen((prev) => !prev); // Toggle para Cadastro
+  const toggleMovimentacaoSubmenu = () => setIsMovimentacaoSubmenuOpen((prev) => !prev); // Toggle para Movimentação
 
   const handleColorChange = (color: string) => {
     setSelectedColor(color);
@@ -56,11 +59,11 @@ const NavVertical: React.FC = () => {
           </a>
         </li>
         <li className="navItem">
-          <a href="#" className="navLink" onClick={toggleSubmenu}>
+          <a href="#" className="navLink" onClick={toggleCadastroSubmenu}>
             <FaUserPlus className="navIcon" />
             {isExpanded && <span className="navText">Cadastro</span>}
           </a>
-          {isSubmenuOpen && (
+          {isCadastroSubmenuOpen && ( // Submenu de Cadastro
             <ul className="submenu">
               <li className="submenuItem">
                 <a href="#" onClick={(e) => handleNavigation("/usuarios", e)}>Usuário</a>
@@ -69,7 +72,7 @@ const NavVertical: React.FC = () => {
                 <a href="#" onClick={(e) => handleNavigation("/tester/listagem", e)}>Tester</a>
               </li>
               <li className="submenuItem">
-              <a href="#" onClick={(e) => handleNavigation("/desenvolvedores/listagem", e)}>Desenvolvedor</a>
+                <a href="#" onClick={(e) => handleNavigation("/desenvolvedores/listagem", e)}>Desenvolvedor</a>
               </li>
               <li className="submenuItem">
                 <a href="#" onClick={(e) => handleNavigation("/tecnologia/listagem", e)}>Tecnologias</a>
@@ -77,6 +80,20 @@ const NavVertical: React.FC = () => {
               <li className="submenuItem">
                 <a href="#" onClick={(e) => handleNavigation("/modulo/listagem", e)}>Módulos</a>
               </li>
+            </ul>
+          )}
+        </li>
+        
+        <li className="navItem">
+          <a href="#" className="navLink" onClick={toggleMovimentacaoSubmenu}>
+            <BiTransfer className="navIcon" />
+            {isExpanded && <span className="navText">Movimentação</span>}
+          </a>
+          {isMovimentacaoSubmenuOpen && ( // Submenu de Movimentação
+            <ul className="submenu">
+              <li className="submenuItem">
+                <a href="#" onClick={(e) => handleNavigation("/usuarios", e)}>Testes</a>
+              </li> 
             </ul>
           )}
         </li>

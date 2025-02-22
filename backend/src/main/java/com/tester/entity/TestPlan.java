@@ -39,7 +39,7 @@ public class TestPlan {
 	@Enumerated(EnumType.STRING)
 	private TaskStatus taskStatus;
 	@NotBlank(message = "informe o número da UL")
-	private String Jira;
+	private String jira;
 	@DateTimeFormat(pattern = "dd/MM/yyyy")
 	private LocalDate data;
 	@DateTimeFormat(pattern = "dd/MM/yyyy")
@@ -76,7 +76,7 @@ public class TestPlan {
 		this.name = name;
 		this.observation = observation;
 		this.status = status;
-		this.Jira = jira;
+		this.jira = jira;
 		this.data = data;
 		this.deliveryData = deliveryData;
 		this.matriz = matriz;
@@ -111,7 +111,7 @@ public class TestPlan {
 
 
 	public String getJira() {
-		return Jira;
+		return jira;
 	}
 
 
@@ -186,7 +186,7 @@ public class TestPlan {
 
 
 	public void setJira(String jira) {
-		Jira = jira;
+		jira = jira;
 	}
 
 

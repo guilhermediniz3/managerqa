@@ -138,7 +138,7 @@ const ListagemTesterPage = () => {
 
   // Função para editar tester
   const editarTester = (id: number) => {
-    navigate(`/testers/editar/${id}`);
+    navigate(`/tester/editar/${id}`);
   };
 
   if (carregando) return <div>Carregando...</div>;

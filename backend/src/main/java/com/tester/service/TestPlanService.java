@@ -1,9 +1,12 @@
 package com.tester.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -158,5 +161,22 @@ public class TestPlanService {
 				.orElseThrow(() -> new ResourceNotFoundException("Plano de teste não encontrado"));
 		return new TestPlanDTO(testPlan);
 	}
+	 // Método para buscar todos os detalhes dos planos de teste com paginação
+    public Page<TestPlanDTO> findAllTestPlanDetails(Pageable pageable) {
+        return testPlanRepository.findAllTestPlanDetails(pageable);
+    }
+
+    // Método para buscar detalhes filtrados com OR e paginação
+    public Page<TestPlanDTO> findAllTestPlanDetailsWithOrFilters(
+            String testerName,
+            String jira,
+            String callNumber,
+            String status,
+            String developerName,
+            String moduleName,
+            Pageable pageable) {
+        return testPlanRepository.findAllTestPlanDetailsWithOrFilters(
+                testerName, jira, callNumber, status, developerName, moduleName, pageable);
+    }
 
 }

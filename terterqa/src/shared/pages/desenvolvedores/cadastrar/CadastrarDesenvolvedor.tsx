@@ -70,6 +70,9 @@ const CriarDesenvolvedor = () => {
     <>
       <NavHorizontal />
       <NavVertical />
+      <br/>
+      <br/>
+      <br/>
       <div className="container mt-4">
         <h1>Criar Desenvolvedor</h1>
         <form onSubmit={criarDesenvolvedor}>
@@ -103,7 +106,7 @@ const CriarDesenvolvedor = () => {
             </div>
           </div>
           <div className="d-flex justify-content-end gap-2">
-            <button type="button" className="btn btn-secondary" onClick={() => navigate("/desenvolvedores")}>
+            <button type="button" className="btn btn-secondary" onClick={() => navigate("/desenvolvedores/listagem")}>
               Voltar
             </button>
             <button type="submit" className="btn btn-primary">Criar</button>

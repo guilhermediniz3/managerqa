@@ -90,7 +90,10 @@ const EditarDesenvolvedor = () => {
     <>
       <NavHorizontal />
       <NavVertical />
-      <div className="container mt-4">
+      <br/>
+      <br/>
+      <br/>
+       <div className="container mt-4">
         <h1>Editar Desenvolvedor</h1>
         <form onSubmit={updateDeveloper}>
           <div className="mb-3">

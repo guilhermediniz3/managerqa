@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/technologies/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/technologies/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/technologies/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH,"/technologies/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/testers").permitAll()
                         .requestMatchers(HttpMethod.GET,"/testers/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/testers/**").permitAll()

@@ -12,6 +12,7 @@ import com.tester.exception.ResourceNotFoundException;
 import com.tester.repository.TesterQARepository;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 @Service
 public class TesterQAService {
@@ -47,7 +48,7 @@ public class TesterQAService {
 		return new TesterQADTO(testerQA);
 			
 	}
-	
+	@Transactional
 	public TesterQADTO updateTesterQA(Long id , TesterQADTO testerQADTO) {
 		
 		TesterQA testerQA =	testerQARepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Tester not found id"+id));
@@ -67,6 +68,7 @@ public class TesterQAService {
 		testerQARepository.delete(testerQA);
 	
 	}
+	@Transactional
 	
 	public TesterQADTO patchTester(Long id, TesterQADTO testerDTO) {
 	    return testerQARepository.findById(id)

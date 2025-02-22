@@ -1,7 +1,11 @@
 package com.tester.controller;
 
+
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tester.dto.TestPlanDTO;
@@ -54,5 +59,29 @@ public class TestPlanController {
 		TestPlanDTO testPlan = testPlanService.getTestPlanById(id);
 		return ResponseEntity.ok(testPlan);
 	}
+	
+         @GetMapping("/all")
+	    public ResponseEntity<Page<TestPlanDTO>> getAllTestPlansDetails(@PageableDefault(size = 10, page = 0) Pageable pageable) {
+	        Page<TestPlanDTO> testPlans = testPlanService.findAllTestPlanDetails(pageable);
+	        return ResponseEntity.ok(testPlans);
+	    }
+
+	    // Endpoint para listar detalhes filtrados com OR e paginação
+	    @GetMapping("/filtered")
+	    public ResponseEntity<Page<TestPlanDTO>> getFilteredTestPlans(
+	            @RequestParam(required = false) String testerName,
+	            @RequestParam(required = false) String jira,
+	            @RequestParam(required = false) String callNumber,
+	            @RequestParam(required = false) String status,
+	            @RequestParam(required = false) String developerName,
+	            @RequestParam(required = false) String moduleName,
+	            @PageableDefault(size = 10, page = 0) Pageable pageable) {
+
+	        Page<TestPlanDTO> filteredTestPlans = testPlanService.findAllTestPlanDetailsWithOrFilters(
+	                testerName, jira, callNumber, status, developerName, moduleName, pageable);
+
+	        return ResponseEntity.ok(filteredTestPlans);
+	    }
+	
 
 }

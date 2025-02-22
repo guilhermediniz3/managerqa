@@ -32,6 +32,8 @@ public class Technology {
 	        this.name = name;
 	        this.active = active;
 	    }
+	    
+	   
 
 	    // Getters e Setters
 	    public Long getId() {
@@ -50,15 +52,16 @@ public class Technology {
 	        this.name = name;
 	    }
 
-	    public boolean isActive() {
-	        return active;
-	    }
 
-	    public void setActive(Boolean active) {
-	        this.active = active;
-	    }
+		public Boolean isActive() {
+			return active;
+		}
 
-	    // Getter para developers (retorna uma cópia defensiva)
+		public void setActive(Boolean active) {
+			this.active = active;
+		}
+
+		// Getter para developers (retorna uma cópia defensiva)
 	    public Set<Developer> getDevelopers() {
 	        return new HashSet<>(developers);
 	    }
