@@ -24,6 +24,7 @@ public class SecurityConfig {
 
     @Autowired
     SecurityFilter securityFilter;
+    
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,6 +35,7 @@ public class SecurityConfig {
                 		.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/testplans/filter/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/api/users/**").permitAll()
@@ -57,12 +59,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/testplans/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/testplans/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/testplans/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/testplans/all/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/test-suites").permitAll()
                         .requestMatchers(HttpMethod.GET,"/test-suites/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/test-suites/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/test-suites/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/testcases").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/testcases/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,"/testcases/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/testcases/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/modules").permitAll()
@@ -70,6 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE,"/modules/**").permitAll()
                         .requestMatchers(HttpMethod.PUT,"/modules/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH,"/modules/**").permitAll()
+               
                         
                         .anyRequest().authenticated()
                 )

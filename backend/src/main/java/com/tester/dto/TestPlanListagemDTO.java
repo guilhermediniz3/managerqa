@@ -1,5 +1,4 @@
 package com.tester.dto;
-
 import java.time.LocalDate;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,7 +12,8 @@ import com.tester.enuns.TaskStatus;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class TestPlanDTO {
+public class TestPlanListagemDTO {
+
     private Long id;
 
     @NotBlank(message = "Informe a descrição da UL")
@@ -37,23 +37,19 @@ public class TestPlanDTO {
     private String matriz;
     private String userName;
     private String callNumber;
-    private Long developerId;
-    private Long systemModuleId;
-    private Long testerId;
+    private String developerName; // Nome do Developer
+    private String systemModuleName; // Nome do SystemModule
+    private String testerQAName; // Nome do TesterQA
     private String password;
 
     // Carrega somente o ID, evitando carregar todo o objeto
     private Set<Long> testeSuiteId;
 
-    // Construtor padrão
-    public TestPlanDTO() {
-    }
-
-    // Construtor com todos os campos
-    public TestPlanDTO(Long id, @NotBlank(message = "Informe a descrição da UL") String name, String observation,
-                       Status status, TaskStatus taskStatus, @NotBlank(message = "Informe o número da UL") String jira,
-                       LocalDate data, LocalDate deliveryData, String matriz, String userName, String callNumber,
-                       Long developerId, Long systemModuleId, Long testerId, String password, Set<Long> testeSuiteId) {
+    // Construtor com todos os parâmetros
+    public TestPlanListagemDTO(Long id, String name, String observation, Status status, TaskStatus taskStatus,
+                               String jira, LocalDate data, LocalDate deliveryData, String matriz, String userName,
+                               String callNumber, String developerName, String systemModuleName, String testerQAName,
+                               String password, Set<Long> testeSuiteId) {
         this.id = id;
         this.name = name;
         this.observation = observation;
@@ -65,15 +61,15 @@ public class TestPlanDTO {
         this.matriz = matriz;
         this.userName = userName;
         this.callNumber = callNumber;
-        this.developerId = developerId;
-        this.systemModuleId = systemModuleId;
-        this.testerId = testerId;
+        this.developerName = developerName;
+        this.systemModuleName = systemModuleName;
+        this.testerQAName = testerQAName;
         this.password = password;
         this.testeSuiteId = testeSuiteId;
     }
 
-    // Construtor a partir da entidade TestPlan
-    public TestPlanDTO(TestPlan testPlan) {
+    // Construtor que inicializa a partir de um TestPlan
+    public TestPlanListagemDTO(TestPlan testPlan) {
         this.id = testPlan.getId();
         this.name = testPlan.getName();
         this.observation = testPlan.getObservation();
@@ -86,15 +82,9 @@ public class TestPlanDTO {
         this.userName = testPlan.getUserName();
         this.callNumber = testPlan.getCallNumber();
         this.password = testPlan.getPassword();
-
-        // Verifique se o Developer não é nulo antes de acessar getId()
-        this.developerId = testPlan.getDeveloper() != null ? testPlan.getDeveloper().getId() : null;
-
-        // Verifique se o SystemModule não é nulo antes de acessar getId()
-        this.systemModuleId = testPlan.getSystemModule() != null ? testPlan.getSystemModule().getId() : null;
-
-        // Verifique se o Tester não é nulo antes de acessar getId()
-        this.testerId = testPlan.getTester() != null ? testPlan.getTester().getId() : null;
+        this.developerName = testPlan.getDeveloper() != null ? testPlan.getDeveloper().getName() : null;
+        this.systemModuleName = testPlan.getSystemModule() != null ? testPlan.getSystemModule().getName() : null;
+        this.testerQAName = testPlan.getTester() != null ? testPlan.getTester().getName() : null;
 
         // Verifique se o TesteSuite não é nulo antes de acessar stream()
         this.testeSuiteId = testPlan.getTesteSuite() != null
@@ -102,7 +92,8 @@ public class TestPlanDTO {
                 : null;
     }
 
-    // Getters e Setters
+    // Getters e Setters (gerados automaticamente ou manualmente)
+
     public Long getId() {
         return id;
     }
@@ -191,28 +182,28 @@ public class TestPlanDTO {
         this.callNumber = callNumber;
     }
 
-    public Long getDeveloperId() {
-        return developerId;
+    public String getDeveloperName() {
+        return developerName;
     }
 
-    public void setDeveloperId(Long developerId) {
-        this.developerId = developerId;
+    public void setDeveloperName(String developerName) {
+        this.developerName = developerName;
     }
 
-    public Long getSystemModuleId() {
-        return systemModuleId;
+    public String getSystemModuleName() {
+        return systemModuleName;
     }
 
-    public void setSystemModuleId(Long systemModuleId) {
-        this.systemModuleId = systemModuleId;
+    public void setSystemModuleName(String systemModuleName) {
+        this.systemModuleName = systemModuleName;
     }
 
-    public Long getTesterId() {
-        return testerId;
+    public String getTesterQAName() {
+        return testerQAName;
     }
 
-    public void setTesterId(Long testerId) {
-        this.testerId = testerId;
+    public void setTesterQAName(String testerQAName) {
+        this.testerQAName = testerQAName;
     }
 
     public String getPassword() {
@@ -230,6 +221,4 @@ public class TestPlanDTO {
     public void setTesteSuiteId(Set<Long> testeSuiteId) {
         this.testeSuiteId = testeSuiteId;
     }
-    
-    
 }

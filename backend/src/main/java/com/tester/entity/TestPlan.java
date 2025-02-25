@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tester.enuns.Status;
 import com.tester.enuns.TaskStatus;
 
@@ -17,7 +18,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -32,7 +32,7 @@ public class TestPlan {
 	private Long id;
 	@NotBlank(message = "informe a descrição da UL")
 	private String name;
-	@Lob
+
 	private String observation;
 	@Enumerated(EnumType.STRING)
 	private Status status;
@@ -40,8 +40,10 @@ public class TestPlan {
 	private TaskStatus taskStatus;
 	@NotBlank(message = "informe o número da UL")
 	private String jira;
+	@JsonFormat(pattern = "dd/MM/yyyy")
 	@DateTimeFormat(pattern = "dd/MM/yyyy")
 	private LocalDate data;
+	@JsonFormat(pattern = "dd/MM/yyyy")	
 	@DateTimeFormat(pattern = "dd/MM/yyyy")
 	private LocalDate deliveryData;
 	private String matriz;
@@ -186,7 +188,7 @@ public class TestPlan {
 
 
 	public void setJira(String jira) {
-		jira = jira;
+		this.jira = jira;
 	}
 
 

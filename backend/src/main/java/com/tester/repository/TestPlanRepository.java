@@ -1,52 +1,57 @@
 package com.tester.repository;
 
+import java.time.LocalDate;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-
-import org.springframework.data.domain.Page;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.tester.dto.TestPlanDTO;
+import com.tester.dto.TestPlanListagemDTO;
 import com.tester.entity.TestPlan;
 @Repository
+
+
 public interface TestPlanRepository extends JpaRepository<TestPlan, Long> {
 	
-	 @Query("SELECT NEW com.tester.dto.TestPlanDTO(" +
-	           "tp.id, tp.name, tp.observation, tp.status, tp.taskStatus, tp.jira, tp.data, tp.deliveryData, " +
-	           "tp.matriz, tp.userName, tp.callNumber, tp.developer.id, tp.systemModule.id, tp.tester.id, " +
-	           "NULL, NULL) " + // password e testeSuiteId não estão sendo usados aqui
-	           "FROM TestPlan tp " +
-	           "JOIN tp.tester t " +
-	           "JOIN tp.developer d " +
-	           "JOIN tp.systemModule sm")
-	    Page<TestPlanDTO> findAllTestPlanDetails(Pageable pageable);
-
-	    @Query("SELECT NEW com.tester.dto.TestPlanDTO(" +
-	           "tp.id, tp.name, tp.observation, tp.status, tp.taskStatus, tp.jira, tp.data, tp.deliveryData, " +
-	           "tp.matriz, tp.userName, tp.callNumber, tp.developer.id, tp.systemModule.id, tp.tester.id, " +
-	           "NULL, NULL) " + // password e testeSuiteId não estão sendo usados aqui
-	           "FROM TestPlan tp " +
-	           "JOIN tp.tester t " +
-	           "JOIN tp.developer d " +
-	           "JOIN tp.systemModule sm " +
-	           "WHERE (:testerName IS NULL OR t.name = :testerName) " +
-	           "   OR (:jira IS NULL OR tp.jira = :jira) " +
-	           "   OR (:callNumber IS NULL OR tp.callNumber = :callNumber) " +
-	           "   OR (:status IS NULL OR tp.status = :status) " +
-	           "   OR (:developerName IS NULL OR d.name = :developerName) " +
-	           "   OR (:moduleName IS NULL OR sm.name = :moduleName)")
-	    Page<TestPlanDTO> findAllTestPlanDetailsWithOrFilters(
-	            @Param("testerName") String testerName,
-	            @Param("jira") String jira,
-	            @Param("callNumber") String callNumber,
-	            @Param("status") String status,
-	            @Param("developerName") String developerName,
-	            @Param("moduleName") String moduleName,
-	            Pageable pageable);
+	@Query("SELECT tp " +
+		       "FROM TestPlan tp " +
+		       "LEFT JOIN tp.developer dev " +
+		       "LEFT JOIN tp.systemModule mod " +
+		       "LEFT JOIN tp.tester tester " +
+		       "WHERE ((:name IS NULL OR tp.name ILIKE %:name%) " +
+		       "OR (:observation IS NULL OR tp.observation ILIKE %:observation%) " +
+		       "OR (:status IS NULL OR tp.status = :status) " +
+		       "OR (:taskStatus IS NULL OR tp.taskStatus = :taskStatus) " +
+		       "OR (:jira IS NULL OR tp.jira ILIKE %:jira%) " +
+		       "OR (:matriz IS NULL OR tp.matriz ILIKE %:matriz%) " +
+		       "OR (:userName IS NULL OR tp.userName ILIKE %:userName%) " +
+		       "OR (:callNumber IS NULL OR tp.callNumber ILIKE %:callNumber%) " +
+		       "OR (:developerName IS NULL OR dev.name ILIKE %:developerName%) " +
+		       "OR (:systemModuleName IS NULL OR mod.name ILIKE %:systemModuleName%) " +
+		       "OR (:testerQAName IS NULL OR tester.name ILIKE %:testerQAName%)) " +
+		       "AND (:dataInicio IS NULL OR tp.data >= :dataInicio) " +
+		       "AND (:dataFim IS NULL OR tp.data <= :dataFim) " +
+		       "AND (:deliveryDataInicio IS NULL OR tp.deliveryData >= :deliveryDataInicio) " +
+		       "AND (:deliveryDataFim IS NULL OR tp.deliveryData <= :deliveryDataFim)")
+		Page<TestPlan> findAllTestPlans(
+		    @Param("name") String name,
+		    @Param("observation") String observation,
+		    @Param("status") String status,
+		    @Param("taskStatus") String taskStatus,
+		    @Param("jira") String jira,
+		    @Param("dataInicio") LocalDate dataInicio,
+		    @Param("dataFim") LocalDate dataFim,
+		    @Param("deliveryDataInicio") LocalDate deliveryDataInicio,
+		    @Param("deliveryDataFim") LocalDate deliveryDataFim,
+		    @Param("matriz") String matriz,
+		    @Param("userName") String userName,
+		    @Param("callNumber") String callNumber,
+		    @Param("developerName") String developerName,
+		    @Param("systemModuleName") String systemModuleName,
+		    @Param("testerQAName") String testerQAName,
+		    Pageable pageable);
 
 }
