@@ -11,6 +11,8 @@ import com.tester.dto.UserDTO;
 import com.tester.entity.User;
 import com.tester.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class UserService {
 
@@ -67,6 +69,7 @@ public class UserService {
 	            throw new RuntimeException("Usuário não encontrado");
 	        }
 	    }
+		@Transactional
 	    public UserDTO patchUser(Long id, UserDTO userDTO) {
 	        return userRepository.findById(id)
 	                .map(user -> {

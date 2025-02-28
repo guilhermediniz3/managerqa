@@ -13,50 +13,50 @@ interface Modulo {
   active: boolean;
 }
 
-const EditarTecnologiaPage = () => {
-  const { id } = useParams<{ id: string }>(); // Obtém o ID do tecnologia da URL
+const EditarModuloPage = () => {
+  const { id } = useParams<{ id: string }>(); // Obtém o ID do módulo da URL
   const navigate = useNavigate();
   const [modulo, setModulo] = useState<Modulo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [mensagemSucesso, setMensagemSucesso] = useState<string | null>(null); // Estado para mensagem de sucesso
 
-  // Buscar os dados do tecnologia ao carregar o componente
+  // Buscar os dados do módulo ao carregar o componente
   useEffect(() => {
-    const buscarTecmologia = async () => {
+    const buscarModulo = async () => {
       try {
-        const response = await axios.get(`http://localhost:8081/technologies/${id}`);
+        const response = await axios.get(`http://localhost:8081/modules/${id}`);
         setModulo(response.data);
         setCarregando(false);
       } catch (error) {
-        setErro("Erro ao carregar tecnologia.");
+        setErro("Erro ao carregar módulo.");
         setCarregando(false);
       }
     };
-    buscarTecmologia();
+    buscarModulo();
   }, [id]);
 
   // Função para salvar as alterações usando PATCH
   const salvarAlteracoes = async () => {
     if (!modulo) return;
     try {
-      await axios.patch(`http://localhost:8081/technologies/${id}`, modulo); // Usa PATCH em vez de PUT
-      setMensagemSucesso("tecnologia atualizado com sucesso!"); // Exibe mensagem de sucesso
+      await axios.patch(`http://localhost:8081/modules/${id}`, modulo); // Usa PATCH em vez de PUT
+      setMensagemSucesso("Módulo atualizado com sucesso!"); // Exibe mensagem de sucesso
     } catch (error) {
-      console.error("Erro ao atualizar tecnologia:", error);
-      alert("Erro ao atualizar tecnologia.");
+      console.error("Erro ao atualizar módulo:", error);
+      alert("Erro ao atualizar módulo.");
     }
   };
 
   // Função para voltar à listagem
   const voltarParaListagem = () => {
-    navigate("/tecnologia/listagem"); // Redireciona para a listagem de tecnologias
+    navigate("/tecnologia/listagem"); // Redireciona para a listagem de módulos
   };
 
   // Renderização condicional
   if (carregando) return <div>Carregando...</div>;
   if (erro) return <div>{erro}</div>;
-  if (!modulo) return <div>tecnologia não encontrado.</div>;
+  if (!modulo) return <div>Módulo não encontrado.</div>;
 
   return (
     <>
@@ -128,4 +128,4 @@ const EditarTecnologiaPage = () => {
   );
 };
 
-export default EditarTecnologiaPage;
+export default EditarModuloPage;

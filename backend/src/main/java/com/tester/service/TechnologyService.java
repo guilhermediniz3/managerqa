@@ -6,10 +6,14 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.tester.dto.DeveloperDTO;
 import com.tester.dto.TechnologyDTO;
 import com.tester.entity.Technology;
 import com.tester.exception.ResourceNotFoundException;
 import com.tester.repository.TechnologyRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 @Service
 public class TechnologyService {
 	
@@ -36,7 +40,8 @@ public class TechnologyService {
 	        Technology savedTechnology = technologyRepository.save(technology);
 	        return new TechnologyDTO(savedTechnology);  // Usando o construtor que recebe a entidade
 	    }
-
+	    
+		@Transactional
 	    public TechnologyDTO updateTechnology(Long id, TechnologyDTO technologyDTO) {
 	        Technology existingTechnology = technologyRepository.findById(id)
 	                .orElseThrow(() -> new ResourceNotFoundException("Technology not found with id " + id));
@@ -52,5 +57,27 @@ public class TechnologyService {
 	                .orElseThrow(() -> new ResourceNotFoundException("Technology not found with id " + id));
 	        technologyRepository.delete(technology);
 	    }
+	    
+	    @Transactional
+	    // refatorar os outros patchs nesse padrao
 
+	    public TechnologyDTO patchTecnology(Long id, TechnologyDTO technologyDTO) {
+	        // Recupera a entidade existente do banco de dados
+	        Technology existingTechnology = technologyRepository.findById(id)
+	                .orElseThrow(() -> new ResourceNotFoundException("Technology not found with id: " + id));
+
+	        // Atualiza apenas os campos presentes no DTO recebido
+	        if (technologyDTO.getName() != null && !technologyDTO.getName().isEmpty()) {
+	            existingTechnology.setName(technologyDTO.getName());
+	        }
+	        if (technologyDTO.isActive() != null) {
+	            existingTechnology.setActive(technologyDTO.isActive());
+	        }
+
+	        // Salva a entidade atualizada no banco de dados
+	        Technology updatedTechnology = technologyRepository.save(existingTechnology);
+
+	        // Converte a entidade atualizada de volta para DTO e retorna
+	        return new TechnologyDTO(updatedTechnology);
+	    }
 }

@@ -24,6 +24,7 @@ import EditarModulo from './shared/pages/modulo/editar/EditarModulo';
 import ListaTecnologia from './shared/pages/tecnologia/listagem/ListaTecnologia';
 import CadastrarTecnologia from './shared/pages/tecnologia/cadastrar/CadastrarTecnologia';
 import EditarTecnologia from './shared/pages/tecnologia/editar/EditarTecnologia';
+import ListaPlanoTeste from './shared/pages/planoTeste/listagem/ListaPlanoTeste'
 ReactDOM.createRoot(document.getElementById('root')!).render(
 
   <React.StrictMode>
@@ -54,6 +55,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/tecnologia/listagem" element={<ListaTecnologia/>} />
           <Route path="/tecnologia/cadastrar" element={<CadastrarTecnologia/>} />
           <Route path="/tecnologia/editar/:id" element={<EditarTecnologia/>} />
+          <Route path="/planoTeste/listagem" element={<ListaPlanoTeste/>} />
+          
    
         </Route>
 

@@ -102,6 +102,8 @@ public class DeveloperService {
 	
 	@Transactional
 	public DeveloperDTO patchDeveloper(Long id, DeveloperDTO developerDTO) {
+		
+		
 	    // Cria um DTO temporário com apenas os campos que foram fornecidos
 	    DeveloperDTO updatedDeveloperDTO = new DeveloperDTO();
 	    updatedDeveloperDTO.setId(id); // Garante que o ID seja preservado

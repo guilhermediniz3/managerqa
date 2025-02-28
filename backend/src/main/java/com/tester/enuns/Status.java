@@ -2,7 +2,7 @@ package com.tester.enuns;
 
 public enum Status {
 
-	CRIADA("Criada"), CONCLUIDA("Concluída"), IMPEDIMENTO("Impedimento"), RETORNO("Retorno");
+	EM_PROGRESSO("em progresso"),CRIADA("Criada"), CONCLUIDA("Concluída"), IMPEDIMENTO("Impedimento"), RETORNO("Retorno");
 
 	private final String descricao;
 

@@ -7,5 +7,8 @@ import com.tester.entity.TestSuite;
 
 @Repository
 public interface TestSuiteRepository extends JpaRepository<TestSuite,Long> {
+	
+	
+	
 
 }

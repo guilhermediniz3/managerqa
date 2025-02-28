@@ -145,7 +145,7 @@ const ListagemtecnologiaPage = () => {
       <br />
       <br />
       <div className="container mt-4">
-        <h1>Módulos</h1>
+        <h1>Tecnologias</h1>
         {/* Campo de Pesquisa */}
         <input
           type="text"
@@ -159,7 +159,7 @@ const ListagemtecnologiaPage = () => {
           className="btn btn-primary mb-3 btn-novo-usuario"
           onClick={() => navigate("/tecnologia/cadastrar")}
         >
-          <FaUserPlus /> Novo Módulo
+          <FaUserPlus /> Nova tecnologia
         </button>
         {/* Tabela de Módulos */}
         <table className="table table-striped">
@@ -175,7 +175,7 @@ const ListagemtecnologiaPage = () => {
             {tecnologiasFiltrados.length === 0 ? (
               <tr>
                 <td colSpan={4} className="text-center">
-                  Nenhum módulo encontrado.
+                  Nenhuma tecnologia encontrado.
                 </td>
               </tr>
             ) : (

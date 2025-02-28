@@ -1,14 +1,18 @@
 package com.tester.service;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.tester.dto.TestPlanDTO;
+import com.tester.dto.TestPlanListagemDTO;
 import com.tester.entity.Developer;
 import com.tester.entity.SystemModule;
 import com.tester.entity.TestPlan;
@@ -158,5 +162,28 @@ public class TestPlanService {
 				.orElseThrow(() -> new ResourceNotFoundException("Plano de teste não encontrado"));
 		return new TestPlanDTO(testPlan);
 	}
+	
+	
+
+    public Page<TestPlanListagemDTO> findAllTestPlans(
+            String name, String observation, String status, String taskStatus,
+            String jira, LocalDate dataInicio, LocalDate dataFim,
+            LocalDate deliveryDataInicio, LocalDate deliveryDataFim,
+            String matriz, String userName, String callNumber,
+            String developerName, String systemModuleName, String testerQAName,
+            Pageable pageable) {
+
+        // Busca os TestPlans do banco de dados
+        Page<TestPlan> testPlans = testPlanRepository.findAllTestPlans(
+                name, observation, status, taskStatus, jira,
+                dataInicio, dataFim, deliveryDataInicio, deliveryDataFim,
+                matriz, userName, callNumber, developerName, systemModuleName, testerQAName,
+                pageable
+        );
+
+        // Mapeia os TestPlans para TestPlanListagemDTO
+        return testPlans.map(testPlan -> new TestPlanListagemDTO(testPlan));
+    }
+    
 
 }
