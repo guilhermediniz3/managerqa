@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './index.css';
 import Login from './shared/pages/login/Login';
 import ForgotPassword from './shared/pages/login/forgot-password/ForgotPassword';
@@ -25,9 +25,12 @@ import ListaTecnologia from './shared/pages/tecnologia/listagem/ListaTecnologia'
 import CadastrarTecnologia from './shared/pages/tecnologia/cadastrar/CadastrarTecnologia';
 import EditarTecnologia from './shared/pages/tecnologia/editar/EditarTecnologia';
 import ListaPlanoTeste from './shared/pages/planoTeste/listagem/ListaPlanoTeste'
+import CadastrarPlanoTeste from'./shared/pages/planoTeste/cadastrar/CadastrarPlanoTeste';
+const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById('root')!).render(
 
   <React.StrictMode>
+      <QueryClientProvider client={queryClient}> {/* Provedor do React Query */}
         <TokenProvider>
     <Router>
       <Routes>
@@ -56,7 +59,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/tecnologia/cadastrar" element={<CadastrarTecnologia/>} />
           <Route path="/tecnologia/editar/:id" element={<EditarTecnologia/>} />
           <Route path="/planoTeste/listagem" element={<ListaPlanoTeste/>} />
-          
+          <Route path="/planoTeste/cadastrar" element={<CadastrarPlanoTeste/>} />
+    
    
         </Route>
 
@@ -65,5 +69,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       </Routes>
     </Router>
     </TokenProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );

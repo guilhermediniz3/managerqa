@@ -44,14 +44,14 @@ interface Filters {
   size: number;
 }
 
-// Interface para um Tester
+// Interface para um Tester (para preencher o dropdown)
 interface Tester {
   id: number;
   name: string;
 }
 
 const TestPlanPage = () => {
-  // Estados
+  // Estados necessários para carregar a lista
   const [filters, setFilters] = useState<Filters>({
     name: "",
     jira: "",
@@ -67,16 +67,14 @@ const TestPlanPage = () => {
     page: 0,
     size: 10,
   });
-
   const [results, setResults] = useState<TestPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [testers, setTesters] = useState<Tester[]>([]);
 
-  // Lista de status
+  // Lista de status para o select
   const statusList = [
     { value: "EM_PROGRESSO", label: "Em Progresso" },
     { value: "CRIADA", label: "Criada" },
@@ -85,14 +83,12 @@ const TestPlanPage = () => {
     { value: "RETORNO", label: "Retorno" },
   ];
 
-  // Buscar a lista de testers
+  // Buscar a lista de testers (usado no dropdown)
   const fetchTesters = async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get("http://localhost:8081/testers", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setTesters(response.data);
     } catch (error) {
@@ -101,20 +97,15 @@ const TestPlanPage = () => {
     }
   };
 
-  // Buscar todos os planos de teste
+  // Buscar todos os planos de teste (sem filtros)
   const fetchAllTestPlans = async () => {
     setLoading(true);
     setError(null);
     try {
       const token = localStorage.getItem("token");
       const response = await axios.get("http://localhost:8081/testplans/all", {
-        params: {
-          page: filters.page,
-          size: filters.size,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        params: { page: filters.page, size: filters.size },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setResults(response.data.content || []);
       setTotalPages(response.data.totalPages || 0);
@@ -126,52 +117,45 @@ const TestPlanPage = () => {
     }
   };
 
-  // Buscar planos de teste filtrados
+  // Buscar planos de teste filtrados (envia somente os parâmetros com valor definido)
   const fetchFilteredTestPlans = async () => {
     setLoading(true);
     setError(null);
     try {
       const token = localStorage.getItem("token");
+      const params: Record<string, any> = { page: filters.page, size: filters.size };
+      if (filters.name) params.name = filters.name;
+      if (filters.jira) params.jira = filters.jira;
+      if (filters.callNumber) params.callNumber = filters.callNumber;
+      if (filters.testerName) params.testerName = filters.testerName;
+      if (filters.developerName) params.developerName = filters.developerName;
+      if (filters.systemModuleName) params.systemModuleName = filters.systemModuleName;
+      if (filters.status) params.status = filters.status;
+      if (filters.dataInicio) params.dataInicio = filters.dataInicio.toISOString();
+      if (filters.dataFim) params.dataFim = filters.dataFim.toISOString();
+      if (filters.deliveryDataInicio) params.deliveryDataInicio = filters.deliveryDataInicio.toISOString();
+      if (filters.deliveryDataFim) params.deliveryDataFim = filters.deliveryDataFim.toISOString();
+
       const response = await axios.get("http://localhost:8081/testplans/all", {
-        params: {
-          name: filters.name || null,
-          jira: filters.jira || null,
-          callNumber: filters.callNumber || null,
-          testerName: filters.testerName || null,
-          developerName: filters.developerName || null,
-          systemModuleName: filters.systemModuleName || null,
-          status: filters.status || null,
-          dataInicio: filters.dataInicio ? filters.dataInicio.toISOString().split("T")[0] : null,
-          dataFim: filters.dataFim ? filters.dataFim.toISOString().split("T")[0] : null,
-          deliveryDataInicio: filters.deliveryDataInicio
-            ? filters.deliveryDataInicio.toISOString().split("T")[0]
-            : null,
-          deliveryDataFim: filters.deliveryDataFim
-            ? filters.deliveryDataFim.toISOString().split("T")[0]
-            : null,
-          page: filters.page,
-          size: filters.size,
-        },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        params,
+        headers: { Authorization: `Bearer ${token}` },
       });
       setResults(response.data.content || []);
       setTotalPages(response.data.totalPages || 0);
     } catch (error) {
-      console.error("Erro ao buscar dados filtrados:", error);
-      setError("Erro ao aplicar os filtros.");
+      console.error("Erro ao buscar os planos de teste filtrados:", error);
+      setError("Erro ao carregar os dados filtrados.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Alternar visibilidade dos filtros
+  // Alterna a visibilidade dos filtros extras
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
 
-  // Limpar todos os filtros
+  // Limpa todos os filtros e recarrega os planos sem filtro
   const clearFilters = () => {
     setFilters({
       name: "",
@@ -188,14 +172,12 @@ const TestPlanPage = () => {
       page: 0,
       size: 10,
     });
-    setSearchTerm("");
     fetchAllTestPlans();
   };
 
-  // Lidar com mudanças no campo de pesquisa
+  // Lida com a mudança do campo de busca (aplica o mesmo valor a vários filtros)
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
-    setSearchTerm(value);
     setFilters((prev) => ({
       ...prev,
       name: value,
@@ -204,21 +186,22 @@ const TestPlanPage = () => {
       testerName: value,
       developerName: value,
       systemModuleName: value,
+      page: 0,
     }));
   };
 
-  // Lidar com mudanças nos filtros
+  // Lida com a mudança dos filtros individuais
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Lidar com mudanças nas datas
+  // Lida com a mudança das datas
   const handleDateChange = (date: Date | null, field: string) => {
     setFilters((prev) => ({ ...prev, [field]: date }));
   };
 
-  // Obter a cor do status
+  // Define a cor do botão conforme o status
   const getStatusColor = (status: string) => {
     switch (status) {
       case "EM_PROGRESSO":
@@ -236,12 +219,12 @@ const TestPlanPage = () => {
     }
   };
 
-  // Mudar a página
+  // Muda a página na paginação
   const handlePageChange = (page: number) => {
     setFilters((prev) => ({ ...prev, page }));
   };
 
-  // Efeito para buscar os planos de teste
+  // Efeito para buscar os planos de teste quando os filtros mudam
   useEffect(() => {
     if (
       filters.name ||
@@ -278,13 +261,13 @@ const TestPlanPage = () => {
           type="text"
           placeholder="Pesquisar por nome, Jira, chamada, tester, desenvolvedor ou módulo..."
           className="search-bar"
-          value={searchTerm}
+          value={filters.name}
           onChange={handleSearchChange}
         />
         <FaFilter className="filter-icon" onClick={toggleFilters} />
       </div>
 
-      {/* Filtros */}
+      {/* Filtros extras */}
       {showFilters && (
         <div className="filters-visible">
           {/* Filtros de Data */}
@@ -306,9 +289,7 @@ const TestPlanPage = () => {
             {(filters.dataInicio || filters.dataFim) && (
               <FaTimes
                 className="clear-icon"
-                onClick={() => {
-                  setFilters((prev) => ({ ...prev, dataInicio: null, dataFim: null }));
-                }}
+                onClick={() => setFilters((prev) => ({ ...prev, dataInicio: null, dataFim: null }))}
               />
             )}
           </div>
@@ -332,9 +313,9 @@ const TestPlanPage = () => {
             {(filters.deliveryDataInicio || filters.deliveryDataFim) && (
               <FaTimes
                 className="clear-icon"
-                onClick={() => {
-                  setFilters((prev) => ({ ...prev, deliveryDataInicio: null, deliveryDataFim: null }));
-                }}
+                onClick={() =>
+                  setFilters((prev) => ({ ...prev, deliveryDataInicio: null, deliveryDataFim: null }))
+                }
               />
             )}
           </div>

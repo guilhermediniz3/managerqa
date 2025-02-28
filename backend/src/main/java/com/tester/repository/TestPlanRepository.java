@@ -16,22 +16,23 @@ import com.tester.entity.TestPlan;
 
 public interface TestPlanRepository extends JpaRepository<TestPlan, Long> {
 	
+	
 	@Query("SELECT tp " +
 		       "FROM TestPlan tp " +
 		       "LEFT JOIN tp.developer dev " +
 		       "LEFT JOIN tp.systemModule mod " +
 		       "LEFT JOIN tp.tester tester " +
-		       "WHERE ((:name IS NULL OR tp.name ILIKE %:name%) " +
-		       "OR (:observation IS NULL OR tp.observation ILIKE %:observation%) " +
-		       "OR (:status IS NULL OR tp.status = :status) " +
-		       "OR (:taskStatus IS NULL OR tp.taskStatus = :taskStatus) " +
-		       "OR (:jira IS NULL OR tp.jira ILIKE %:jira%) " +
-		       "OR (:matriz IS NULL OR tp.matriz ILIKE %:matriz%) " +
-		       "OR (:userName IS NULL OR tp.userName ILIKE %:userName%) " +
-		       "OR (:callNumber IS NULL OR tp.callNumber ILIKE %:callNumber%) " +
-		       "OR (:developerName IS NULL OR dev.name ILIKE %:developerName%) " +
-		       "OR (:systemModuleName IS NULL OR mod.name ILIKE %:systemModuleName%) " +
-		       "OR (:testerQAName IS NULL OR tester.name ILIKE %:testerQAName%)) " +
+		       "WHERE (:name IS NULL OR tp.name ILIKE %:name%) " +
+		       "AND (:observation IS NULL OR tp.observation ILIKE %:observation%) " +
+		       "AND (:status IS NULL OR tp.status = :status) " +
+		       "AND (:taskStatus IS NULL OR tp.taskStatus = :taskStatus) " +
+		       "AND (:jira IS NULL OR tp.jira ILIKE %:jira%) " +
+		       "AND (:matriz IS NULL OR tp.matriz ILIKE %:matriz%) " +
+		       "AND (:userName IS NULL OR tp.userName ILIKE %:userName%) " +
+		       "AND (:callNumber IS NULL OR tp.callNumber ILIKE %:callNumber%) " +
+		       "AND (:developerName IS NULL OR dev.name ILIKE %:developerName%) " +
+		       "AND (:systemModuleName IS NULL OR mod.name ILIKE %:systemModuleName%) " +
+		       "AND (:testerQAName IS NULL OR tester.name ILIKE %:testerQAName%) " +
 		       "AND (:dataInicio IS NULL OR tp.data >= :dataInicio) " +
 		       "AND (:dataFim IS NULL OR tp.data <= :dataFim) " +
 		       "AND (:deliveryDataInicio IS NULL OR tp.deliveryData >= :deliveryDataInicio) " +
@@ -53,5 +54,7 @@ public interface TestPlanRepository extends JpaRepository<TestPlan, Long> {
 		    @Param("systemModuleName") String systemModuleName,
 		    @Param("testerQAName") String testerQAName,
 		    Pageable pageable);
+
+	
 
 }
