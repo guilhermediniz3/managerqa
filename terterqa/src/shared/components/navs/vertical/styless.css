@@ -1,0 +1,133 @@
+.navVertical {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 100vh;
+  background-color: #333333; /* Cor de fundo inicial */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: width 0.3s;
+  z-index: 1000;
+}
+
+.navVertical.expanded {
+  width: 200px;
+}
+
+.verticalHeader {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+}
+
+.expandButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.navIcon {
+  font-size: 20px;
+  color: white;
+}
+
+.navList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.navItem {
+  width: 100%;
+  position: relative; /* Para posicionar o submenu corretamente */
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  text-decoration: none;
+  color: white;
+}
+
+.navText {
+  margin-left: 10px;
+}
+
+.colorPickerContainer {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.colorPickerButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.colorOptions {
+  position: absolute;
+  bottom: 40px;
+  display: flex;
+  flex-wrap: wrap; /* Permite que as cores quebrem para a próxima linha */
+  gap: 5px; /* Espaçamento entre as cores */
+  width: 100px; /* Largura fixa para 4 cores por linha */
+}
+
+.colorOption {
+  width: 20px; /* Tamanho das opções de cor */
+  height: 20px; /* Tamanho das opções de cor */
+  border-radius: 50%;
+  cursor: pointer;
+  flex: 0 0 20px; /* Ajuste o tamanho fixo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Estilos para o submenu */
+.submenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  padding-left: 20px; /* Indentação para o submenu */
+  background-color: rgba(0, 0, 0, 0.8); /* Fundo escuro para destacar o submenu */
+  border-radius: 5px; /* Bordas arredondadas */
+  position: absolute;
+  left: 60px; /* Posiciona o submenu ao lado do menu recolhido */
+  top: 0;
+  z-index: 1000; /* Garante que o submenu fique acima de outros elementos */
+  min-width: 150px; /* Largura mínima do submenu */
+}
+
+.navVertical.expanded .submenu {
+  left: 0; /* Posiciona o submenu dentro do menu expandido */
+  background-color: transparent; /* Remove o fundo escuro */
+  position: static; /* Retorna ao fluxo normal */
+}
+
+.submenuItem {
+  padding: 5px 0;
+}
+
+.submenuItem a {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  display: block;
+  padding: 5px 10px; /* Espaçamento interno para os itens do submenu */
+}
+
+.submenuItem a:hover {
+  text-decoration: underline;
+  background-color: rgba(255, 255, 255, 0.1); /* Efeito de hover nos itens */
+}

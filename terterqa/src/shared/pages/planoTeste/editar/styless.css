@@ -1,0 +1,45 @@
+/* Estilo geral da página */
+.container {
+    margin-top: 50px;
+  }
+  
+  /* Estilo do título */
+  h1 {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  /* Estilo do formulário */
+  form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  /* Estilo dos campos de entrada */
+  .form-control {
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  /* Estilo dos botões */
+  .btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+  }
+  
+  /* Estilo da mensagem de sucesso */
+  .alert-success {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  /* Estilo dos ícones de status */
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }

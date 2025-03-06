@@ -1,0 +1,15 @@
+.dashboardContainer {
+    margin-top: 50px; /* Altura do NavHorizontal */
+    margin-left: 60px; /* Largura do menu vertical recolhido */
+    padding: 20px;
+    transition: margin-left 0.3s;
+  }
+  
+  /* Ajusta a margem do conteúdo principal quando o NavVertical está expandido */
+  .navVertical.expanded ~ .dashboardContainer {
+    margin-left: 200px; /* Largura do menu vertical expandido */
+  }
+  
+  .dashboardContent {
+    padding: 20px;
+  }

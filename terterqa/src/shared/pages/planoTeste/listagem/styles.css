@@ -1,0 +1,142 @@
+/* Estilo geral da página */
+.container {
+  margin-top: 50px; /* Adiciona espaço no topo após o NavHorizontal */
+}
+
+/* Estilo do campo de pesquisa */
+.search-bar {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px;
+  border: 2px solid #ccc;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  margin-bottom: 15px;
+}
+.search-bar:focus {
+  border-color: #007bff; /* Altera a cor da borda ao focar */
+}
+
+.date-group {
+  display: flex; /* Alinha os inputs horizontalmente */
+  align-items: center; /* Centraliza verticalmente */
+  gap: 15px; /* Espaçamento entre os inputs */
+}
+
+/* Estilo para os campos de data (inicial e final) */
+.date-input {
+  width: 100%;
+  max-width: 140px; /* Reduzido para caber lado a lado */
+  padding: 8px;
+  border: 2px solid #ccc;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  margin-right: 20px; /* Espaçamento entre os campos de data */
+}
+.date-input:focus {
+  border-color: #007bff; /* Altera a cor da borda ao focar */
+}
+
+/* Estilo para o ícone de limpar campo */
+.clear-icon {
+  cursor: pointer;
+  font-size: 16px;
+  color: #dc3545; /* Cor vermelha */
+  margin-left: 8px;
+}
+
+/* Estilo para os botões "Aplicar Filtros" e "Limpar Filtros" */
+.custom-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px; /* Tamanho reduzido para ficar igual aos botões de status */
+  font-size: 14px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #007bff; /* Azul padrão */
+  border: none;
+  border-radius: 20px; /* Borda arredondada */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+}
+
+.custom-button:hover {
+  background-color: #0056b3; /* Azul mais escuro ao passar o mouse */
+  transform: scale(1.05); /* Efeito de zoom leve */
+}
+
+.custom-button:disabled {
+  background-color: #ccc; /* Cinza para botões desativados */
+  cursor: not-allowed;
+}
+
+/* Estilo específico para o botão "Limpar Filtros" */
+.clear-filters-button {
+  background-color: #6c757d; /* Cinza neutro */
+  margin-left: 10px; /* Espaçamento entre os botões */
+}
+
+.clear-filters-button:hover {
+  background-color: #5a6268; /* Cinza mais escuro */
+}
+
+/* Estilo para os botões de status */
+.status-button-fixed {
+  width: 140px;
+  text-align: center;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  white-space: nowrap;
+}
+
+/* Centraliza o conteúdo das células da tabela */
+.table-custom td,
+.table-custom th {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Estilo para o contêiner dos filtros */
+.filters-visible {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px; /* Espaçamento entre os filtros */
+  margin-bottom: 20px; /* Espaçamento abaixo dos filtros */
+}
+
+/* Estilo para cada grupo de filtro */
+.filter-group {
+  display: flex;
+  flex-direction: row; /* Alinha os elementos horizontalmente */
+  align-items: center; /* Centraliza verticalmente */
+  flex: 1 1 auto; /* Flexível, mas com largura mínima automática */
+}
+
+/* Estilo para a paginação */
+.pagination-custom {
+  margin-top: 20px; /* Adiciona um espaçamento acima da paginação */
+  justify-content: center; /* Centraliza a paginação */
+}
+
+/* Estilo para o ícone de Editar */
+.icon-edit {
+  color: #0d6efd; /* Azul */
+  cursor: pointer;
+  font-size: 25px; /* Tamanho do ícone */
+  margin-right: 15px; /* Espaçamento entre os ícones */
+}
+
+/* Estilo para o ícone de Duplicar */
+.icon-duplicate {
+  color: #6c757d; /* Cinza */
+  cursor: pointer;
+  font-size: 25px; /* Tamanho do ícone */
+}

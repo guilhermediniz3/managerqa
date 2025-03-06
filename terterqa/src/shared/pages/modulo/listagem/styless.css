@@ -1,0 +1,67 @@
+/* Estilo geral da página */
+.container {
+    margin-top: 50px; /* Adiciona espaço no topo após o NavHorizontal */
+  }
+  
+  /* Estilo do campo de pesquisa */
+  .search-bar {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px; /* Reduzido o padding para uma margem mais fina */
+    border: 2px solid #ccc;
+    border-radius: 25px; /* Bordas arredondadas */
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+    margin-bottom: 15px; /* Espaçamento reduzido abaixo do campo de pesquisa */
+  }
+  
+  .search-bar:focus {
+    border-color: #007bff; /* Altera a cor da borda ao focar */
+  }
+  
+  /* Estilo do botão "Novo Usuário" */
+  .btn-novo-usuario {
+    float: right; /* Posiciona o botão à direita */
+    margin-bottom: 15px; /* Espaçamento abaixo do botão */
+  }
+  
+  /* Estilo da tabela */
+  .table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  /* Estilo das linhas da tabela */
+  .table tbody tr:hover {
+    background-color: #f1f1f1; /* Cor de fundo ao passar o mouse */
+    cursor: pointer;
+  }
+  
+  /* Estilo dos ícones de ação */
+  .action-icons {
+    display: flex;
+    gap: 10px;
+  }
+
+  /* Estilo para o ícone de edição */
+.edit-icon {
+  color: #0d6efd; /* Azul do botão "Novo Usuário" */
+  cursor: pointer;
+  font-size: 20px;
+}
+
+/* Estilo para o ícone de ativo (verde mais claro) */
+.active-icon {
+  color: #28a745; /* Verde mais claro */
+  cursor: pointer;
+  font-size: 24px;
+}
+
+/* Estilo para o ícone de inativo (cinza) */
+.inactive-icon {
+  color: #6c757d; /* Cinza */
+  cursor: pointer;
+  font-size: 24px;
+}
