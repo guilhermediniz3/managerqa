@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tester.enuns.Status;
 
 import jakarta.persistence.CascadeType;
@@ -27,11 +28,13 @@ public class TestSuite {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	private Long codeSuite;
 
 	@Enumerated(EnumType.STRING)
 	private Status status;
-
-	@DateTimeFormat(pattern = "dd/MM/yyyy")
+	
+	@JsonFormat(pattern = "dd/MM/yyyy") // Adiciona o formato esperado
+	 @DateTimeFormat(pattern = "dd/MM/yyyy")
 	private LocalDate data;
 	@ManyToOne
 	@JoinColumn(name = "test_plan_id") 
@@ -44,12 +47,14 @@ public class TestSuite {
 
 	}
 
-	public TestSuite(Long id, Status status, LocalDate data, Set<TestCaseEntity> cases) {
+	public TestSuite(Long id, Long codeSuite, Status status, LocalDate data, Set<TestCaseEntity> cases) {
 		super();
 		this.id = id;
+		this.codeSuite = codeSuite;
 		this.status = status;
 		this.data = data;
 		this.cases = cases;
+		
 	}
 
 	public Long getId() {
@@ -86,6 +91,14 @@ public class TestSuite {
 
 	public void setTestPlan(TestPlan testPlan) {
 		this.testPlan = testPlan;
+	}
+
+	public Long getCodeSuite() {
+		return codeSuite;
+	}
+
+	public void setCodeSuite(Long codeSuite) {
+		this.codeSuite = codeSuite;
 	}
 
 	public void setCases(Set<TestCaseEntity> cases) {

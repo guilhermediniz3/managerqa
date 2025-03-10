@@ -59,7 +59,7 @@ const CriarDesenvolvedor = () => {
       await axios.post("http://localhost:8081/developers", developer);
       setSuccessMessage("Desenvolvedor criado com sucesso!");
       setShowSuccessToast(true);
-      setTimeout(() => navigate("/desenvolvedores"), 2000);
+      setTimeout(() => navigate("/desenvolvedores/listagem"), 2000);
     } catch (error) {
       setErrorMessage("Erro ao criar Desenvolvedor.");
       setShowErrorToast(true);
