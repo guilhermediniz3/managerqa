@@ -91,3 +91,24 @@
 .light-mode .btn-primary {
   color: black; /* Texto preto no modo claro */
 }
+
+/* Estilos personalizados */
+.custom-container {
+  max-width: 900px; /* Largura máxima do container */
+  margin: 0 auto; /* Centralizar o container */
+}
+
+.custom-row {
+  border: 1px solid #d1cfcf; /* Borda fina */
+  border-radius: 4px; /* Bordas arredondadas */
+  margin-bottom: 4px; /* Espaçamento entre as linhas */
+  padding: 10px; /* Espaçamento interno */
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease; /* Transição suave */
+}
+
+.custom-row:hover {
+  background-color: #f0f0f0; /* Cor de fundo ao passar o mouse */
+  border-color: #a0a0a0; /* Cor da borda ao passar o mouse */
+  color: #000000; /* Texto preto durante o hover */
+  cursor: pointer; /* Muda o cursor para indicar que é clicável */
+}

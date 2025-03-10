@@ -13,6 +13,8 @@ import axios from 'axios';
 import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
 import NavVertical from "../../../components/navs/vertical/NavVertical";
 import { useNavigate, useParams } from 'react-router-dom';
+import { FaEdit } from 'react-icons/fa';
+import { HiOutlineDuplicate } from 'react-icons/hi';
 
 function EditTestPlan() {
   const { id } = useParams(); // Obtém o ID do plano de teste da URL
@@ -28,7 +30,8 @@ function EditTestPlan() {
   const [jira, setJira] = useState("");
   const [callNumber, setCallNumber] = useState("");
   const [observations, setObservations] = useState("");
-  const [suites, setSuites] = useState([]);
+  const [suites, setSuites] = useState([]); // Lista de suites
+  const [nextCode, setNextCode] = useState<number>(1); // Estado para o próximo código incremental
 
   interface Modulo {
     id: number;
@@ -55,8 +58,11 @@ function EditTestPlan() {
   const [developers, setDevelopers] = useState<Developer[]>([]);
   const [selectedDeveloper, setSelectedDeveloper] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
+  // Carrega os dados do plano de teste e as suites existentes
   useEffect(() => {
-    // Carrega os dados do plano de teste existente
+    // Carrega os dados do plano de teste
     axios.get(`http://localhost:8081/testplans/${id}`)
       .then((response) => {
         const testPlan = response.data;
@@ -64,18 +70,30 @@ function EditTestPlan() {
         setDeliveryDate(new Date(testPlan.deliveryData));
         setSelectedStatus(testPlan.status);
         setIsTaskCreated(testPlan.created);
-        setMatriz(testPlan.matriz);
-        setUsername(testPlan.userName);
-        setPassword(testPlan.password);
-        setName(testPlan.name);
-        setJira(testPlan.jira);
-        setCallNumber(testPlan.callNumber);
-        setObservations(testPlan.observation);
-        setSelectedDeveloper(testPlan.developerId);
-        setSelectedModulo(testPlan.systemModuleId);
-        setSelectedTester(testPlan.testerId);
+        setMatriz(testPlan.matriz || "Sem matriz");
+        setUsername(testPlan.userName || "Sem usuário");
+        setPassword(testPlan.password || "Sem senha");
+        setName(testPlan.name || "Sem nome");
+        setJira(testPlan.jira || "Sem JIRA");
+        setCallNumber(testPlan.callNumber || "Sem número");
+        setObservations(testPlan.observation || "Sem observações");
+        setSelectedDeveloper(testPlan.developerId || "");
+        setSelectedModulo(testPlan.systemModuleId || "");
+        setSelectedTester(testPlan.testerId || "");
       })
       .catch((error) => console.error("Erro ao buscar Plano de Teste:", error));
+
+    // Carrega as suites existentes para o plano de teste
+    axios.get(`http://localhost:8081/testplans/${id}/suites`)
+      .then((response) => {
+        setSuites(response.data);
+        // Define o próximo código incremental com base na última suite
+        if (response.data.length > 0) {
+          const lastCode = response.data[response.data.length - 1].codeSuite;
+          setNextCode(lastCode + 1);
+        }
+      })
+      .catch((error) => console.error("Erro ao buscar Suites:", error));
 
     // Carrega os módulos, testers e desenvolvedores
     axios.get<Modulo[]>("http://localhost:8081/modules")
@@ -100,11 +118,20 @@ function EditTestPlan() {
       .catch((error) => console.error("Erro ao buscar desenvolvedores:", error));
   }, [id]);
 
+  // Função para formatar a data no formato DD/MM/YYYY
+  const formatDateToDDMMYYYY = (date: Date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Função para enviar os dados do formulário para o backend
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const formattedStartDate = startDate.toLocaleDateString('pt-BR');
-    const formattedDeliveryDate = deliveryDate.toLocaleDateString('pt-BR');
+    const formattedStartDate = formatDateToDDMMYYYY(startDate); // Formato DD/MM/YYYY
+    const formattedDeliveryDate = formatDateToDDMMYYYY(deliveryDate); // Formato DD/MM/YYYY
 
     const testPlanData = {
       name: name || "Sem nome",
@@ -121,7 +148,7 @@ function EditTestPlan() {
       systemModuleId: selectedModulo || 1,
       testerId: selectedTester || 1,
       password: password || "Sem senha",
-      testeSuiteId: [],
+      testeSuiteId: suites.map((suite) => suite.id), // IDs das suites associadas
     };
 
     axios.put(`http://localhost:8081/testplans/${id}`, testPlanData)
@@ -135,23 +162,28 @@ function EditTestPlan() {
       });
   };
 
-  const handleCreateSuite = () => {
+  // Função para criar uma nova suite
+  const handleCreateSuite = async () => {
     const newSuite = {
-      id: suites.length + 1,
       status: "EM_PROGRESSO",
-      data: new Date().toLocaleDateString('pt-BR'),
+      data: formatDateToDDMMYYYY(new Date()), // Formato DD/MM/YYYY
+      testPlanId: id, // ID do plano de teste
+      codeSuite: nextCode, // Código incremental gerado pelo frontend
     };
 
-    axios.post('/api/suites', newSuite)
-      .then((response) => {
-        setSuites([...suites, response.data]);
-      })
-      .catch((error) => {
-        console.error("Erro ao criar suite:", error);
-      });
-  };
+    try {
+      const response = await axios.post('http://localhost:8081/test-suites', newSuite);
+      console.log('Suite criada com sucesso:', response.data);
 
-  const navigate = useNavigate();
+      // Atualiza a lista de suites com a nova suite
+      setSuites([...suites, response.data]);
+
+      // Incrementa o próximo código
+      setNextCode(nextCode + 1);
+    } catch (error) {
+      console.error('Erro ao criar suite:', error);
+    }
+  };
 
   return (
     <Container style={{ marginTop: '20px', marginBottom: '20px' }}>
@@ -162,6 +194,7 @@ function EditTestPlan() {
       <br />
 
       <Tabs defaultActiveKey="edit-test-plan" id="fill-tab-example" className="mb-3" fill>
+        {/* Primeira Aba - Editar Plano de Teste */}
         <Tab eventKey="edit-test-plan" title="Editar Plano de Teste">
           <Form onSubmit={handleSubmit} style={{ margin: '20px', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
             <Row>
@@ -375,7 +408,6 @@ function EditTestPlan() {
                     onChange={(e) => setSelectedStatus(e.target.value)}
                   >
                     <option value="EM_PROGRESSO">Em Progresso</option>
-                    <option value="CRIADA">Criada</option>
                     <option value="CONCLUIDA">Concluída</option>
                     <option value="IMPEDIMENTO">Impedimento</option>
                     <option value="RETORNO">Retorno</option>
@@ -443,23 +475,35 @@ function EditTestPlan() {
           </Form>
         </Tab>
 
-        <Tab eventKey="other-tab" title="Outra Aba">
+        {/* Segunda Aba - Suites */}
+        <Tab eventKey="suites-tab" title="Suites">
           <div style={{ margin: '20px' }}>
             <Button onClick={handleCreateSuite} variant="success" style={{ marginBottom: '20px' }}>
               Nova Suite
             </Button>
+
             <ListGroup>
               {suites.map((suite) => (
                 <ListGroup.Item key={suite.id}>
-                  <strong>Suite #{suite.id}</strong> - Data: {suite.data}
-                  <Button
-                    variant="info"
-                    size="sm"
-                    style={{ marginLeft: '10px' }}
-                    onClick={() => navigate(`/edit-suite/${suite.id}`)}
-                  >
-                    Editar
-                  </Button>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div>
+                      <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+                    </div>
+                    <div>
+                      {/* Ícone de Editar */}
+                      <FaEdit
+                        className="icon-edit"
+                        style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }}
+                        onClick={() => navigate(`/edit-suite/${suite.id}`)}
+                      />
+                      {/* Ícone de Duplicar */}
+                      <HiOutlineDuplicate
+                        className="icon-duplicate"
+                        style={{ color: "#6c757d", cursor: "pointer" }}
+                        onClick={() => alert(`Duplicar suite ${suite.codeSuite}`)}
+                      />
+                    </div>
+                  </div>
                 </ListGroup.Item>
               ))}
             </ListGroup>

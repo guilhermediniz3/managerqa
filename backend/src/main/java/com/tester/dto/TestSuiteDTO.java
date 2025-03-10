@@ -1,33 +1,38 @@
 package com.tester.dto;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tester.entity.TestSuite;
 import com.tester.enuns.Status;
 
 public class TestSuiteDTO {
 
 	private Long id;
+	private Long codeSuite;
 
 	private Status status;
 
-	@DateTimeFormat(pattern = "dd/MM/yyyy")
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    @DateTimeFormat(pattern = "dd/MM/yyyy")
 	private LocalDate data;
 	private Long testPlanId;
-	private Set<Long> TestCaseId;
+	private Set<Long> TestCaseId = new HashSet<>();
 	
 	public TestSuiteDTO() {
 		
 	}
 
 
-	public TestSuiteDTO(Long id, Status status, LocalDate data, Long testPlanId, Set<Long> testCaseId) {
+	public TestSuiteDTO(Long id,Long codeSuite, Status status, LocalDate data, Long testPlanId, Set<Long> testCaseId) {
 		
 		this.id = id;
+		this.codeSuite =codeSuite;
 		this.status = status;
 		this.data = data;
 		this.testPlanId = testPlanId;
@@ -37,6 +42,7 @@ public class TestSuiteDTO {
 	public TestSuiteDTO(TestSuite testSuite) {
 		
 		this.id = testSuite.getId();
+		this.codeSuite = testSuite.getCodeSuite();
 		this.status = testSuite.getStatus();
 		this.data = testSuite.getData();
 		this.testPlanId = testSuite.getTestPlan().getId(); 	// composição
@@ -92,6 +98,16 @@ public class TestSuiteDTO {
 
 	public void setTestCaseId(Set<Long> testCaseId) {
 		TestCaseId = testCaseId;
+	}
+
+
+	public Long getCodeSuite() {
+		return codeSuite;
+	}
+
+
+	public void setCodeSuite(Long codeSuite) {
+		this.codeSuite = codeSuite;
 	}
 	
 	
