@@ -13,50 +13,43 @@ import axios from 'axios';
 import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
 import NavVertical from "../../../components/navs/vertical/NavVertical";
 import { useNavigate } from 'react-router-dom';
+import './styless.css';
+import { HiOutlineDuplicate } from "react-icons/hi";
+import { FaEdit } from "react-icons/fa";
+
+// Definindo a interface para Suite
+interface TestSuite {
+  id: number;
+  status: string;
+  data: string;
+  testPlanId: number;
+  codeSuite: number; // Novo campo para o código incremental
+}
 
 function CreateTestPlan() {
   const [startDate, setStartDate] = useState(new Date());
   const [deliveryDate, setDeliveryDate] = useState(new Date());
-
-
-
   const [selectedStatus, setSelectedStatus] = useState("EM_PROGRESSO");
   const [selectedTaskStatus, setSelectedTaskStatus] = useState("in_progress");
-  const [isTaskCreated, setIsTaskCreated] = useState(false); // Estado para o switch
+  const [isTaskCreated, setIsTaskCreated] = useState(false);
   const [matriz, setMatriz] = useState("");
-  const [username, setUsername] = useState(""); // Nome de Usuário
-  const [password, setPassword] = useState(""); // Senha
-  const [name, setName] = useState(""); // Nome
-  const [jira, setJira] = useState(""); // JIRA
-  const [callNumber, setCallNumber] = useState(""); // Número de Chamada
-  const [observations, setObservations] = useState(""); // Observações
-
-
-  // Estados para armazenar dados vindos do backend
-
-
-
-  // Estado para armazenar as suites criadas
-  const [suites, setSuites] = useState([]);
-
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [jira, setJira] = useState("");
+  const [callNumber, setCallNumber] = useState("");
+  const [observations, setObservations] = useState("");
+  const [suites, setSuites] = useState<TestSuite[]>([]); // Tipando o estado suites
+  const [testPlanId, setTestPlanId] = useState<number | null>(null); // Armazenando o ID do TestPlan
+  const [nextCode, setNextCode] = useState<number>(1); // Estado para o próximo código incremental
 
   interface Modulo {
-
     id: number;
     name: string;
     active: boolean;
   }
   const [modules, setModules] = useState<Modulo[]>([]);
   const [selectedModulo, setSelectedModulo] = useState<string | null>(null);
-
-  useEffect(() => {
-    axios.get<Modulo[]>("http://localhost:8081/modules")
-      .then((response) => {
-        const activeModulo = response.data.filter((modulo) => modulo.active);
-        setModules(activeModulo);
-      })
-      .catch((error) => console.error("Erro ao buscar Módulos:", error));
-  }, []);
 
   interface Tester {
     id: number;
@@ -66,92 +59,118 @@ function CreateTestPlan() {
   const [testers, setTesters] = useState<Tester[]>([]);
   const [selectedTester, setSelectedTester] = useState<string | null>(null);
 
-  useEffect(() => {
-    axios.get<Tester[]>("http://localhost:8081/testers")
-      .then((response) => {
-
-        const activeTester = response.data.filter((teste) => teste.active);
-        setTesters(activeTester);
-      })
-      .catch((error) => console.error("Erro ao buscar testadores:", error));
-  }, []);
-
-
   interface Developer {
     id: number;
     name: string;
     active: boolean;
     technologyIds: number[];
   }
-
   const [developers, setDevelopers] = useState<Developer[]>([]);
   const [selectedDeveloper, setSelectedDeveloper] = useState<string | null>(null);
 
+  const navigate = useNavigate();
+
+  // Buscar módulos ativos
+  useEffect(() => {
+    axios.get<Modulo[]>("http://localhost:8081/modules")
+      .then((response) => {
+        const activeModulo = response.data.filter((modulo) => modulo.active);
+        setModules(activeModulo);
+      })
+      .catch((error) => console.error("Erro ao buscar Módulos:", error));
+  }, []);
+
+  // Buscar testadores ativos
+  useEffect(() => {
+    axios.get<Tester[]>("http://localhost:8081/testers")
+      .then((response) => {
+        const activeTester = response.data.filter((teste) => teste.active);
+        setTesters(activeTester);
+      })
+      .catch((error) => console.error("Erro ao buscar testadores:", error));
+  }, []);
+
+  // Buscar desenvolvedores ativos
   useEffect(() => {
     axios.get<Developer[]>('http://localhost:8081/developers')
       .then((response) => {
         const activeDevelopers = response.data.filter((dev) => dev.active);
-        setDevelopers(activeDevelopers); // Armazena os objetos inteiros
+        setDevelopers(activeDevelopers);
       })
       .catch((error) => console.error("Erro ao buscar desenvolvedores:", error));
   }, []);
 
+  // Função para formatar a data no formato DD/MM/YYYY
+  const formatDateToDDMMYYYY = (date: Date) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
   // Função para enviar os dados do formulário para o backend
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-
-
-    const formattedStartDate = startDate.toLocaleDateString('pt-BR'); // Formata a data como DD/MM/YYYY
-    const formattedDeliveryDate = deliveryDate.toLocaleDateString('pt-BR'); // Formata a data como DD/MM/YYYY
+    const formattedStartDate = formatDateToDDMMYYYY(startDate); // Formato DD/MM/YYYY
+    const formattedDeliveryDate = formatDateToDDMMYYYY(deliveryDate); // Formato DD/MM/YYYY
 
     const testPlanData = {
-      name: name || "Sem nome", // Garante que o campo não seja null
+      name: name || "Sem nome",
       created: isTaskCreated,
-      observation: observations || "Sem observações", // Garante que o campo não seja null
-      status: selectedStatus || "EM_PROGRESSO", // Garante que o campo não seja null
-      jira: jira || "Sem JIRA", // Garante que o campo não seja null
-      data: formattedStartDate, // Data formatada
-      deliveryData: formattedDeliveryDate, // Data de entrega formatada
+      observation: observations || "Sem observações",
+      status: selectedStatus || "EM_PROGRESSO",
+      jira: jira || "Sem JIRA",
+      data: formattedStartDate,
+      deliveryData: formattedDeliveryDate,
       matriz: matriz || "Sem matriz",
-      userName: username || "Sem usuário", // Garante que o campo não seja null
-      callNumber: callNumber || "Sem número", // Garante que o campo não seja null
-      developerId: selectedDeveloper || 1, // Garante que o campo não seja null (valor padrão 1)
-      systemModuleId: selectedModulo || 1, // Ajustado para seguir a mesma lógica dos outros selects
-      testerId: selectedTester || 1, // Garante que o campo não seja null (valor padrão 1)
-      password: password || "Sem senha", // Garante que o campo não seja null
+      userName: username || "Sem usuário",
+      callNumber: callNumber || "Sem número",
+      developerId: selectedDeveloper ? Number(selectedDeveloper) : 1,
+      systemModuleId: selectedModulo ? Number(selectedModulo) : 1,
+      testerId: selectedTester ? Number(selectedTester) : 1,
+      password: password || "Sem senha",
       testeSuiteId: [], // Array vazio por padrão
     };
 
-    axios.post('http://localhost:8081/testplans', testPlanData)
-      .then((response) => {
-        console.log("Plano de Teste Criado:", response.data);
-        alert("Plano de Teste criado com sucesso!");
-      })
-      .catch((error) => {
-        console.error("Erro ao criar Plano de Teste:", error);
-        alert("Erro ao criar Plano de Teste. Verifique o console para mais detalhes.");
-      });
+    try {
+      const response = await axios.post('http://localhost:8081/testplans', testPlanData);
+      console.log("Plano de Teste Criado:", response.data);
+      setTestPlanId(response.data.id); // Armazena o ID do TestPlan criado
+      alert("Plano de Teste criado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao criar Plano de Teste:", error);
+      alert("Erro ao criar Plano de Teste. Verifique o console para mais detalhes.");
+    }
   };
 
-  // Função para criar uma nova suite via endpoint Axios
-  const handleCreateSuite = () => {
+  // Função para criar uma nova suite
+  const handleCreateSuite = async () => {
+    if (!testPlanId) {
+      alert("Crie um Plano de Teste antes de adicionar uma Suite.");
+      return;
+    }
+
     const newSuite = {
-      id: suites.length + 1, // Simulação de ID incremental
       status: "EM_PROGRESSO",
-      data: new Date().toLocaleDateString('pt-BR'), // Data no formato DD/MM/YYYY
+      data: formatDateToDDMMYYYY(new Date()), // Formato DD/MM/YYYY
+      testPlanId: testPlanId,
+      codeSuite: nextCode, // Usa o próximo código disponível
     };
 
-    axios.post('/api/suites', newSuite)
-      .then((response) => {
-        setSuites([...suites, response.data]); // Atualiza a lista de suites
-      })
-      .catch((error) => {
-        console.error("Erro ao criar suite:", error);
-      });
-  };
+    try {
+      const response = await axios.post<TestSuite>('http://localhost:8081/test-suites', newSuite);
+      console.log('Suite criada com sucesso:', response.data);
 
-  const navigate = useNavigate();
+      // Atualiza a lista de suites com a nova suite
+      setSuites([...suites, response.data]);
+
+      // Incrementa o próximo código
+      setNextCode(nextCode + 1);
+    } catch (error) {
+      console.error('Erro ao criar suite:', error);
+    }
+  };
 
   return (
     <Container style={{ marginTop: '20px', marginBottom: '20px' }}>
@@ -242,14 +261,14 @@ function CreateTestPlan() {
                     placeholder="Título da UL"
                     required
                     onInvalid={(e) => {
-                      const target = e.target as HTMLInputElement; // Cast para HTMLInputElement
+                      const target = e.target as HTMLInputElement;
                       target.setCustomValidity("Por favor, Informe a descrição da UL.");
                     }}
                     onInput={(e) => {
-                      const target = e.target as HTMLInputElement; // Cast para HTMLInputElement
-                      target.setCustomValidity(""); // Reseta a mensagem de erro
+                      const target = e.target as HTMLInputElement;
+                      target.setCustomValidity("");
                     }}
-                    isInvalid={!name} // Valida se o campo está vazio, para mostrar o erro
+                    isInvalid={!name}
                   />
                 </Form.Group>
               </Col>
@@ -263,14 +282,14 @@ function CreateTestPlan() {
                     placeholder="Número da UL-"
                     required
                     onInvalid={(e) => {
-                      const target = e.target as HTMLInputElement; // Cast para HTMLInputElement
+                      const target = e.target as HTMLInputElement;
                       target.setCustomValidity("Por favor, Informe o número da UL.");
                     }}
                     onInput={(e) => {
-                      const target = e.target as HTMLInputElement; // Cast para HTMLInputElement
-                      target.setCustomValidity(""); // Reseta a mensagem de erro
+                      const target = e.target as HTMLInputElement;
+                      target.setCustomValidity("");
                     }}
-                    isInvalid={!jira} // Valida se o campo está vazio, para mostrar o erro
+                    isInvalid={!jira}
                   />
                 </Form.Group>
               </Col>
@@ -298,14 +317,14 @@ function CreateTestPlan() {
                     onChange={(e) => setSelectedTester(e.target.value)}
                     required
                     onInvalid={(e) => {
-                      const target = e.target as HTMLSelectElement; // Cast para HTMLSelectElement
+                      const target = e.target as HTMLSelectElement;
                       target.setCustomValidity("Por favor, selecione um tester antes de continuar.");
                     }}
                     onInput={(e) => {
-                      const target = e.target as HTMLSelectElement; // Cast para HTMLSelectElement
-                      target.setCustomValidity(""); // Reseta a mensagem de erro
+                      const target = e.target as HTMLSelectElement;
+                      target.setCustomValidity("");
                     }}
-                    isInvalid={!selectedTester} // Define como inválido se não houver tester selecionado
+                    isInvalid={!selectedTester}
                   >
                     <option value="">Selecione um testador</option>
                     {testers.map((tester) => (
@@ -325,19 +344,19 @@ function CreateTestPlan() {
                     onChange={(e) => setSelectedDeveloper(e.target.value)}
                     required
                     onInvalid={(e) => {
-                      const target = e.target as HTMLSelectElement; // Cast para HTMLSelectElement
+                      const target = e.target as HTMLSelectElement;
                       target.setCustomValidity("Por favor, selecione um desenvolvedor antes de continuar.");
                     }}
                     onInput={(e) => {
-                      const target = e.target as HTMLSelectElement; // Cast para HTMLSelectElement
-                      target.setCustomValidity(""); // Reseta a mensagem de erro
+                      const target = e.target as HTMLSelectElement;
+                      target.setCustomValidity("");
                     }}
-                    isInvalid={!selectedDeveloper} // Define como inválido se não houver tester selecionado
+                    isInvalid={!selectedDeveloper}
                   >
                     <option value="">Selecione um desenvolvedor</option>
                     {developers.map((dev) => (
                       <option key={dev.id} value={dev.id}>
-                        {dev.name} {/* Exibe apenas o nome */}
+                        {dev.name}
                       </option>
                     ))}
                   </Form.Control>
@@ -352,14 +371,14 @@ function CreateTestPlan() {
                     onChange={(e) => setSelectedModulo(e.target.value)}
                     required
                     onInvalid={(e) => {
-                      const target = e.target as HTMLSelectElement; // Cast para HTMLSelectElement
+                      const target = e.target as HTMLSelectElement;
                       target.setCustomValidity("Por favor, selecione um Módulo antes de continuar.");
                     }}
                     onInput={(e) => {
-                      const target = e.target as HTMLSelectElement; // Cast para HTMLSelectElement
-                      target.setCustomValidity(""); // Reseta a mensagem de erro
+                      const target = e.target as HTMLSelectElement;
+                      target.setCustomValidity("");
                     }}
-                    isInvalid={!selectedModulo} // Define como inválido se não houver tester selecionado
+                    isInvalid={!selectedModulo}
                   >
                     <option value="">Selecione um módulo</option>
                     {modules.map((modulo) => (
@@ -461,26 +480,28 @@ function CreateTestPlan() {
               Nova Suite
             </Button>
 
-            <Container fluid="md">
-              <Row>
-                <Col>1 of 1 teste teste  teste teste </Col>
-              </Row>
-              <Row>
-                <Col>1 of 1 teste teste  teste teste </Col>
-              </Row>
-            </Container>
             <ListGroup>
               {suites.map((suite) => (
                 <ListGroup.Item key={suite.id}>
-                  <strong>Suite #{suite.id}</strong> - Data: {suite.data}
-                  <Button
-                    variant="info"
-                    size="sm"
-                    style={{ marginLeft: '10px' }}
-                    onClick={() => navigate(`/edit-suite/${suite.id}`)}
-                  >
-                    Editar
-                  </Button>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div>
+                      <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+                    </div>
+                    <div>
+                      {/* Ícone de Editar */}
+                      <FaEdit
+                        className="icon-edit"
+                        style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }}
+                        onClick={() => navigate(`/edit-suite/${suite.id}`)}
+                      />
+                      {/* Ícone de Duplicar */}
+                      <HiOutlineDuplicate
+                        className="icon-duplicate"
+                        style={{ color: "#6c757d", cursor: "pointer" }}
+                        onClick={() => alert(`Duplicar suite ${suite.codeSuite}`)} // Adicione a lógica de duplicação aqui
+                      />
+                    </div>
+                  </div>
                 </ListGroup.Item>
               ))}
             </ListGroup>
