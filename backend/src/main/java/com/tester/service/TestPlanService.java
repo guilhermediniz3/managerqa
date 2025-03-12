@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.tester.dto.LastCodeSuiteDTO;
 import com.tester.dto.TestPlanDTO;
 import com.tester.dto.TestPlanListagemDTO;
 import com.tester.entity.Developer;
@@ -42,6 +43,8 @@ public class TestPlanService {
 
 	@Autowired
 	private TesterQARepository testerRepository;
+	@Autowired
+	private TestSuiteRepository TestSuiteRepository;
 
 	public TestPlanDTO createTestPlan(TestPlanDTO testPlanDTO) {
 		// Criando a entidade a partir do DTO
@@ -259,6 +262,16 @@ public class TestPlanService {
         // Salvando atualização
         TestPlan updatedTestPlan = testPlanRepository.save(testPlan);
         return new TestPlanDTO(updatedTestPlan);
+    }
+    
+    public LastCodeSuiteDTO getLastCodeSuiteByTestPlanId(Long testPlanId) {
+        // Busca o último TestSuite associado ao testPlanId
+        TestSuite testSuite = testSuiteRepository.findLastTestSuiteByTestPlanId(testPlanId)
+            .orElseThrow(() -> new RuntimeException("Nenhum test suite encontrado para o testPlanId: " + testPlanId));
+
+        // Converte a entidade TestSuite para LastCodeSuiteDTO
+        LastCodeSuiteDTO lastCodeSuiteDTO = new LastCodeSuiteDTO(testSuite);
+        return lastCodeSuiteDTO;
     }
     
 

@@ -83,15 +83,25 @@ function EditTestPlan() {
       })
       .catch((error) => console.error("Erro ao buscar Plano de Teste:", error));
 
+    // Busca o último codeSuite gerado para o testPlanId
+    axios.get(`http://localhost:8081/testplans/${id}/last-code-suite`)
+      .then((response) => {
+        const { id: suiteId, codeSuite, testPlanId } = response.data;
+
+        // Verifica se o testPlanId da resposta corresponde ao id do plano de teste
+        if (testPlanId === parseInt(id)) {
+          // Atualiza o estado nextCode com o codeSuite encontrado
+          setNextCode(codeSuite + 1); // Próximo código será codeSuite + 1
+        } else {
+          console.error("O codeSuite retornado não pertence ao testPlanId informado.");
+        }
+      })
+      .catch((error) => console.error("Erro ao buscar o último codeSuite:", error));
+
     // Carrega as suites existentes para o plano de teste
     axios.get(`http://localhost:8081/testplans/${id}/suites`)
       .then((response) => {
         setSuites(response.data);
-        // Define o próximo código incremental com base na última suite
-        if (response.data.length > 0) {
-          const lastCode = response.data[response.data.length - 1].codeSuite;
-          setNextCode(lastCode + 1);
-        }
       })
       .catch((error) => console.error("Erro ao buscar Suites:", error));
 

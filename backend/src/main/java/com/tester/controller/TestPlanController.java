@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tester.dto.LastCodeSuiteDTO;
 import com.tester.dto.TestPlanDTO;
 import com.tester.dto.TestPlanListagemDTO;
 import com.tester.service.TestPlanService;
@@ -98,6 +99,13 @@ public class TestPlanController {
 	    public ResponseEntity<TestPlanDTO> patchTestPlan(@PathVariable Long id, @RequestBody TestPlanDTO testPlanDTO) {
 	        TestPlanDTO updatedTestPlan = testPlanService.patchTestPlan(id, testPlanDTO);
 	        return ResponseEntity.ok(updatedTestPlan);
+	    }
+	  
+	  
+	  @GetMapping("/{testPlanId}/last-code-suite")
+	    public ResponseEntity<LastCodeSuiteDTO> getLastCodeSuiteByTestPlanId(@PathVariable Long testPlanId) {
+	        LastCodeSuiteDTO lastCodeSuiteDTO = testPlanService.getLastCodeSuiteByTestPlanId(testPlanId);
+	        return ResponseEntity.ok(lastCodeSuiteDTO);
 	    }
 		
 }

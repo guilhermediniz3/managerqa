@@ -99,6 +99,10 @@ public class UserService {
 	                })
 	                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
 	    }
+		
+		
+		
+		
 
 	
 }
