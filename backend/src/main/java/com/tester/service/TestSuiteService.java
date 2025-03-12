@@ -149,5 +149,8 @@ public class TestSuiteService {
 		return new TestSuiteDTO(finalClonedTestSuite);
 	}
 	
+	  public List<TestSuiteDTO> getTestSuitesByTestPlanId(Long testPlanId) {
+	        return testSuiteRepository.findAllTestSuitesByTestPlanId(testPlanId);
+		}
 
 }
