@@ -33,6 +33,7 @@ public class TestSuiteService {
 	        TestSuite testSuite = new TestSuite();
 	        testSuite.setStatus(dto.getStatus());
 	        testSuite.setData(dto.getData());
+	        testSuite.setCodeSuite(dto.getCodeSuite());
 
 	        // Buscar e setar o TestPlan
 	        Optional<TestPlan> testPlanOpt = testPlanRepository.findById(dto.getTestPlanId());
@@ -73,6 +74,7 @@ public class TestSuiteService {
 
 	        testSuite.setStatus(dto.getStatus());
 	        testSuite.setData(dto.getData());
+	        testSuite.setCodeSuite(dto.getCodeSuite());
 
 	        // Atualizar TestPlan
 	        Optional<TestPlan> testPlanOpt = testPlanRepository.findById(dto.getTestPlanId());
@@ -111,7 +113,8 @@ public class TestSuiteService {
 	        TestSuite clonedTestSuite = new TestSuite();
 	        clonedTestSuite.setStatus(originalTestSuite.getStatus());
 	        clonedTestSuite.setData(originalTestSuite.getData());
-
+	        clonedTestSuite.setCodeSuite(originalTestSuite.getCodeSuite());
+	        clonedTestSuite.setCodeSuite(clonedTestSuite.getCodeSuite());
 	        // Buscar o TestPlan associado ao TestSuite original e associá-lo ao novo TestSuite
 	        TestPlan originalTestPlan = originalTestSuite.getTestPlan();
 	        clonedTestSuite.setTestPlan(originalTestPlan);
