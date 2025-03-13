@@ -67,6 +67,8 @@ public class SecurityConfig {
 	                        .requestMatchers(HttpMethod.POST,"/testcases").permitAll()
 	                        .requestMatchers(HttpMethod.DELETE,"/testcases/**").permitAll()
 	                        .requestMatchers(HttpMethod.PUT,"/testcases/**").permitAll()
+	                        .requestMatchers(HttpMethod.GET,"/testcases/**").permitAll()
+	                        .requestMatchers(HttpMethod.GET, "/testcases/plan/{testPlanId}/suite/{testSuiteId}").permitAll()
 	                        .requestMatchers(HttpMethod.POST,"/modules").permitAll()
 	                        .requestMatchers(HttpMethod.GET,"/modules/**").permitAll()
 	                        .requestMatchers(HttpMethod.DELETE,"/modules/**").permitAll()
@@ -75,6 +77,8 @@ public class SecurityConfig {
 	                        .requestMatchers(HttpMethod.GET, "/test-suites/testplan/{testPlanId}/suites").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/test-suites/testplan/**").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/api/test-plans/{testPlanId}/last-code-suite").permitAll()
+	
+
 	               
                         
                         .anyRequest().authenticated()

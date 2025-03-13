@@ -500,7 +500,7 @@ function EditTestPlan() {
               {/* Ícone de Editar */}
               <FaEdit
                 style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }}
-                onClick={() => navigate(`/edit-suite/${suite.id}`)}
+                onClick={() => navigate(`/plan/${id}/suite/${suite.id}`)} // Redireciona para /case/:id
               />
               {/* Ícone de Duplicar */}
               <HiOutlineDuplicate
