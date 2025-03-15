@@ -16,26 +16,28 @@ import com.tester.entity.TestCaseEntity;
 public interface TestCaseRepository extends JpaRepository<TestCaseEntity, Long> {
 
 	@Query("""
-			    SELECT new com.tester.dto.TestCaseDTO(
-			        tc.id,
-			        tc.scenario,
-			        tc.expectedResult,
-			        tc.obtainedResult,
-			        tc.videoEvidence,
-			        tc.status,
-			        tc.data,
-			        ts.id AS testSuiteId,
-			        tp.id AS testPlanId
-			    )
-			    FROM TestCaseEntity tc
-			    JOIN tc.testSuite ts
-			    JOIN ts.testPlan tp
-			    WHERE tp.id = :testPlanId
-			      AND ts.id = :testSuiteId
-			""")
-	List<TestCaseDTO> findTestCasesByTestPlanAndTestSuite(@Param("testPlanId") Long testPlanId,
-			@Param("testSuiteId") Long testSuiteId);
-
+		    SELECT new com.tester.dto.TestCaseDTO(
+		        tc.id,
+		        tc.codeCase,  
+		        tc.scenario,
+		        tc.expectedResult,
+		        tc.obtainedResult,
+		        tc.videoEvidence,
+		        tc.status,
+		        tc.data,
+		        ts.id AS testSuiteId,
+		        tp.id AS testPlanId
+		    )
+		    FROM TestCaseEntity tc
+		    JOIN tc.testSuite ts
+		    JOIN ts.testPlan tp
+		    WHERE tp.id = :testPlanId
+		      AND ts.id = :testSuiteId
+		    ORDER BY tc.codeCase ASC
+		""")
+		List<TestCaseDTO> findTestCasesByTestPlanAndTestSuite(@Param("testPlanId") Long testPlanId,
+		        @Param("testSuiteId") Long testSuiteId);
+	
 	@Query(value = "SELECT tc.code_case " +
             "FROM operational.tb_test_case tc " +
             "JOIN operational.tb_test_suite ts ON tc.test_suite_id = ts.id " +

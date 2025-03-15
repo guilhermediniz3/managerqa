@@ -78,6 +78,30 @@ public class TestCaseDTO {
 		this.testSuiteId = testSuiteId;
 		this.testPlanId = testPlanId;
 	}
+	
+	public TestCaseDTO(
+		    Long id,
+		    Long codeCase,
+		    String scenario,
+		    String expectedResult,
+		    String obtainedResult,
+		    String videoEvidence,
+		    Status status,
+		    LocalDate data,
+		    Long testSuiteId,
+		    Long testPlanId
+		) {
+		    this.id = id;
+		    this.codeCase = codeCase;
+		    this.scenario = scenario;
+		    this.expectedResult = expectedResult;
+		    this.obtainedResult = obtainedResult;
+		    this.videoEvidence = videoEvidence;
+		    this.status = status;
+		    this.data = data;
+		    this.testSuiteId = testSuiteId;
+		    this.testPlanId = testPlanId;
+		}
 
 	public Long getId() {
 		return id;
