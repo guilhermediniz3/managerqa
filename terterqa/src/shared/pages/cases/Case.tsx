@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 import { ListGroup, Form, Button, Row, Col, Spinner } from "react-bootstrap";
 
 // Interface para representar um TestCase
@@ -48,11 +48,26 @@ function parseDate(dateString: string): Date {
 const Case = () => {
   const { testPlanId, testSuiteId } = useParams<{ testPlanId: string; testSuiteId: string }>();
   const [testCases, setTestCases] = useState<TestCase[]>([]);
-  const [nextCode, setNextCode] = useState(1);
   const [nextTempId, setNextTempId] = useState(-1); // ID temporário para novos casos
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [selectedVideoUrl, setSelectedVideoUrl] = useState("");
   const [loading, setLoading] = useState(false); // Estado de carregamento
+  const navigate = useNavigate();
+
+  // Busca o último codeCase do backend
+  const fetchLastCodeCase = async () => {
+    if (!testPlanId || !testSuiteId) return 0; // Retorna 0 se os IDs não estiverem definidos
+
+    try {
+      const response = await axios.get(
+        `http://localhost:8081/testcases/last-code?testPlanId=${testPlanId}&testSuiteId=${testSuiteId}`
+      );
+      return response.data || 0; // Retorna o último codeCase ou 0 se não houver
+    } catch (error) {
+      console.log("Nenhum codeCase encontrado. Iniciando do 1.");
+      return 0; // Retorna 0 se não houver codeCase no banco
+    }
+  };
 
   // Busca os TestCases do backend
   const fetchTestCases = async () => {
@@ -60,7 +75,7 @@ const Case = () => {
 
     setLoading(true); // Ativa o estado de carregamento
     try {
-      const response: AxiosResponse<TestCase[]> = await axios.get(
+      const response = await axios.get(
         `http://localhost:8081/testcases/plan/${testPlanId}/suite/${testSuiteId}`
       );
       const data = response.data;
@@ -79,16 +94,17 @@ const Case = () => {
     }
   };
 
+  // Efeito para buscar os dados iniciais
   useEffect(() => {
     fetchTestCases(); // Busca os casos ao carregar o componente
   }, [testPlanId, testSuiteId]); // Executa quando testPlanId ou testSuiteId mudam
 
   // Adiciona um novo TestCase em modo de edição
-  const handleCreateCase = () => {
+  const handleCreateCase = async () => {
     const newCase: TestCase = {
       id: nextTempId, // Usa um ID temporário
-      codeCase: nextCode,
-      scenario: "",
+      codeCase: null, // Inicialmente, o codeCase é null
+      scenario: "", // O campo de cenário começa vazio
       expectedResult: "",
       obtainedResult: "",
       videoEvidence: "",
@@ -97,8 +113,8 @@ const Case = () => {
       testSuiteId: parseInt(testSuiteId),
       testPlanId: parseInt(testPlanId),
     };
+
     setTestCases([...testCases, newCase]);
-    setNextCode(nextCode + 1);
     setNextTempId(nextTempId - 1); // Decrementa o ID temporário para o próximo caso
   };
 
@@ -120,13 +136,24 @@ const Case = () => {
         return;
       }
 
-      // Monta o DTO para enviar ao backend
+      let newCodeCase: number | null = null;
+
+      // Se for um novo caso (ID temporário negativo), busca o último codeCase e incrementa
+      if (testCase.id && testCase.id < 0) {
+        const lastCodeCase = await fetchLastCodeCase();
+        newCodeCase = lastCodeCase + 1;
+      } else {
+        // Se for uma atualização, mantém o codeCase existente
+        newCodeCase = testCase.codeCase;
+      }
+
       const testCaseDTO = {
         ...testCase,
+        codeCase: newCodeCase, // Define o novo codeCase
         data: testCase.data, // Mantém a data como string
       };
 
-      let response: AxiosResponse<TestCase>;
+      let response;
 
       if (testCase.id && testCase.id < 0) {
         // Se o TestCase tem um ID temporário, é um novo caso (POST)
@@ -138,7 +165,7 @@ const Case = () => {
         // Atualiza o estado com o novo TestCase retornado pelo backend
         setTestCases((prev) =>
           prev.map((tc) =>
-            tc.id === id ? { ...tc, id: response.data.id } : tc
+            tc.id === id ? { ...tc, id: response.data.id, codeCase: response.data.codeCase } : tc
           )
         );
       } else {
@@ -159,6 +186,25 @@ const Case = () => {
     } catch (error) {
       console.error("Erro ao salvar TestCase:", error);
       alert("Erro ao salvar TestCase. Verifique o console para mais detalhes.");
+    }
+  };
+
+  // Deleta um TestCase
+  const handleDeleteCase = async (id: number) => {
+    try {
+      if (id && id < 0) {
+        // Se o ID for temporário (negativo), apenas remove do estado local
+        setTestCases((prev) => prev.filter((tc) => tc.id !== id));
+        alert("TestCase removido com sucesso!");
+      } else {
+        // Se o ID for real (positivo), faz a requisição DELETE ao backend
+        await axios.delete(`http://localhost:8081/testcases/${id}`);
+        setTestCases((prev) => prev.filter((tc) => tc.id !== id)); // Remove o caso do estado local
+        alert("TestCase deletado com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao deletar TestCase:", error);
+      alert("Erro ao deletar TestCase. Verifique o console para mais detalhes.");
     }
   };
 
@@ -191,10 +237,19 @@ const Case = () => {
 
   return (
     <div style={{ margin: "20px" }}>
-      {/* Botão para criar um novo TestCase */}
-      <Button onClick={handleCreateCase} variant="success" style={{ marginBottom: "20px" }}>
-        Novo Case
-      </Button>
+      {/* Botão "Novo Case" alinhado à direita */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
+        <Button onClick={handleCreateCase} variant="success">
+          Novo Case
+        </Button>
+      </div>
+
+      {/* Botão "Voltar" */}
+      <div style={{ marginBottom: "20px" }}>
+        <Button onClick={() => navigate(`/plan/${testPlanId}/suite/${testSuiteId}`)} variant="secondary">
+          Voltar
+        </Button>
+      </div>
 
       {/* Lista de TestCases */}
       <ListGroup>
@@ -206,7 +261,9 @@ const Case = () => {
                 <Col md={6}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                     <Form.Group controlId={`formScenario-${testCase.id}`}>
-                      <Form.Label>Cenário</Form.Label>
+                      <Form.Label>
+                        {testCase.codeCase ? `Cenário ${testCase.codeCase}` : "Cenário"}
+                      </Form.Label>
                       <Form.Control
                         as="textarea"
                         rows={1}
@@ -243,7 +300,7 @@ const Case = () => {
                   </div>
                 </Col>
 
-                {/* Coluna 2: Vídeo, Status, Data, Botão Salvar */}
+                {/* Coluna 2: Vídeo, Status, Data, Botão Salvar e Deletar */}
                 <Col md={4}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                     <Form.Group controlId={`formVideoEvidence-${testCase.id}`}>
@@ -321,11 +378,16 @@ const Case = () => {
                       </Form.Group>
                     </div>
 
-                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeleteCase(testCase.id!)}
+                      >
+                        Deletar
+                      </Button>
                       <Button
                         variant="primary"
                         onClick={() => handleSaveCase(testCase.id!)}
-                        style={{ width: "30%" }}
                       >
                         Salvar
                       </Button>

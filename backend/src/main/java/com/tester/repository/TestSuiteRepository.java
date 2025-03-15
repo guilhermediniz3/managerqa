@@ -28,3 +28,4 @@ public interface TestSuiteRepository extends JpaRepository<TestSuite,Long> {
     	       "ORDER BY ts.codeSuite ASC")
     	List<TestSuiteDTO> findAllTestSuitesByTestPlanId(@Param("testPlanId") Long testPlanId);
 }
+	
