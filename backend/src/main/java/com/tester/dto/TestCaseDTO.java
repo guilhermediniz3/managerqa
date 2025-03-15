@@ -21,8 +21,9 @@ import jakarta.validation.constraints.NotBlank;
 public class TestCaseDTO {
 
 	private Long id;
-	@NotBlank(message = "O nome não pode ser vazio")
+
 	private Long codeCase;
+	@NotBlank(message = "O nome não pode ser vazio")
 	private String scenario;
 	private String expectedResult;
 	private String obtainedResult;
