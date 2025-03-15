@@ -27,6 +27,7 @@ public class TestCaseService {
                 .orElseThrow(() -> new RuntimeException("TestSuite não encontrado com ID: " + dto.getTestSuiteId()));
 
         TestCaseEntity testCase = new TestCaseEntity();
+        testCase.setCodeCase(dto.getCodeCase());
         testCase.setScenario(dto.getScenario());
         testCase.setExpectedResult(dto.getExpectedResult());
         testCase.setObtainedResult(dto.getObtainedResult());
@@ -60,7 +61,7 @@ public class TestCaseService {
 
         TestSuite testSuite = testSuiteRepository.findById(dto.getTestSuiteId())
                 .orElseThrow(() -> new RuntimeException("TestSuite não encontrado com ID: " + dto.getTestSuiteId()));
-
+        
         testCase.setScenario(dto.getScenario());
         testCase.setExpectedResult(dto.getExpectedResult());
         testCase.setObtainedResult(dto.getObtainedResult());
@@ -79,6 +80,9 @@ public class TestCaseService {
             throw new RuntimeException("TestCase não encontrado com ID: " + id);
         }
         testCaseRepository.deleteById(id);
+    }
+    public List<TestCaseDTO> getTestCasesByTestPlanAndTestSuite(Long testPlanId, Long testSuiteId) {
+        return testCaseRepository.findTestCasesByTestPlanAndTestSuite(testPlanId, testSuiteId);
     }
 
 }
