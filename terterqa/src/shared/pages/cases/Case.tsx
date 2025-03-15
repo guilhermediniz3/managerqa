@@ -4,7 +4,7 @@ import Modal from "react-bootstrap/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
-import { ListGroup, Form, Button, Row, Col, Spinner } from "react-bootstrap";
+import { ListGroup, Form, Button, Row, Col, Spinner, Toast, ToastContainer } from "react-bootstrap";
 
 // Interface para representar um TestCase
 interface TestCase {
@@ -40,9 +40,10 @@ function formatVimeoUrl(url: string): string {
 }
 
 // Função para converter uma string no formato "dd/MM/yyyy" para um objeto Date
-function parseDate(dateString: string): Date {
+function parseDate(dateString: string): Date | null {
+  if (!dateString) return null;
   const [day, month, year] = dateString.split("/");
-  return new Date(`${year}-${month}-${day}`);
+  return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
 }
 
 const Case = () => {
@@ -52,6 +53,8 @@ const Case = () => {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [selectedVideoUrl, setSelectedVideoUrl] = useState("");
   const [loading, setLoading] = useState(false); // Estado de carregamento
+  const [showToast, setShowToast] = useState(false); // Estado para controlar o Toast
+  const [toastMessage, setToastMessage] = useState(""); // Mensagem do Toast
   const navigate = useNavigate();
 
   // Busca o último codeCase do backend
@@ -88,7 +91,8 @@ const Case = () => {
       setTestCases(mappedTestCases);
     } catch (error) {
       console.error("Erro ao buscar os casos:", error);
-      alert("Erro ao buscar os casos. Verifique o console para mais detalhes.");
+      setToastMessage("Erro ao buscar os casos. Verifique o console para mais detalhes.");
+      setShowToast(true);
     } finally {
       setLoading(false); // Desativa o estado de carregamento
     }
@@ -132,20 +136,14 @@ const Case = () => {
     try {
       const testCase = testCases.find((tc) => tc.id === id);
       if (!testCase) {
-        alert("TestCase não encontrado.");
+        setToastMessage("TestCase não encontrado.");
+        setShowToast(true);
         return;
       }
 
-      let newCodeCase: number | null = null;
-
-      // Se for um novo caso (ID temporário negativo), busca o último codeCase e incrementa
-      if (testCase.id && testCase.id < 0) {
-        const lastCodeCase = await fetchLastCodeCase();
-        newCodeCase = lastCodeCase + 1;
-      } else {
-        // Se for uma atualização, mantém o codeCase existente
-        newCodeCase = testCase.codeCase;
-      }
+      // Busca o último codeCase antes de salvar
+      const lastCodeCase = await fetchLastCodeCase();
+      const newCodeCase = lastCodeCase + 1;
 
       const testCaseDTO = {
         ...testCase,
@@ -181,11 +179,15 @@ const Case = () => {
         );
       }
 
-      console.log("TestCase salvo com sucesso:", response.data);
-      alert("TestCase salvo com sucesso!");
+      setToastMessage("TestCase salvo com sucesso!");
+      setShowToast(true);
+
+      // Atualiza a lista de TestCases após o salvamento
+      await fetchTestCases();
     } catch (error) {
       console.error("Erro ao salvar TestCase:", error);
-      alert("Erro ao salvar TestCase. Verifique o console para mais detalhes.");
+      setToastMessage("Erro ao salvar TestCase. Verifique o console para mais detalhes.");
+      setShowToast(true);
     }
   };
 
@@ -195,16 +197,22 @@ const Case = () => {
       if (id && id < 0) {
         // Se o ID for temporário (negativo), apenas remove do estado local
         setTestCases((prev) => prev.filter((tc) => tc.id !== id));
-        alert("TestCase removido com sucesso!");
+        setToastMessage("TestCase removido com sucesso!");
+        setShowToast(true);
       } else {
         // Se o ID for real (positivo), faz a requisição DELETE ao backend
         await axios.delete(`http://localhost:8081/testcases/${id}`);
         setTestCases((prev) => prev.filter((tc) => tc.id !== id)); // Remove o caso do estado local
-        alert("TestCase deletado com sucesso!");
+        setToastMessage("TestCase deletado com sucesso!");
+        setShowToast(true);
       }
+
+      // Atualiza a lista de TestCases após a exclusão
+      await fetchTestCases();
     } catch (error) {
       console.error("Erro ao deletar TestCase:", error);
-      alert("Erro ao deletar TestCase. Verifique o console para mais detalhes.");
+      setToastMessage("Erro ao deletar TestCase. Verifique o console para mais detalhes.");
+      setShowToast(true);
     }
   };
 
@@ -214,7 +222,8 @@ const Case = () => {
       setSelectedVideoUrl(formatVimeoUrl(url));
       setShowVideoModal(true);
     } else {
-      alert("URL do vídeo não disponível.");
+      setToastMessage("URL do vídeo não disponível.");
+      setShowToast(true);
     }
   };
 
@@ -237,6 +246,22 @@ const Case = () => {
 
   return (
     <div style={{ margin: "20px" }}>
+      {/* Toast para exibir mensagens */}
+      <ToastContainer position="top-end" className="p-3">
+        <Toast
+          onClose={() => setShowToast(false)}
+          show={showToast}
+          delay={3000}
+          autohide
+          bg="success"
+        >
+          <Toast.Header>
+            <strong className="me-auto">Sucesso</strong>
+          </Toast.Header>
+          <Toast.Body>{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
+
       {/* Botão "Novo Case" alinhado à direita */}
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
         <Button onClick={handleCreateCase} variant="success">
@@ -370,7 +395,15 @@ const Case = () => {
                         <div className="custom-datepicker">
                           <DatePicker
                             selected={parseDate(testCase.data)} // Converte a string para Date
-                            onChange={(date) => handleUpdateCase(testCase.id!, "data", date?.toLocaleDateString("pt-BR") || "")}
+                            onChange={(date) => {
+                              if (date) {
+                                const day = String(date.getUTCDate()).padStart(2, "0");
+                                const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Mês é base 0
+                                const year = date.getUTCFullYear();
+                                const formattedDate = `${day}/${month}/${year}`; // Formata a data para "dd/MM/yyyy"
+                                handleUpdateCase(testCase.id!, "data", formattedDate); // Atualiza o estado com a nova data
+                              }
+                            }}
                             dateFormat="dd/MM/yyyy"
                             className="form-control"
                           />
