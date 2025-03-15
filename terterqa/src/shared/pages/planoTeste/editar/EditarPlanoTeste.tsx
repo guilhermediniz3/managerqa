@@ -15,6 +15,7 @@ import NavVertical from "../../../components/navs/vertical/NavVertical";
 import { useNavigate, useParams } from 'react-router-dom';
 import { FaEdit } from 'react-icons/fa';
 import { HiOutlineDuplicate } from 'react-icons/hi';
+import './styless.css';
 
 function EditTestPlan() {
   const { id } = useParams(); // Obtém o ID do plano de teste da URL
@@ -31,7 +32,9 @@ function EditTestPlan() {
   const [callNumber, setCallNumber] = useState("");
   const [observations, setObservations] = useState("");
   const [suites, setSuites] = useState([]); // Lista de suites
-  const [nextCode, setNextCode] = useState<number>(1); // Estado para o próximo código incremental
+  const [nextCode, setNextCode] = useState(1); // Estado para o próximo código incremental
+  const [loading, setLoading] = useState(true); // Estado para indicar carregamento
+  const [error, setError] = useState(null); // Estado para tratar erros
 
   interface Modulo {
     id: number;
@@ -62,14 +65,21 @@ function EditTestPlan() {
 
   // Carrega os dados do plano de teste e as suites existentes
   useEffect(() => {
-    // Carrega os dados do plano de teste
-    axios.get(`http://localhost:8081/testplans/${id}`)
-      .then((response) => {
-        const testPlan = response.data;
-        setStartDate(new Date(testPlan.data));
-        setDeliveryDate(new Date(testPlan.deliveryData));
-        setSelectedStatus(testPlan.status);
-        setIsTaskCreated(testPlan.created);
+    const fetchData = async () => {
+      try {
+        setLoading(true); // Inicia o carregamento
+
+        // Carrega os dados do plano de teste
+        const testPlanResponse = await axios.get(`http://localhost:8081/testplans/${id}`);
+        const testPlan = testPlanResponse.data;
+
+        // Atualiza as datas apenas se não forem nulas
+        if (testPlan.data) setStartDate(new Date(testPlan.data));
+        if (testPlan.deliveryData) setDeliveryDate(new Date(testPlan.deliveryData));
+
+        // Atualiza os outros campos
+        setSelectedStatus(testPlan.status || "EM_PROGRESSO");
+        setIsTaskCreated(testPlan.created || false);
         setMatriz(testPlan.matriz || "Sem matriz");
         setUsername(testPlan.userName || "Sem usuário");
         setPassword(testPlan.password || "Sem senha");
@@ -80,52 +90,42 @@ function EditTestPlan() {
         setSelectedDeveloper(testPlan.developerId || "");
         setSelectedModulo(testPlan.systemModuleId || "");
         setSelectedTester(testPlan.testerId || "");
-      })
-      .catch((error) => console.error("Erro ao buscar Plano de Teste:", error));
 
-    // Busca o último codeSuite gerado para o testPlanId
-    axios.get(`http://localhost:8081/testplans/${id}/last-code-suite`)
-      .then((response) => {
-        const { id: suiteId, codeSuite, testPlanId } = response.data;
-
-        // Verifica se o testPlanId da resposta corresponde ao id do plano de teste
+        // Busca o último codeSuite gerado para o testPlanId
+        const lastCodeSuiteResponse = await axios.get(`http://localhost:8081/testplans/${id}/last-code-suite`);
+        const { codeSuite, testPlanId } = lastCodeSuiteResponse.data;
         if (testPlanId === parseInt(id)) {
-          // Atualiza o estado nextCode com o codeSuite encontrado
           setNextCode(codeSuite + 1); // Próximo código será codeSuite + 1
         } else {
           console.error("O codeSuite retornado não pertence ao testPlanId informado.");
         }
-      })
-      .catch((error) => console.error("Erro ao buscar o último codeSuite:", error));
 
-    // Carrega as suites existentes para o plano de teste
-    axios.get(`http://localhost:8081/testplans/${id}/suites`)
-      .then((response) => {
-        setSuites(response.data);
-      })
-      .catch((error) => console.error("Erro ao buscar Suites:", error));
+        // Carrega as suites existentes para o plano de teste
+        const suitesResponse = await axios.get(`http://localhost:8081/test-suites/testplan/${id}`);
+        setSuites(suitesResponse.data);
 
-    // Carrega os módulos, testers e desenvolvedores
-    axios.get<Modulo[]>("http://localhost:8081/modules")
-      .then((response) => {
-        const activeModulo = response.data.filter((modulo) => modulo.active);
+        // Carrega os módulos, testers e desenvolvedores
+        const modulesResponse = await axios.get<Modulo[]>("http://localhost:8081/modules");
+        const activeModulo = modulesResponse.data.filter((modulo) => modulo.active);
         setModules(activeModulo);
-      })
-      .catch((error) => console.error("Erro ao buscar Módulos:", error));
 
-    axios.get<Tester[]>("http://localhost:8081/testers")
-      .then((response) => {
-        const activeTester = response.data.filter((teste) => teste.active);
+        const testersResponse = await axios.get<Tester[]>("http://localhost:8081/testers");
+        const activeTester = testersResponse.data.filter((teste) => teste.active);
         setTesters(activeTester);
-      })
-      .catch((error) => console.error("Erro ao buscar testadores:", error));
 
-    axios.get<Developer[]>('http://localhost:8081/developers')
-      .then((response) => {
-        const activeDevelopers = response.data.filter((dev) => dev.active);
+        const developersResponse = await axios.get<Developer[]>('http://localhost:8081/developers');
+        const activeDevelopers = developersResponse.data.filter((dev) => dev.active);
         setDevelopers(activeDevelopers);
-      })
-      .catch((error) => console.error("Erro ao buscar desenvolvedores:", error));
+
+        setLoading(false); // Finaliza o carregamento
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+        setError("Erro ao carregar dados. Tente novamente mais tarde.");
+        setLoading(false); // Finaliza o carregamento mesmo em caso de erro
+      }
+    };
+
+    fetchData();
   }, [id]);
 
   // Função para formatar a data no formato DD/MM/YYYY
@@ -139,10 +139,8 @@ function EditTestPlan() {
   // Função para enviar os dados do formulário para o backend
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const formattedStartDate = formatDateToDDMMYYYY(startDate); // Formato DD/MM/YYYY
     const formattedDeliveryDate = formatDateToDDMMYYYY(deliveryDate); // Formato DD/MM/YYYY
-
     const testPlanData = {
       name: name || "Sem nome",
       created: isTaskCreated,
@@ -184,16 +182,22 @@ function EditTestPlan() {
     try {
       const response = await axios.post('http://localhost:8081/test-suites', newSuite);
       console.log('Suite criada com sucesso:', response.data);
-
       // Atualiza a lista de suites com a nova suite
       setSuites([...suites, response.data]);
-
       // Incrementa o próximo código
       setNextCode(nextCode + 1);
     } catch (error) {
       console.error('Erro ao criar suite:', error);
     }
   };
+
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <Container style={{ marginTop: '20px', marginBottom: '20px' }}>
@@ -202,7 +206,6 @@ function EditTestPlan() {
       <br />
       <br />
       <br />
-
       <Tabs defaultActiveKey="edit-test-plan" id="fill-tab-example" className="mb-3" fill>
         {/* Primeira Aba - Editar Plano de Teste */}
         <Tab eventKey="edit-test-plan" title="Editar Plano de Teste">
@@ -231,7 +234,6 @@ function EditTestPlan() {
                 </Form.Group>
               </Col>
             </Row>
-
             <Row>
               <Col md={4}>
                 <Form.Group controlId="formUserName">
@@ -267,7 +269,6 @@ function EditTestPlan() {
                 </Form.Group>
               </Col>
             </Row>
-
             <Row>
               <Col md={4}>
                 <Form.Group controlId="formName">
@@ -323,7 +324,6 @@ function EditTestPlan() {
                 </Form.Group>
               </Col>
             </Row>
-
             <Row>
               <Col md={4}>
                 <Form.Group controlId="formTester">
@@ -407,7 +407,6 @@ function EditTestPlan() {
                 </Form.Group>
               </Col>
             </Row>
-
             <Row>
               <Col md={4}>
                 <Form.Group controlId="formStatus">
@@ -451,7 +450,6 @@ function EditTestPlan() {
                 </Form.Group>
               </Col>
             </Row>
-
             <Row>
               <Col md={12}>
                 <Form.Group controlId="formObservation">
@@ -491,32 +489,29 @@ function EditTestPlan() {
             <Button onClick={handleCreateSuite} variant="success" style={{ marginBottom: '20px' }}>
               Nova Suite
             </Button>
-
             <ListGroup>
-              {suites.map((suite) => (
-                <ListGroup.Item key={suite.id}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div>
-                      <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
-                    </div>
-                    <div>
-                      {/* Ícone de Editar */}
-                      <FaEdit
-                        className="icon-edit"
-                        style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }}
-                        onClick={() => navigate(`/edit-suite/${suite.id}`)}
-                      />
-                      {/* Ícone de Duplicar */}
-                      <HiOutlineDuplicate
-                        className="icon-duplicate"
-                        style={{ color: "#6c757d", cursor: "pointer" }}
-                        onClick={() => alert(`Duplicar suite ${suite.codeSuite}`)}
-                      />
-                    </div>
-                  </div>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
+      {suites.map((suite) => (
+        <ListGroup.Item key={suite.id}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div>
+              <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+            </div>
+            <div>
+              {/* Ícone de Editar */}
+              <FaEdit
+                style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }}
+                onClick={() => navigate(`/plan/${id}/suite/${suite.id}`)} // Redireciona para /case/:id
+              />
+              {/* Ícone de Duplicar */}
+              <HiOutlineDuplicate
+                style={{ color: "#6c757d", cursor: "pointer" }}
+                onClick={() => alert(`Duplicar suite ${suite.codeSuite}`)}
+              />
+            </div>
+          </div>
+        </ListGroup.Item>
+      ))}
+    </ListGroup>
           </div>
         </Tab>
       </Tabs>

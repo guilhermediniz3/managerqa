@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tester.dto.TestCaseDTO;
+import com.tester.entity.TestCaseEntity;
 import com.tester.service.TestCaseService;
 
 import jakarta.validation.Valid;
@@ -60,5 +61,14 @@ public class TestCaseController {
 	        testCaseService.delete(id);
 	        return ResponseEntity.noContent().build();
 	    }
+	    
 
+	    @GetMapping("/plan/{testPlanId}/suite/{testSuiteId}")
+	    public ResponseEntity<List<TestCaseDTO>> getTestCasesByPlanAndSuite(
+	        @PathVariable Long testPlanId,
+	        @PathVariable Long testSuiteId) {
+
+	        List<TestCaseDTO> testCases = testCaseService.getTestCasesByTestPlanAndTestSuite(testPlanId, testSuiteId);
+	        return ResponseEntity.ok(testCases);
+	    }
 }

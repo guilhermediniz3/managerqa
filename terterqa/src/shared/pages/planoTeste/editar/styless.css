@@ -43,3 +43,19 @@
     align-items: center;
     gap: 10px;
   }
+
+/* Efeito de hover no item da lista */
+.list-group-item:hover {
+  background-color: rgba(0, 0, 0, 0.22); /* Preto com 5% de opacidade */
+  color: inherit; /* Mantém a cor do texto original */
+}
+
+/* Efeito de hover no ícone de editar */
+.list-group-item .fa-edit:hover {
+  color: #0056b3; /* Cor mais escura ao passar o mouse */
+}
+
+/* Efeito de hover no ícone de duplicar */
+.list-group-item .hi-outline-duplicate:hover {
+  color: #495057; /* Cor mais escura ao passar o mouse */
+}

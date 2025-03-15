@@ -74,6 +74,12 @@ public class TestSuiteController {
 	            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND); // Caso não encontre o TestSuite
 	        }
 	    }
+	    
+	    @GetMapping("/testplan/{testPlanId}")
+	    public ResponseEntity<List<TestSuiteDTO>> getTestSuitesByTestPlanId(@PathVariable Long testPlanId) {
+	        List<TestSuiteDTO> testSuites = testSuiteService.getTestSuitesByTestPlanId(testPlanId);
+	        return ResponseEntity.ok(testSuites);
+	    }
 
 	    
 
