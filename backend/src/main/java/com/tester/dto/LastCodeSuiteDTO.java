@@ -3,13 +3,16 @@ package com.tester.dto;
 import com.tester.entity.TestSuite;
 
 public class LastCodeSuiteDTO {
-	
-	private Long id;
-	private Long codeSuite;
-    private Long testPlanId; 
-	
+
+    private Long id; // ID do TestSuite (opcional, pode ser null se não houver TestSuite)
+    private Long codeSuite; // Código da suite (pode ser 0 ou 1 como valor padrão)
+    private Long testPlanId; // ID do TestPlan associado
+
     // Construtor padrão
     public LastCodeSuiteDTO() {
+        this.id = null; // ID pode ser null se não houver TestSuite
+        this.codeSuite = 0L; // Valor padrão para codeSuite
+        this.testPlanId = null; // Inicialmente null, deve ser definido posteriormente
     }
 
     // Construtor com parâmetros
@@ -21,9 +24,15 @@ public class LastCodeSuiteDTO {
 
     // Construtor que recebe a entidade TestSuite
     public LastCodeSuiteDTO(TestSuite testSuite) {
-        this.id = testSuite.getId();
-        this.codeSuite = testSuite.getCodeSuite();
-        this.testPlanId = testSuite.getTestPlan().getId(); 
+        if (testSuite != null) {
+            this.id = testSuite.getId();
+            this.codeSuite = testSuite.getCodeSuite();
+            this.testPlanId = testSuite.getTestPlan() != null ? testSuite.getTestPlan().getId() : null;
+        } else {
+            this.id = null;
+            this.codeSuite = 0L; // Valor padrão se o TestSuite for null
+            this.testPlanId = null;
+        }
     }
 
     // Getters e Setters
@@ -51,4 +60,13 @@ public class LastCodeSuiteDTO {
         this.testPlanId = testPlanId;
     }
 
+    // Método toString para facilitar a depuração
+    @Override
+    public String toString() {
+        return "LastCodeSuiteDTO{" +
+                "id=" + id +
+                ", codeSuite=" + codeSuite +
+                ", testPlanId=" + testPlanId +
+                '}';
+    }
 }

@@ -271,7 +271,10 @@ const Case = () => {
 
       {/* Botão "Voltar" */}
       <div style={{ marginBottom: "20px" }}>
-        <Button onClick={() => navigate(`/plan/${testPlanId}/suite/${testSuiteId}`)} variant="secondary">
+        <Button
+          onClick={() => navigate("/planoTeste/editar/7")} // Redireciona para a URL especificada
+          variant="secondary"
+        >
           Voltar
         </Button>
       </div>

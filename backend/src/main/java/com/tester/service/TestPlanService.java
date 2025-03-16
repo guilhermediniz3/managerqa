@@ -3,6 +3,7 @@ package com.tester.service;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -99,55 +100,65 @@ public class TestPlanService {
 	}
 
 	public TestPlanDTO updateTestPlan(Long id, TestPlanDTO testPlanDTO) {
-		// Buscando o TestPlan pelo ID
-		TestPlan testPlan = testPlanRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Plano de teste não encontrado"));
+	    // Buscando o TestPlan pelo ID
+	    TestPlan testPlan = testPlanRepository.findById(id)
+	            .orElseThrow(() -> new ResourceNotFoundException("Plano de teste não encontrado"));
 
-		// Atualizando os campos
-		testPlan.setName(testPlanDTO.getName());
-		testPlan.setObservation(testPlanDTO.getObservation());
-		testPlan.setStatus(testPlanDTO.getStatus());
-		testPlan.setTaskStatus(testPlanDTO.getTaskStatus());
-		testPlan.setJira(testPlanDTO.getJira());
-		testPlan.setData(testPlanDTO.getData());
-		testPlan.setDeliveryData(testPlanDTO.getDeliveryData());
-		testPlan.setMatriz(testPlanDTO.getMatriz());
-		testPlan.setUserName(testPlanDTO.getUserName());
-		testPlan.setPassword(testPlanDTO.getPassword());
-		testPlan.setCallNumber(testPlanDTO.getCallNumber());
+	    // Atualizando os campos
+	    testPlan.setName(testPlanDTO.getName());
+	    testPlan.setCreated(testPlanDTO.getCreated()); // Certifique-se de que isso está presente
+	    testPlan.setObservation(testPlanDTO.getObservation());
+	    testPlan.setStatus(testPlanDTO.getStatus());
+	    testPlan.setTaskStatus(testPlanDTO.getTaskStatus());
+	    testPlan.setJira(testPlanDTO.getJira());
+	    testPlan.setData(testPlanDTO.getData());
+	    testPlan.setDeliveryData(testPlanDTO.getDeliveryData());
+	    testPlan.setMatriz(testPlanDTO.getMatriz());
+	    testPlan.setUserName(testPlanDTO.getUserName());
+	    testPlan.setPassword(testPlanDTO.getPassword());
+	    testPlan.setCallNumber(testPlanDTO.getCallNumber());
 
-		// Atualizando relacionamentos
-		if (testPlanDTO.getDeveloperId() != null) {
-			Developer developer = developerRepository.findById(testPlanDTO.getDeveloperId())
-					.orElseThrow(() -> new ResourceNotFoundException("Desenvolvedor não encontrado"));
-			testPlan.setDeveloper(developer);
-		}
+	    // Atualizando relacionamentos
+	    if (testPlanDTO.getDeveloperId() != null) {
+	        Developer developer = developerRepository.findById(testPlanDTO.getDeveloperId())
+	                .orElseThrow(() -> new ResourceNotFoundException("Desenvolvedor não encontrado"));
+	        testPlan.setDeveloper(developer);
+	    }
 
-		if (testPlanDTO.getSystemModuleId() != null) {
-			SystemModule systemModule = systemModuleRepository.findById(testPlanDTO.getSystemModuleId())
-					.orElseThrow(() -> new ResourceNotFoundException("Módulo do sistema não encontrado"));
-			testPlan.setSystemModule(systemModule);
-		}
+	    if (testPlanDTO.getSystemModuleId() != null) {
+	        SystemModule systemModule = systemModuleRepository.findById(testPlanDTO.getSystemModuleId())
+	                .orElseThrow(() -> new ResourceNotFoundException("Módulo do sistema não encontrado"));
+	        testPlan.setSystemModule(systemModule);
+	    }
 
-		if (testPlanDTO.getTesterId() != null) {
-			TesterQA tester = testerRepository.findById(testPlanDTO.getTesterId())
-					.orElseThrow(() -> new ResourceNotFoundException("Tester não encontrado"));
-			testPlan.setTester(tester);
-		}
+	    if (testPlanDTO.getTesterId() != null) {
+	        TesterQA tester = testerRepository.findById(testPlanDTO.getTesterId())
+	                .orElseThrow(() -> new ResourceNotFoundException("Tester não encontrado"));
+	        testPlan.setTester(tester);
+	    }
 
-		if (testPlanDTO.getTesteSuiteId() != null && !testPlanDTO.getTesteSuiteId().isEmpty()) {
-			Set<TestSuite> testSuites = new HashSet<>(testSuiteRepository.findAllById(testPlanDTO.getTesteSuiteId()));
+	    if (testPlanDTO.getTesteSuiteId() != null && !testPlanDTO.getTesteSuiteId().isEmpty()) {
+	        Set<TestSuite> testSuites = new HashSet<>(testSuiteRepository.findAllById(testPlanDTO.getTesteSuiteId()));
 
-			if (testSuites.size() != testPlanDTO.getTesteSuiteId().size()) {
-				throw new ResourceNotFoundException("Uma ou mais TestSuites não foram encontradas");
-			}
+	        if (testSuites.size() != testPlanDTO.getTesteSuiteId().size()) {
+	            throw new ResourceNotFoundException("Uma ou mais TestSuites não foram encontradas");
+	        }
 
-			testPlan.setTesteSuite(testSuites);
-		}
+	        // Limpa a coleção existente
+	        testPlan.getTesteSuite().clear();
 
-		// Salvando atualização
-		TestPlan updatedTestPlan = testPlanRepository.save(testPlan);
-		return new TestPlanDTO(updatedTestPlan);
+	        // Adiciona as novas TestSuites
+	        testPlan.getTesteSuite().addAll(testSuites);
+
+	        // Atualiza o lado inverso do relacionamento (TestSuite -> TestPlan)
+	        for (TestSuite suite : testSuites) {
+	            suite.setTestPlan(testPlan);
+	        }
+	    }
+
+	    // Salvando atualização
+	    TestPlan updatedTestPlan = testPlanRepository.save(testPlan);
+	    return new TestPlanDTO(updatedTestPlan);
 	}
 
 	public void deleteTestPlan(Long id) {
@@ -188,8 +199,6 @@ public class TestPlanService {
         // Mapeia os TestPlans para TestPlanListagemDTO
         return testPlans.map(testPlan -> new TestPlanListagemDTO(testPlan));
     }
-    
-    
     public TestPlanDTO patchTestPlan(Long id, TestPlanDTO testPlanDTO) {
         // Buscando o TestPlan pelo ID
         TestPlan testPlan = testPlanRepository.findById(id)
@@ -198,6 +207,9 @@ public class TestPlanService {
         // Atualizando os campos apenas se não forem nulos no DTO
         if (testPlanDTO.getName() != null) {
             testPlan.setName(testPlanDTO.getName());
+        }
+        if (testPlanDTO.getCreated() != null) { // Certifique-se de que isso está presente
+            testPlan.setCreated(testPlanDTO.getCreated());
         }
         if (testPlanDTO.getObservation() != null) {
             testPlan.setObservation(testPlanDTO.getObservation());
@@ -250,26 +262,43 @@ public class TestPlanService {
         }
 
         if (testPlanDTO.getTesteSuiteId() != null && !testPlanDTO.getTesteSuiteId().isEmpty()) {
+            // Busca as novas TestSuites
             Set<TestSuite> testSuites = new HashSet<>(testSuiteRepository.findAllById(testPlanDTO.getTesteSuiteId()));
 
             if (testSuites.size() != testPlanDTO.getTesteSuiteId().size()) {
                 throw new ResourceNotFoundException("Uma ou mais TestSuites não foram encontradas");
             }
 
-            testPlan.setTesteSuite(testSuites);
+            // Limpa a coleção existente
+            testPlan.getTesteSuite().clear();
+
+            // Adiciona as novas TestSuites
+            testPlan.getTesteSuite().addAll(testSuites);
+
+            // Atualiza o lado inverso do relacionamento (TestSuite -> TestPlan)
+            for (TestSuite suite : testSuites) {
+                suite.setTestPlan(testPlan);
+            }
         }
 
         // Salvando atualização
         TestPlan updatedTestPlan = testPlanRepository.save(testPlan);
         return new TestPlanDTO(updatedTestPlan);
     }
-    
     public LastCodeSuiteDTO getLastCodeSuiteByTestPlanId(Long testPlanId) {
         // Busca o último TestSuite associado ao testPlanId
-        TestSuite testSuite = testSuiteRepository.findLastTestSuiteByTestPlanId(testPlanId)
-            .orElseThrow(() -> new RuntimeException("Nenhum test suite encontrado para o testPlanId: " + testPlanId));
+        Optional<TestSuite> testSuiteOptional = testSuiteRepository.findLastTestSuiteByTestPlanId(testPlanId);
 
-        // Converte a entidade TestSuite para LastCodeSuiteDTO
+        // Se não houver TestSuite, retorna um valor padrão
+        if (testSuiteOptional.isEmpty()) {
+            LastCodeSuiteDTO lastCodeSuiteDTO = new LastCodeSuiteDTO();
+            lastCodeSuiteDTO.setCodeSuite(0L); // Valor padrão
+            lastCodeSuiteDTO.setTestPlanId(testPlanId); // Define o testPlanId
+            return lastCodeSuiteDTO;
+        }
+
+        // Se houver TestSuite, retorna o DTO com os dados
+        TestSuite testSuite = testSuiteOptional.get();
         LastCodeSuiteDTO lastCodeSuiteDTO = new LastCodeSuiteDTO(testSuite);
         return lastCodeSuiteDTO;
     }
