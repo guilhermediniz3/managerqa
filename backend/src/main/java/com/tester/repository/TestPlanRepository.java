@@ -1,7 +1,6 @@
 package com.tester.repository;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.tester.dto.CreatedByDTO;
 import com.tester.entity.TestPlan;
 @Repository
 
@@ -56,8 +56,9 @@ public interface TestPlanRepository extends JpaRepository<TestPlan, Long> {
 		    @Param("testerQAName") String testerQAName,
 		    Pageable pageable);
 	
+	   // retorna quem criou a ul
+    
+	  @Query("SELECT new com.tester.dto.CreatedByDTO(t.created_by) FROM TestPlan t WHERE t.id = :testPlanId")
+	    CreatedByDTO findCreatedByByTestPlanId(@Param("testPlanId") Long testPlanId);
 	
-
-	
-
 }

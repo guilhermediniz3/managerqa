@@ -16,6 +16,9 @@ import { useNavigate } from 'react-router-dom';
 import './styless.css';
 import { HiOutlineDuplicate } from "react-icons/hi";
 import { FaEdit } from "react-icons/fa";
+import { FiAlertCircle } from "react-icons/fi"; // Importando o ícone
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger'; // Importando o OverlayTrigger
+import Tooltip from 'react-bootstrap/Tooltip'; // Importando o Tooltip
 
 // Definindo a interface para Suite
 interface TestSuite {
@@ -112,8 +115,8 @@ function CreateTestPlan() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formattedStartDate = formatDateToDDMMYYYY(startDate); // Formato DD/MM/YYYY
-    const formattedDeliveryDate = formatDateToDDMMYYYY(deliveryDate); // Formato DD/MM/YYYY
+    const formattedStartDate = formatDateToDDMMYYYY(startDate);
+    const formattedDeliveryDate = formatDateToDDMMYYYY(deliveryDate);
 
     const testPlanData = {
       name: name || "Sem nome",
@@ -130,9 +133,20 @@ function CreateTestPlan() {
       systemModuleId: selectedModulo ? Number(selectedModulo) : 1,
       testerId: selectedTester ? Number(selectedTester) : 1,
       password: password || "Sem senha",
-      testeSuiteId: [], // Array vazio por padrão
+      testeSuiteId: [],
     };
 
+    if (testPlanId) {
+      // Se o testPlanId já existe, atualize o registro
+      await handleUpdate(testPlanId, testPlanData);
+    } else {
+      // Caso contrário, crie um novo registro
+      await handleCreate(testPlanData);
+    }
+  };
+
+  // Função para criar um novo registro
+  const handleCreate = async (testPlanData: any) => {
     try {
       const response = await axios.post('http://localhost:8081/testplans', testPlanData);
       console.log("Plano de Teste Criado:", response.data);
@@ -141,6 +155,18 @@ function CreateTestPlan() {
     } catch (error) {
       console.error("Erro ao criar Plano de Teste:", error);
       alert("Erro ao criar Plano de Teste. Verifique o console para mais detalhes.");
+    }
+  };
+
+  // Função para atualizar um registro existente
+  const handleUpdate = async (id: number, testPlanData: any) => {
+    try {
+      const response = await axios.put(`http://localhost:8081/testplans/${id}`, testPlanData);
+      console.log("Plano de Teste Atualizado:", response.data);
+      alert("Plano de Teste atualizado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar Plano de Teste:", error);
+      alert("Erro ao atualizar Plano de Teste. Verifique o console para mais detalhes.");
     }
   };
 
@@ -402,7 +428,6 @@ function CreateTestPlan() {
                     onChange={(e) => setSelectedStatus(e.target.value)}
                   >
                     <option value="EM_PROGRESSO">Em Progresso</option>
-                    <option value="CRIADA">Criada</option>
                     <option value="CONCLUIDA">Concluída</option>
                     <option value="IMPEDIMENTO">Impedimento</option>
                     <option value="RETORNO">Retorno</option>
@@ -425,7 +450,21 @@ function CreateTestPlan() {
               </Col>
               <Col md={4}>
                 <Form.Group controlId="formTaskSwitch">
-                  <Form.Label>Criada</Form.Label>
+                  <Form.Label>
+                    Criada{' '}
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={
+                        <Tooltip id="tooltip-criada">
+                          Ao marcar o switch antes de salvar, será contabilizado como UL criada. Após o salvamento, não será mais contabilizado.
+                        </Tooltip>
+                      }
+                    >
+                      <span>
+                        <FiAlertCircle style={{color: 'red', cursor: 'pointer', marginLeft: '5px' }} />
+                      </span>
+                    </OverlayTrigger>
+                  </Form.Label>
                   <Form.Check
                     type="switch"
                     id="custom-switch"
@@ -454,9 +493,9 @@ function CreateTestPlan() {
             </Row>
             <Row>
               <Col md={10}>
-                {/* Botão Salvar */}
+                {/* Botão Voltar */}
                 <div style={{ textAlign: 'right', marginTop: '20px' }}>
-                  <Button type="submit" variant="secondary" onClick={() => navigate('/planoTeste/listagem')} >
+                  <Button type="button" variant="secondary" onClick={() => navigate('/planoTeste/listagem')} >
                     Voltar
                   </Button>
                 </div>
@@ -508,7 +547,7 @@ function CreateTestPlan() {
           </div>
         </Tab>
       </Tabs>
-    </Container>
+    </Container >
   );
 }
 

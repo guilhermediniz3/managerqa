@@ -19,6 +19,7 @@ public class TestPlanDTO {
     @NotBlank(message = "Informe a descrição da UL")
     private String name;
     private Boolean created;
+    private String created_by;
     private String observation;
     private Status status;
     private TaskStatus taskStatus;
@@ -50,7 +51,7 @@ public class TestPlanDTO {
     }
 
     // Construtor com todos os campos
-    public TestPlanDTO(Long id, @NotBlank(message = "Informe a descrição da UL") String name,Boolean created, String observation,
+    public TestPlanDTO(Long id, @NotBlank(message = "Informe a descrição da UL") String name,Boolean created,String created_by,String observation,
                        Status status, TaskStatus taskStatus, @NotBlank(message = "Informe o número da UL") String jira,
                        LocalDate data, LocalDate deliveryData, String matriz, String userName, String callNumber,
                        Long developerId, Long systemModuleId, Long testerId, String password, Set<Long> testeSuiteId) {
@@ -71,6 +72,7 @@ public class TestPlanDTO {
         this.password = password;
         this.testeSuiteId = testeSuiteId;
         this.created = created;
+        this.created_by = created_by;
     }
 
     // Construtor a partir da entidade TestPlan
@@ -78,6 +80,7 @@ public class TestPlanDTO {
         this.id = testPlan.getId();
         this.name = testPlan.getName();
         this.created = testPlan.getCreated();
+        this.created_by = testPlan.getCreated_by();
         this.observation = testPlan.getObservation();
         this.status = testPlan.getStatus();
         this.taskStatus = testPlan.getTaskStatus();
@@ -239,6 +242,14 @@ public class TestPlanDTO {
 
 	public void setCreated(Boolean created) {
 		this.created = created;
+	}
+
+	public String getCreated_by() {
+		return created_by;
+	}
+
+	public void setCreated_by(String created_by) {
+		this.created_by = created_by;
 	}
     
     
