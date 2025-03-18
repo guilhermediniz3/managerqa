@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import axios, { AxiosResponse } from "axios";
-import { ListGroup, Form, Button, Row, Col, Spinner } from "react-bootstrap";
+import axios from "axios";
+import { ListGroup, Form, Button, Row, Col, Spinner, Toast, ToastContainer } from "react-bootstrap";
 
 // Interface para representar um TestCase
 interface TestCase {
@@ -40,19 +40,37 @@ function formatVimeoUrl(url: string): string {
 }
 
 // Função para converter uma string no formato "dd/MM/yyyy" para um objeto Date
-function parseDate(dateString: string): Date {
+function parseDate(dateString: string): Date | null {
+  if (!dateString) return null;
   const [day, month, year] = dateString.split("/");
-  return new Date(`${year}-${month}-${day}`);
+  return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
 }
 
 const Case = () => {
   const { testPlanId, testSuiteId } = useParams<{ testPlanId: string; testSuiteId: string }>();
   const [testCases, setTestCases] = useState<TestCase[]>([]);
-  const [nextCode, setNextCode] = useState(1);
   const [nextTempId, setNextTempId] = useState(-1); // ID temporário para novos casos
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [selectedVideoUrl, setSelectedVideoUrl] = useState("");
   const [loading, setLoading] = useState(false); // Estado de carregamento
+  const [showToast, setShowToast] = useState(false); // Estado para controlar o Toast
+  const [toastMessage, setToastMessage] = useState(""); // Mensagem do Toast
+  const navigate = useNavigate();
+
+  // Busca o último codeCase do backend
+  const fetchLastCodeCase = async () => {
+    if (!testPlanId || !testSuiteId) return 0; // Retorna 0 se os IDs não estiverem definidos
+
+    try {
+      const response = await axios.get(
+        `http://localhost:8081/testcases/last-code?testPlanId=${testPlanId}&testSuiteId=${testSuiteId}`
+      );
+      return response.data || 0; // Retorna o último codeCase ou 0 se não houver
+    } catch (error) {
+      console.log("Nenhum codeCase encontrado. Iniciando do 1.");
+      return 0; // Retorna 0 se não houver codeCase no banco
+    }
+  };
 
   // Busca os TestCases do backend
   const fetchTestCases = async () => {
@@ -60,7 +78,7 @@ const Case = () => {
 
     setLoading(true); // Ativa o estado de carregamento
     try {
-      const response: AxiosResponse<TestCase[]> = await axios.get(
+      const response = await axios.get(
         `http://localhost:8081/testcases/plan/${testPlanId}/suite/${testSuiteId}`
       );
       const data = response.data;
@@ -73,22 +91,24 @@ const Case = () => {
       setTestCases(mappedTestCases);
     } catch (error) {
       console.error("Erro ao buscar os casos:", error);
-      alert("Erro ao buscar os casos. Verifique o console para mais detalhes.");
+      setToastMessage("Erro ao buscar os casos. Verifique o console para mais detalhes.");
+      setShowToast(true);
     } finally {
       setLoading(false); // Desativa o estado de carregamento
     }
   };
 
+  // Efeito para buscar os dados iniciais
   useEffect(() => {
     fetchTestCases(); // Busca os casos ao carregar o componente
   }, [testPlanId, testSuiteId]); // Executa quando testPlanId ou testSuiteId mudam
 
   // Adiciona um novo TestCase em modo de edição
-  const handleCreateCase = () => {
+  const handleCreateCase = async () => {
     const newCase: TestCase = {
       id: nextTempId, // Usa um ID temporário
-      codeCase: nextCode,
-      scenario: "",
+      codeCase: null, // Inicialmente, o codeCase é null
+      scenario: "", // O campo de cenário começa vazio
       expectedResult: "",
       obtainedResult: "",
       videoEvidence: "",
@@ -97,8 +117,8 @@ const Case = () => {
       testSuiteId: parseInt(testSuiteId),
       testPlanId: parseInt(testPlanId),
     };
+
     setTestCases([...testCases, newCase]);
-    setNextCode(nextCode + 1);
     setNextTempId(nextTempId - 1); // Decrementa o ID temporário para o próximo caso
   };
 
@@ -116,17 +136,22 @@ const Case = () => {
     try {
       const testCase = testCases.find((tc) => tc.id === id);
       if (!testCase) {
-        alert("TestCase não encontrado.");
+        setToastMessage("TestCase não encontrado.");
+        setShowToast(true);
         return;
       }
 
-      // Monta o DTO para enviar ao backend
+      // Busca o último codeCase antes de salvar
+      const lastCodeCase = await fetchLastCodeCase();
+      const newCodeCase = lastCodeCase + 1;
+
       const testCaseDTO = {
         ...testCase,
+        codeCase: newCodeCase, // Define o novo codeCase
         data: testCase.data, // Mantém a data como string
       };
 
-      let response: AxiosResponse<TestCase>;
+      let response;
 
       if (testCase.id && testCase.id < 0) {
         // Se o TestCase tem um ID temporário, é um novo caso (POST)
@@ -138,7 +163,7 @@ const Case = () => {
         // Atualiza o estado com o novo TestCase retornado pelo backend
         setTestCases((prev) =>
           prev.map((tc) =>
-            tc.id === id ? { ...tc, id: response.data.id } : tc
+            tc.id === id ? { ...tc, id: response.data.id, codeCase: response.data.codeCase } : tc
           )
         );
       } else {
@@ -154,11 +179,40 @@ const Case = () => {
         );
       }
 
-      console.log("TestCase salvo com sucesso:", response.data);
-      alert("TestCase salvo com sucesso!");
+      setToastMessage("TestCase salvo com sucesso!");
+      setShowToast(true);
+
+      // Atualiza a lista de TestCases após o salvamento
+      await fetchTestCases();
     } catch (error) {
       console.error("Erro ao salvar TestCase:", error);
-      alert("Erro ao salvar TestCase. Verifique o console para mais detalhes.");
+      setToastMessage("Erro ao salvar TestCase. Verifique o console para mais detalhes.");
+      setShowToast(true);
+    }
+  };
+
+  // Deleta um TestCase
+  const handleDeleteCase = async (id: number) => {
+    try {
+      if (id && id < 0) {
+        // Se o ID for temporário (negativo), apenas remove do estado local
+        setTestCases((prev) => prev.filter((tc) => tc.id !== id));
+        setToastMessage("TestCase removido com sucesso!");
+        setShowToast(true);
+      } else {
+        // Se o ID for real (positivo), faz a requisição DELETE ao backend
+        await axios.delete(`http://localhost:8081/testcases/${id}`);
+        setTestCases((prev) => prev.filter((tc) => tc.id !== id)); // Remove o caso do estado local
+        setToastMessage("TestCase deletado com sucesso!");
+        setShowToast(true);
+      }
+
+      // Atualiza a lista de TestCases após a exclusão
+      await fetchTestCases();
+    } catch (error) {
+      console.error("Erro ao deletar TestCase:", error);
+      setToastMessage("Erro ao deletar TestCase. Verifique o console para mais detalhes.");
+      setShowToast(true);
     }
   };
 
@@ -168,7 +222,8 @@ const Case = () => {
       setSelectedVideoUrl(formatVimeoUrl(url));
       setShowVideoModal(true);
     } else {
-      alert("URL do vídeo não disponível.");
+      setToastMessage("URL do vídeo não disponível.");
+      setShowToast(true);
     }
   };
 
@@ -191,10 +246,38 @@ const Case = () => {
 
   return (
     <div style={{ margin: "20px" }}>
-      {/* Botão para criar um novo TestCase */}
-      <Button onClick={handleCreateCase} variant="success" style={{ marginBottom: "20px" }}>
-        Novo Case
-      </Button>
+      {/* Toast para exibir mensagens */}
+      <ToastContainer position="top-end" className="p-3">
+        <Toast
+          onClose={() => setShowToast(false)}
+          show={showToast}
+          delay={3000}
+          autohide
+          bg="success"
+        >
+          <Toast.Header>
+            <strong className="me-auto">Sucesso</strong>
+          </Toast.Header>
+          <Toast.Body>{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
+
+      {/* Botão "Novo Case" alinhado à direita */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
+        <Button onClick={handleCreateCase} variant="success">
+          Novo Case
+        </Button>
+      </div>
+
+      {/* Botão "Voltar" */}
+      <div style={{ marginBottom: "20px" }}>
+        <Button
+          onClick={() => navigate("/planoTeste/editar/7")} // Redireciona para a URL especificada
+          variant="secondary"
+        >
+          Voltar
+        </Button>
+      </div>
 
       {/* Lista de TestCases */}
       <ListGroup>
@@ -206,7 +289,9 @@ const Case = () => {
                 <Col md={6}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                     <Form.Group controlId={`formScenario-${testCase.id}`}>
-                      <Form.Label>Cenário</Form.Label>
+                      <Form.Label>
+                        {testCase.codeCase ? `Cenário ${testCase.codeCase}` : "Cenário"}
+                      </Form.Label>
                       <Form.Control
                         as="textarea"
                         rows={1}
@@ -243,7 +328,7 @@ const Case = () => {
                   </div>
                 </Col>
 
-                {/* Coluna 2: Vídeo, Status, Data, Botão Salvar */}
+                {/* Coluna 2: Vídeo, Status, Data, Botão Salvar e Deletar */}
                 <Col md={4}>
                   <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
                     <Form.Group controlId={`formVideoEvidence-${testCase.id}`}>
@@ -313,7 +398,15 @@ const Case = () => {
                         <div className="custom-datepicker">
                           <DatePicker
                             selected={parseDate(testCase.data)} // Converte a string para Date
-                            onChange={(date) => handleUpdateCase(testCase.id!, "data", date?.toLocaleDateString("pt-BR") || "")}
+                            onChange={(date) => {
+                              if (date) {
+                                const day = String(date.getUTCDate()).padStart(2, "0");
+                                const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Mês é base 0
+                                const year = date.getUTCFullYear();
+                                const formattedDate = `${day}/${month}/${year}`; // Formata a data para "dd/MM/yyyy"
+                                handleUpdateCase(testCase.id!, "data", formattedDate); // Atualiza o estado com a nova data
+                              }
+                            }}
                             dateFormat="dd/MM/yyyy"
                             className="form-control"
                           />
@@ -321,11 +414,16 @@ const Case = () => {
                       </Form.Group>
                     </div>
 
-                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeleteCase(testCase.id!)}
+                      >
+                        Deletar
+                      </Button>
                       <Button
                         variant="primary"
                         onClick={() => handleSaveCase(testCase.id!)}
-                        style={{ width: "30%" }}
                       >
                         Salvar
                       </Button>
