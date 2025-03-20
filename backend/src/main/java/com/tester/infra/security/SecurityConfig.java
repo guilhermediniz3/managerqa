@@ -92,7 +92,7 @@ public class SecurityConfig {
 	                        .requestMatchers(HttpMethod.GET, "/plan/{testPlanId}/suite/{testSuiteId}/last-code-case").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/testplan/*/created-by").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/relatorios/excel").permitAll()
-	                   
+	                        .requestMatchers(HttpMethod.GET, "/relatorios/pdf").permitAll() 
 	                        
 	                
 
