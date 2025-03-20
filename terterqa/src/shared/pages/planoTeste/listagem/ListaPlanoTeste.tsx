@@ -13,6 +13,10 @@ import "./styles.css"; // Importe o arquivo CSS personalizado
 import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
 import NavVertical from "../../../components/navs/vertical/NavVertical";
 import { useNavigate } from 'react-router-dom';
+import ReportModal from "../../..//components/Modal/ReportModal";
+
+
+
 
 
 
@@ -255,14 +259,14 @@ const TestPlanPage = () => {
     fetchTesters();
   }, []);
 
-  
+  const [showReportModal, setShowReportModal] = useState(false);
 
 
   return (
     <div className="container">
       <NavHorizontal />
       <NavVertical />
-      
+
 
       {/* Campo de Pesquisa e Ícone de Filtro */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -372,13 +376,27 @@ const TestPlanPage = () => {
         </div>
       )}
 
-       {/* Botão Salvar */}
-       <div style={{ textAlign: 'right', marginTop: '20px' }}>
-              <Button type="submit" variant="primary"  style={{ borderRadius: '25px' }}onClick={() => navigate('/planoTeste/cadastrar')} >
-                Nova UL
-              </Button>
-            </div>
-          
+      {/* Botão Salvar */}
+      <div className="button-container">
+        <Button
+          type="submit"
+          className="btn btn-primary"
+          onClick={() => navigate('/planoTeste/cadastrar')}
+        >
+          Nova UL
+        </Button>
+        <Button
+          className="btn btn-success"
+          onClick={() => setShowReportModal(true)}
+        >
+          Report
+        </Button>
+      </div>
+
+      {/* Modal de Relatório */}
+      <ReportModal show={showReportModal} onHide={() => setShowReportModal(false)} />
+
+
 
       {/* Tabela de Resultados */}
       <Table striped bordered hover className="table-custom">
@@ -413,7 +431,7 @@ const TestPlanPage = () => {
                 </Button>
               </td>
               <td>
-                <FaEdit className="icon-edit" style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }} onClick={() => navigate(`/planoTeste/editar/${item.id}`)} />            
+                <FaEdit className="icon-edit" style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }} onClick={() => navigate(`/planoTeste/editar/${item.id}`)} />
               </td>
             </tr>
           ))}

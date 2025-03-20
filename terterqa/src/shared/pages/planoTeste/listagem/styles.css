@@ -162,3 +162,43 @@
   grid-auto-flow: column;
   grid-template-columns: repeat(auto-fit, minmax(max-content, 1fr));
 }
+
+/* Estilo para os botões "Nova UL" e "Report" */
+.button-container {
+  display: flex;
+  justify-content: flex-end; /* Alinha os botões à direita */
+  gap: 10px; /* Espaçamento entre os botões */
+  margin-top: 20px; /* Espaçamento acima dos botões */
+}
+
+.button-container .btn {
+  flex: 1; /* Faz com que os botões tenham o mesmo tamanho */
+  max-width: 150px; /* Define um tamanho máximo para os botões */
+  border-radius: 25px; /* Borda arredondada */
+  padding: 8px 16px; /* Espaçamento interno */
+  font-size: 14px; /* Tamanho da fonte */
+  font-weight: bold; /* Texto em negrito */
+  text-align: center; /* Centraliza o texto */
+  white-space: nowrap; /* Evita quebra de texto */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Transições suaves */
+}
+
+.button-container .btn-primary {
+  background-color: #007bff; /* Azul para o botão "Nova UL" */
+  border: none;
+}
+
+.button-container .btn-primary:hover {
+  background-color: #0056b3; /* Azul mais escuro ao passar o mouse */
+  transform: scale(1.05); /* Efeito de zoom leve */
+}
+
+.button-container .btn-success {
+  background-color: #28a745; /* Verde para o botão "Report" */
+  border: none;
+}
+
+.button-container .btn-success:hover {
+  background-color: #218838; /* Verde mais escuro ao passar o mouse */
+  transform: scale(1.05); /* Efeito de zoom leve */
+}

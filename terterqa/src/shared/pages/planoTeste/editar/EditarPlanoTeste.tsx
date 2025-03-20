@@ -337,7 +337,7 @@ function EditTestPlan() {
                   />
                 </Form.Group>
               </Col>
-              <Col md={6}>
+              <Col md={4}>
                 <Form.Group controlId="formData">
                   <Form.Label>Data</Form.Label>
                   <DatePicker
