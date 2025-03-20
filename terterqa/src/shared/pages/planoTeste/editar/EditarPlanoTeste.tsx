@@ -326,7 +326,7 @@ function EditTestPlan() {
         <Tab eventKey="edit-test-plan" title="Editar Plano de Teste">
           <Form onSubmit={handleSubmit} style={{ margin: '20px', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
             <Row>
-              <Col md={6}>
+              <Col md={4}>
                 <Form.Group controlId="formDeliveryDate">
                   <Form.Label>Data de Entrega</Form.Label>
                   <DatePicker

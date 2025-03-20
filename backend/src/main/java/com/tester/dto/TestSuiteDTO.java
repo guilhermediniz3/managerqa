@@ -11,11 +11,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tester.entity.TestSuite;
 import com.tester.enuns.Status;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
 public class TestSuiteDTO {
 
 	private Long id;
 	private Long codeSuite;
-
+   @Enumerated(EnumType.STRING)
 	private Status status;
 
     @JsonFormat(pattern = "dd/MM/yyyy")

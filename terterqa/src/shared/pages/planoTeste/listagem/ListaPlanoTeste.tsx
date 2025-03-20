@@ -413,8 +413,7 @@ const TestPlanPage = () => {
                 </Button>
               </td>
               <td>
-                <FaEdit className="icon-edit" style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }} onClick={() => navigate(`/planoTeste/editar/${item.id}`)} />
-                <HiOutlineDuplicate className="icon-duplicate" style={{ color: "#6c757d", cursor: "pointer" }} />
+                <FaEdit className="icon-edit" style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }} onClick={() => navigate(`/planoTeste/editar/${item.id}`)} />            
               </td>
             </tr>
           ))}

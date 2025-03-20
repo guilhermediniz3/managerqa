@@ -5,6 +5,9 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import { ListGroup, Form, Button, Row, Col, Spinner, Toast, ToastContainer } from "react-bootstrap";
+import NavHorizontal from "../../components/navs/horizontal/NavHorizontal";
+import NavVertical from "../../components/navs/vertical/NavVertical";
+import { Container } from 'react-bootstrap';
 
 // Interface para representar um TestCase
 interface TestCase {
@@ -245,223 +248,237 @@ const Case = () => {
   }
 
   return (
+
+
     <div style={{ margin: "20px" }}>
-      {/* Toast para exibir mensagens */}
-      <ToastContainer position="top-end" className="p-3">
-        <Toast
-          onClose={() => setShowToast(false)}
-          show={showToast}
-          delay={3000}
-          autohide
-          bg="success"
-        >
-          <Toast.Header>
-            <strong className="me-auto">Sucesso</strong>
-          </Toast.Header>
-          <Toast.Body>{toastMessage}</Toast.Body>
-        </Toast>
-      </ToastContainer>
-
-      {/* Botão "Novo Case" alinhado à direita */}
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
-        <Button onClick={handleCreateCase} variant="success">
-          Novo Case
-        </Button>
-      </div>
-
-      {/* Botão "Voltar" */}
-      <div style={{ marginBottom: "20px" }}>
-        <Button
-          onClick={() => navigate(`/planoTeste/editar/${testPlanId}`)} // Redireciona para a URL especificada
-          variant="secondary"
-        >
-          Voltar
-        </Button>
-      </div>  
-
-      {/* Lista de TestCases */}
-      <ListGroup>
-        {testCases.map((testCase) => {
-          return (
-            <ListGroup.Item key={testCase.id}>
-              <Row>
-                {/* Coluna 1: Cenário, Resultado Esperado, Resultado Obtido */}
-                <Col md={6}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                    <Form.Group controlId={`formScenario-${testCase.id}`}>
-                      <Form.Label>
-                        {testCase.codeCase ? `Cenário ${testCase.codeCase}` : "Cenário"}
-                      </Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={1}
-                        value={testCase.scenario}
-                        onChange={(e) => handleUpdateCase(testCase.id!, "scenario", e.target.value)}
-                        placeholder="Digite o cenário"
-                        style={{ width: '100%' }}
-                      />
-                    </Form.Group>
-
-                    <Form.Group controlId={`formExpectedResult-${testCase.id}`}>
-                      <Form.Label>Resultado Esperado</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={1}
-                        value={testCase.expectedResult}
-                        onChange={(e) => handleUpdateCase(testCase.id!, "expectedResult", e.target.value)}
-                        placeholder="Digite o resultado esperado"
-                        style={{ width: '100%' }}
-                      />
-                    </Form.Group>
-
-                    <Form.Group controlId={`formObtainedResult-${testCase.id}`}>
-                      <Form.Label>Resultado Obtido</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={1}
-                        value={testCase.obtainedResult}
-                        onChange={(e) => handleUpdateCase(testCase.id!, "obtainedResult", e.target.value)}
-                        placeholder="Digite o resultado obtido"
-                        style={{ width: '100%' }}
-                      />
-                    </Form.Group>
-                  </div>
-                </Col>
-
-                {/* Coluna 2: Vídeo, Status, Data, Botão Salvar e Deletar */}
-                <Col md={4}>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
-                    <Form.Group controlId={`formVideoEvidence-${testCase.id}`}>
-                      <Form.Label>Vídeo (URL)</Form.Label>
-                      <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "1px" }}>
-                        <Form.Control
-                          type="text"
-                          value={testCase.videoEvidence}
-                          onChange={(e) => handleUpdateCase(testCase.id!, "videoEvidence", e.target.value)}
-                          placeholder="Insira o link do vídeo do Vimeo"
-                          style={{ width: '70%', marginTop: "-45px" }}
-                        />
-
-                        <div
-                          style={{
-                            width: "90px",
-                            height: "90px",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            overflow: "hidden",
-                            position: "relative",
-                          }}
-                          onClick={() => handleVideoClick(testCase.videoEvidence)}
-                        >
-                          {testCase.videoEvidence ? (
-                            <img
-                              src={`https://vumbnail.com/${testCase.videoEvidence.split("/").pop()}.jpg`}
-                              alt="Thumbnail"
-                              style={{
-                                width: "60px",
-                                height: "44px",
-                                position: "absolute",
-                                top: "50%",
-                                left: "40%",
-                                transform: "translate(-50%, -100%)",
-                              }}
-                              onError={(e) => {
-                                e.currentTarget.style.display = "none";
-                              }}
+    <NavHorizontal />
+    <NavVertical />
+  
+    {/* Container para centralizar o formulário */}
+    <Container>
+      {/* Row e Col para centralizar o conteúdo */}
+      <Row className="justify-content-md-center">
+        <Col md={12}> {/* Ajuste o valor de md para controlar a largura do formulário */}
+          {/* Toast para exibir mensagens */}
+          <ToastContainer position="top-end" className="p-3">
+            <Toast
+              onClose={() => setShowToast(false)}
+              show={showToast}
+              delay={3000}
+              autohide
+              bg="success"
+            >
+              <Toast.Header>
+                <strong className="me-auto">Sucesso</strong>
+              </Toast.Header>
+              <Toast.Body>{toastMessage}</Toast.Body>
+            </Toast>
+          </ToastContainer>
+  
+          {/* Botão "Novo Case" alinhado à direita */}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
+            <Button onClick={handleCreateCase} variant="success">
+              Novo Case
+            </Button>
+          </div>
+  
+          {/* Botão "Voltar" */}
+          <div style={{ marginBottom: "20px" }}>
+            <Button
+              onClick={() => navigate(`/planoTeste/editar/${testPlanId}`)} // Redireciona para a URL especificada
+              variant="secondary"
+            >
+              Voltar
+            </Button>
+          </div>
+  
+          {/* Lista de TestCases */}
+          <ListGroup>
+            {testCases.map((testCase) => {
+              return (
+                <ListGroup.Item key={testCase.id}>
+                  <Row>
+                    {/* Coluna 1: Cenário, Resultado Esperado, Resultado Obtido */}
+                    <Col md={6}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                        <Form.Group controlId={`formScenario-${testCase.id}`}>
+                          <Form.Label>
+                            {testCase.codeCase ? `Cenário ${testCase.codeCase}` : "Cenário"}
+                          </Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={1}
+                            value={testCase.scenario}
+                            onChange={(e) => handleUpdateCase(testCase.id!, "scenario", e.target.value)}
+                            placeholder="Digite o cenário"
+                            style={{ width: '100%' }}
+                          />
+                        </Form.Group>
+  
+                        <Form.Group controlId={`formExpectedResult-${testCase.id}`}>
+                          <Form.Label>Resultado Esperado</Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={1}
+                            value={testCase.expectedResult}
+                            onChange={(e) => handleUpdateCase(testCase.id!, "expectedResult", e.target.value)}
+                            placeholder="Digite o resultado esperado"
+                            style={{ width: '100%' }}
+                          />
+                        </Form.Group>
+  
+                        <Form.Group controlId={`formObtainedResult-${testCase.id}`}>
+                          <Form.Label>Resultado Obtido</Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={1}
+                            value={testCase.obtainedResult}
+                            onChange={(e) => handleUpdateCase(testCase.id!, "obtainedResult", e.target.value)}
+                            placeholder="Digite o resultado obtido"
+                            style={{ width: '100%' }}
+                          />
+                        </Form.Group>
+                      </div>
+                    </Col>
+  
+                    {/* Coluna 2: Vídeo, Status, Data, Botão Salvar e Deletar */}
+                    <Col md={4}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                        <Form.Group controlId={`formVideoEvidence-${testCase.id}`}>
+                          <Form.Label>Vídeo (URL)</Form.Label>
+                          <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "1px" }}>
+                            <Form.Control
+                              type="text"
+                              value={testCase.videoEvidence}
+                              onChange={(e) => handleUpdateCase(testCase.id!, "videoEvidence", e.target.value)}
+                              placeholder="Insira o link do vídeo do Vimeo"
+                              style={{ width: '70%', marginTop: "-45px" }}
                             />
-                          ) : (
-                            <span>Sem vídeo</span>
-                          )}
+  
+                            <div
+                              style={{
+                                width: "90px",
+                                height: "90px",
+                                borderRadius: "8px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                overflow: "hidden",
+                                position: "relative",
+                              }}
+                              onClick={() => handleVideoClick(testCase.videoEvidence)}
+                            >
+                              {testCase.videoEvidence ? (
+                                <img
+                                  src={`https://vumbnail.com/${testCase.videoEvidence.split("/").pop()}.jpg`}
+                                  alt="Thumbnail"
+                                  style={{
+                                    width: "60px",
+                                    height: "44px",
+                                    position: "absolute",
+                                    top: "50%",
+                                    left: "40%",
+                                    transform: "translate(-50%, -100%)",
+                                  }}
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                <span>Sem vídeo</span>
+                              )}
+                            </div>
+                          </div>
+                        </Form.Group>
+  
+                        <div style={{ display: "flex", flexDirection: "row", gap: "5px" }}>
+                          <Form.Group controlId={`formStatus-${testCase.id}`} style={{ flex: 1 }}>
+                            <Form.Label>Status</Form.Label>
+                            <Form.Select
+                              value={testCase.status}
+                              onChange={(e) => handleUpdateCase(testCase.id!, "status", e.target.value)}
+                              style={{ width: '75%', height: "46px" }}
+                            >
+                              <option value="EM_PROGRESSO">Em Progresso</option>
+                              <option value="CONCLUIDA">Concluída</option>
+                              <option value="RETORNO">Retorno</option>
+                            </Form.Select>
+                          </Form.Group>
+  
+                          <Form.Group controlId={`formData-${testCase.id}`} style={{ flex: 1 }}>
+                            <Form.Label>Data</Form.Label>
+                            <div className="custom-datepicker">
+                              <DatePicker
+                                selected={parseDate(testCase.data)} // Converte a string para Date
+                                onChange={(date) => {
+                                  if (date) {
+                                    const day = String(date.getUTCDate()).padStart(2, "0");
+                                    const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Mês é base 0
+                                    const year = date.getUTCFullYear();
+                                    const formattedDate = `${day}/${month}/${year}`; // Formata a data para "dd/MM/yyyy"
+                                    handleUpdateCase(testCase.id!, "data", formattedDate); // Atualiza o estado com a nova data
+                                  }
+                                }}
+                                dateFormat="dd/MM/yyyy"
+                                className="form-control"
+                              />
+                            </div>
+                          </Form.Group>
+                        </div>
+  
+                        <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                          <Button
+                            variant="danger"
+                            onClick={() => handleDeleteCase(testCase.id!)}
+                          >
+                            Deletar
+                          </Button>
+                          <Button
+                            variant="primary"
+                            onClick={() => handleSaveCase(testCase.id!)}
+                          >
+                            Salvar
+                          </Button>
                         </div>
                       </div>
-                    </Form.Group>
+                    </Col>
+                  </Row>
+                </ListGroup.Item>
+              );
+            })}
+          </ListGroup>
+  
+          {/* Modal de Vídeo */}
+          <Modal show={showVideoModal} onHide={handleCloseVideoModal} size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>Vídeo</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              {selectedVideoUrl ? (
+                <iframe
+                  src={selectedVideoUrl}
+                  width="100%"
+                  height="400"
+                  frameBorder="0"
+                  allow="autoplay; fullscreen"
+                  allowFullScreen
+                ></iframe>
+              ) : (
+                <p>Carregando vídeo...</p>
+              )}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={handleCloseVideoModal}>
+                Fechar
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        </Col>
+      </Row>
+    </Container>
+  </div>
 
-                    <div style={{ display: "flex", flexDirection: "row", gap: "5px" }}>
-                      <Form.Group controlId={`formStatus-${testCase.id}`} style={{ flex: 1 }}>
-                        <Form.Label>Status</Form.Label>
-                        <Form.Select
-                          value={testCase.status}
-                          onChange={(e) => handleUpdateCase(testCase.id!, "status", e.target.value)}
-                          style={{ width: '75%', height: "46px" }}
-                        >
-                          <option value="EM_PROGRESSO">Em Progresso</option>
-                          <option value="CONCLUIDA">Concluída</option>
-                          <option value="RETORNO">Retorno</option>
-                        </Form.Select>
-                      </Form.Group>
-
-                      <Form.Group controlId={`formData-${testCase.id}`} style={{ flex: 1 }}>
-                        <Form.Label>Data</Form.Label>
-                        <div className="custom-datepicker">
-                          <DatePicker
-                            selected={parseDate(testCase.data)} // Converte a string para Date
-                            onChange={(date) => {
-                              if (date) {
-                                const day = String(date.getUTCDate()).padStart(2, "0");
-                                const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Mês é base 0
-                                const year = date.getUTCFullYear();
-                                const formattedDate = `${day}/${month}/${year}`; // Formata a data para "dd/MM/yyyy"
-                                handleUpdateCase(testCase.id!, "data", formattedDate); // Atualiza o estado com a nova data
-                              }
-                            }}
-                            dateFormat="dd/MM/yyyy"
-                            className="form-control"
-                          />
-                        </div>
-                      </Form.Group>
-                    </div>
-
-                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-                      <Button
-                        variant="danger"
-                        onClick={() => handleDeleteCase(testCase.id!)}
-                      >
-                        Deletar
-                      </Button>
-                      <Button
-                        variant="primary"
-                        onClick={() => handleSaveCase(testCase.id!)}
-                      >
-                        Salvar
-                      </Button>
-                    </div>
-                  </div>
-                </Col>
-              </Row>
-            </ListGroup.Item>
-          );
-        })}
-      </ListGroup>
-
-      {/* Modal de Vídeo */}
-      <Modal show={showVideoModal} onHide={handleCloseVideoModal} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Vídeo</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedVideoUrl ? (
-            <iframe
-              src={selectedVideoUrl}
-              width="100%"
-              height="400"
-              frameBorder="0"
-              allow="autoplay; fullscreen"
-              allowFullScreen
-            ></iframe>
-          ) : (
-            <p>Carregando vídeo...</p>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseVideoModal}>
-            Fechar
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </div>
   );
 };
 

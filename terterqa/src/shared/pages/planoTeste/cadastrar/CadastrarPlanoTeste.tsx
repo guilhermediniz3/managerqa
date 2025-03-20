@@ -1,24 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
+import { Tab, Tabs, Form, Button, Row, Col, Container, ListGroup, OverlayTrigger, Tooltip, ProgressBar } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Container from 'react-bootstrap/Container';
-import ListGroup from 'react-bootstrap/ListGroup';
 import axios from 'axios';
-import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
-import NavVertical from "../../../components/navs/vertical/NavVertical";
 import { useNavigate } from 'react-router-dom';
-import './styless.css';
 import { HiOutlineDuplicate } from "react-icons/hi";
 import { FaEdit } from "react-icons/fa";
-import { FiAlertCircle } from "react-icons/fi"; // Importando o ícone
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger'; // Importando o OverlayTrigger
-import Tooltip from 'react-bootstrap/Tooltip'; // Importando o Tooltip
+import { FiAlertCircle } from "react-icons/fi";
+import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
+import NavVertical from "../../../components/navs/vertical/NavVertical";
+import './styless.css';
 
 // Definindo a interface para Suite
 interface TestSuite {
@@ -26,7 +17,36 @@ interface TestSuite {
   status: string;
   data: string;
   testPlanId: number;
-  codeSuite: number; // Novo campo para o código incremental
+  codeSuite: number;
+}
+
+interface TestCase {
+  id: number;
+  status: string;
+  testSuiteId: number;
+}
+
+// Componente StackedProgressBar
+function StackedProgressBar({ testCases }: { testCases: TestCase[] }) {
+  const totalCases = testCases.length;
+  const completedCases = testCases.filter(caseItem => caseItem.status === 'CONCLUIDA').length;
+  const inProgressCases = testCases.filter(caseItem => caseItem.status === 'EM_PROGRESSO').length;
+  const returnCases = testCases.filter(caseItem => caseItem.status === 'RETORNO').length;
+
+  const completedPercentage = totalCases > 0 ? (completedCases / totalCases) * 100 : 0;
+  const inProgressPercentage = totalCases > 0 ? (inProgressCases / totalCases) * 100 : 0;
+  const returnPercentage = totalCases > 0 ? (returnCases / totalCases) * 100 : 0;
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <ProgressBar style={{ height: '10px', flex: 1 }}>
+        <ProgressBar variant="success" now={completedPercentage} key={1} label={`${completedPercentage.toFixed(1)}%`} />
+        <ProgressBar variant="info" now={inProgressPercentage} key={2} label={`${inProgressPercentage.toFixed(1)}%`} />
+        <ProgressBar variant="danger" now={returnPercentage} key={3} label={`${returnPercentage.toFixed(1)}%`} />
+      </ProgressBar>
+      <div style={{ fontSize: '0.9em', whiteSpace: 'nowrap' }}>Total: {totalCases}</div>
+    </div>
+  );
 }
 
 function CreateTestPlan() {
@@ -42,9 +62,10 @@ function CreateTestPlan() {
   const [jira, setJira] = useState("");
   const [callNumber, setCallNumber] = useState("");
   const [observations, setObservations] = useState("");
-  const [suites, setSuites] = useState<TestSuite[]>([]); // Tipando o estado suites
-  const [testPlanId, setTestPlanId] = useState<number | null>(null); // Armazenando o ID do TestPlan
-  const [nextCode, setNextCode] = useState<number>(1); // Estado para o próximo código incremental
+  const [suites, setSuites] = useState<TestSuite[]>([]);
+  const [testPlanId, setTestPlanId] = useState<number | null>(null);
+  const [nextCode, setNextCode] = useState<number>(1);
+  const [testCases, setTestCases] = useState<TestCase[]>([]);
 
   interface Modulo {
     id: number;
@@ -195,6 +216,39 @@ function CreateTestPlan() {
       setNextCode(nextCode + 1);
     } catch (error) {
       console.error('Erro ao criar suite:', error);
+    }
+  };
+
+  // Função para clonar uma suite
+  const handleCloneSuite = async (suiteId: number) => {
+    try {
+      // Busca os dados da suite que será clonada
+      const suiteToClone = suites.find((suite) => suite.id === suiteId);
+      if (!suiteToClone) {
+        alert("Suite não encontrada para clonar.");
+        return;
+      }
+
+      // Cria a nova suite com o próximo código disponível
+      const newSuite = {
+        status: "EM_PROGRESSO", // Status padrão para a nova suite
+        data: formatDateToDDMMYYYY(new Date()), // Data atual
+        testPlanId: testPlanId!, // ID do TestPlan atual
+        codeSuite: nextCode, // Próximo código incremental
+      };
+
+      // Envia a nova suite para o backend
+      const response = await axios.post<TestSuite>('http://localhost:8081/test-suites', newSuite);
+      console.log('Suite clonada com sucesso:', response.data);
+
+      // Atualiza o estado das suites com a nova suite clonada
+      setSuites((prevSuites) => [...prevSuites, response.data]);
+
+      // Incrementa o próximo código
+      setNextCode(nextCode + 1);
+    } catch (error) {
+      console.error('Erro ao clonar suite:', error);
+      alert('Erro ao clonar suite. Verifique o console para mais detalhes.');
     }
   };
 
@@ -456,7 +510,7 @@ function CreateTestPlan() {
                       placement="top"
                       overlay={
                         <Tooltip id="tooltip-criada">
-                          Ao marcar o switch antes de salvar, será contabilizado como UL criada. Após o salvamento, não será mais contabilizado.
+                          Ao marcar o switch será contabilizado como UL criada apenas na criação e não será possível editar posteriormente.
                         </Tooltip>
                       }
                     >
@@ -520,29 +574,29 @@ function CreateTestPlan() {
             </Button>
 
             <ListGroup>
-              {suites.map((suite) => (
-                <ListGroup.Item key={suite.id}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div>
-                      <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+              {suites.map((suite) => {
+                const suiteTestCases = testCases.filter(caseItem => caseItem.testSuiteId === suite.id);
+                return (
+                  <ListGroup.Item key={suite.id}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div>
+                        <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+                      </div>
+                      <div>
+                        <FaEdit
+                          style={{ color: "#0d6efd", cursor: "pointer", marginRight: '15px' }}
+                          onClick={() => navigate(`/plan/${testPlanId}/suite/${suite.id}`)}
+                        />
+                        <HiOutlineDuplicate
+                          style={{ color: "#6c757d", cursor: "pointer" }}
+                          onClick={() => handleCloneSuite(suite.id)}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      {/* Ícone de Editar */}
-                      <FaEdit
-                        className="icon-edit"
-                        style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }}
-                        onClick={() => navigate(`/edit-suite/${suite.id}`)}
-                      />
-                      {/* Ícone de Duplicar */}
-                      <HiOutlineDuplicate
-                        className="icon-duplicate"
-                        style={{ color: "#6c757d", cursor: "pointer" }}
-                        onClick={() => alert(`Duplicar suite ${suite.codeSuite}`)} // Adicione a lógica de duplicação aqui
-                      />
-                    </div>
-                  </div>
-                </ListGroup.Item>
-              ))}
+                    <StackedProgressBar testCases={suiteTestCases} />
+                  </ListGroup.Item>
+                );
+              })}
             </ListGroup>
           </div>
         </Tab>

@@ -1,6 +1,8 @@
 package com.tester.repository;
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import com.tester.dto.CreatedByDTO;
 import com.tester.entity.TestPlan;
+import com.tester.enuns.Status;
 @Repository
 
 
@@ -60,5 +63,29 @@ public interface TestPlanRepository extends JpaRepository<TestPlan, Long> {
     
 	  @Query("SELECT new com.tester.dto.CreatedByDTO(t.created_by) FROM TestPlan t WHERE t.id = :testPlanId")
 	    CreatedByDTO findCreatedByByTestPlanId(@Param("testPlanId") Long testPlanId);
-	
+	  
+	  
+	  
+	  // relatorios 
+
+	  @Query("SELECT t FROM TestPlan t WHERE t.created_by = :testerName AND t.data = :data")
+	    List<TestPlan> findByCreatedByAndData(@Param("testerName") String testerName, @Param("data") LocalDate data);
+
+	    @Query("SELECT t FROM TestPlan t WHERE t.data = :data")
+	    List<TestPlan> findByData(@Param("data") LocalDate data);
+
+	    @Query("SELECT t FROM TestPlan t WHERE t.data = :data AND t.status = :status")
+	    List<TestPlan> findByDataAndStatus(@Param("data") LocalDate data, @Param("status") Status status);
+
+	    @Query("SELECT t FROM TestPlan t WHERE t.created_by = :testerName AND t.data = :data AND t.status = :status")
+	    List<TestPlan> findByCreatedByAndDataAndStatus(@Param("testerName") String testerName, @Param("data") LocalDate data, @Param("status") Status status);
+
+	    @Query("SELECT COUNT(t) FROM TestPlan t WHERE t.created_by = :testerName AND t.data = :data AND t.status = :status")
+	    Long countByCreatedByAndDataAndStatus(@Param("testerName") String testerName, @Param("data") LocalDate data, @Param("status") Status status);
+
+	    @Query("SELECT COUNT(t) FROM TestPlan t WHERE t.data = :data AND t.status = :status")
+	    Long countByDataAndStatus(@Param("data") LocalDate data, @Param("status") Status status);
+
+	    @Query("SELECT COUNT(t) FROM TestPlan t WHERE t.created_by = :testerName AND t.data = :data")
+	    Long countByCreatedByAndData(@Param("testerName") String testerName, @Param("data") LocalDate data);
 }

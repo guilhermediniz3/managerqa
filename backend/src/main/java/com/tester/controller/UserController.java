@@ -31,52 +31,51 @@ public class UserController {
 	
 	private UserService userService;
 	
-	
-	  @PostMapping
-	  public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO){
-		  UserDTO  saveUser = userService.createUser(userDTO);
-		  return ResponseEntity.status(HttpStatus.CREATED).body(saveUser);
-		  
-	  }
-	  
-	  
-	  @GetMapping
-	  
-	  public ResponseEntity<List<UserDTO>> getAllUsers(){
-		  List<UserDTO> users = userService.getAllUsers();
-		  return ResponseEntity.ok(users);
-  
-		  
-	  }
-	  
-	  @GetMapping("/{id}")
-	    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-	        Optional<UserDTO> user = userService.getUserById(id);
-	        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-	    }
-	  
-	  @PutMapping("/{id}")
-	    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO) {
-	        UserDTO updatedUser = userService.updateUser(id, userDTO);
-	        return ResponseEntity.ok(updatedUser);
-	    }
+	   // Criar um novo usuário
+    @PostMapping
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserDTO userDTO) {
+        UserDTO savedUser = userService.createUser(userDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+    }
 
-	    // Deletar um usuário
-	    @DeleteMapping("/{id}")
-	    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-	        try {
-	            userService.deleteUser(id);
-	            return ResponseEntity.noContent().build();
-	        } catch (RuntimeException e) {
-	            return ResponseEntity.notFound().build();
-	        }
-	    }	
-	    
-	    @PatchMapping("/{id}")
-	    public ResponseEntity<UserDTO> patchUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
-	        UserDTO updatedUser = userService.patchUser(id, userDTO);
-	        return ResponseEntity.ok(updatedUser);
-	    }
+    // Buscar todos os usuários
+    @GetMapping
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> users = userService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
+    // Buscar um usuário por ID
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        Optional<UserDTO> user = userService.getUserById(id);
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // Atualizar um usuário
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO userDTO) {
+        UserDTO updatedUser = userService.updateUser(id, userDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    // Deletar um usuário
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Atualização parcial de um usuário
+    @PatchMapping("/{id}")
+    public ResponseEntity<UserDTO> patchUser(@PathVariable Long id, @RequestBody UserDTO userDTO) {
+        UserDTO updatedUser = userService.patchUser(id, userDTO);
+        return ResponseEntity.ok(updatedUser);
+    }
 	    
 
 }

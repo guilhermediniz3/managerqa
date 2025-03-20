@@ -61,6 +61,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/tecnologia/editar/:id" element={<EditarTecnologia/>} />
           <Route path="/planoTeste/listagem" element={<ListaPlanoTeste/>} />
           <Route path="/planoTeste/cadastrar" element={<CadastrarPlanoTeste/>} />
+          <Route path="/planoTeste/cadastrar/:id" element={<CadastrarPlanoTeste/>} />
           <Route path="/planoTeste/editar/:id" element={<EditarPlanoTeste/>} />
           <Route path="/plan/:testPlanId/suite/:testSuiteId" element={<Case />} />
     
