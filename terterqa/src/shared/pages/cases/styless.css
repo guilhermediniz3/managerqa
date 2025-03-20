@@ -1,0 +1,52 @@
+.custom-datepicker {
+    width: 150px; /* Largura desejada */
+    height: 45px; /* Altura desejada */
+ 
+  }
+
+
+
+  /* Estilos padrão */
+.custom-datepicker {
+    width: 100%;
+  }
+  
+  /* Ajustes para telas menores que 768px */
+  @media (max-width: 768px) {
+    .custom-datepicker {
+      width: 100%;
+    }
+  
+    .form-control {
+      width: 100% !important; /* Força a largura total em telas pequenas */
+    }
+  
+    .col-md-4, .col-md-6 {
+      width: 100%; /* Colunas ocupam 100% da largura em telas pequenas */
+    }
+  
+    .btn {
+      width: 100%; /* Botão ocupa 100% da largura */
+      max-width: 100%; /* Remove a largura máxima */
+    }
+  
+    .thumbnail-container {
+      width: 70px; /* Reduz a largura da miniatura */
+      height: 70px; /* Reduz a altura da miniatura */
+    }
+  }
+  
+  /* Ajustes para telas menores que 480px */
+  @media (max-width: 480px) {
+    .form-label {
+      font-size: 14px; /* Reduz o tamanho da fonte dos labels */
+    }
+  
+    .form-control {
+      font-size: 12px; /* Reduz o tamanho da fonte dos inputs */
+    }
+  
+    .btn {
+      font-size: 14px; /* Ajusta o tamanho da fonte do botão */
+    }
+  }

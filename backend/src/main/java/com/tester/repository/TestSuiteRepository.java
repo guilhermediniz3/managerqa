@@ -22,9 +22,12 @@ public interface TestSuiteRepository extends JpaRepository<TestSuite,Long> {
     Optional<TestSuite> findLastTestSuiteByTestPlanId(@Param("testPlanId") Long testPlanId);
     
     
+    
+    
     @Query("SELECT new com.tester.dto.TestSuiteDTO(ts.id, ts.codeSuite, ts.status, ts.data, ts.testPlan.id) " +
     	       "FROM TestSuite ts " +
     	       "WHERE ts.testPlan.id = :testPlanId " +
     	       "ORDER BY ts.codeSuite ASC")
     	List<TestSuiteDTO> findAllTestSuitesByTestPlanId(@Param("testPlanId") Long testPlanId);
 }
+	

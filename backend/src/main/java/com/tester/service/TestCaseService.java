@@ -1,6 +1,7 @@
 package com.tester.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,8 +82,18 @@ public class TestCaseService {
         }
         testCaseRepository.deleteById(id);
     }
-    public List<TestCaseDTO> getTestCasesByTestPlanAndTestSuite(Long testPlanId, Long testSuiteId) {
+    
+// listar todos os cases vinculados
+    public List<TestCaseDTO> findTestCasesByTestPlanAndTestSuite(Long testPlanId, Long testSuiteId) {
         return testCaseRepository.findTestCasesByTestPlanAndTestSuite(testPlanId, testSuiteId);
+    }
+    
+    
+    
+    
+   // listar o ultimo codecase
+    public Optional<Long> findLastCodeCase(Long testPlanId, Long testSuiteId) {
+        return testCaseRepository.findLastCodeCaseByTestPlanIdAndTestSuiteId(testPlanId, testSuiteId);
     }
 
 }

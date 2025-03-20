@@ -19,8 +19,8 @@ import './styless.css';
 
 function EditTestPlan() {
   const { id } = useParams(); // Obtém o ID do plano de teste da URL
-  const [startDate, setStartDate] = useState(new Date());
-  const [deliveryDate, setDeliveryDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(null);
+  const [deliveryDate, setDeliveryDate] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("EM_PROGRESSO");
   const [selectedTaskStatus, setSelectedTaskStatus] = useState("in_progress");
   const [isTaskCreated, setIsTaskCreated] = useState(false);
@@ -42,7 +42,7 @@ function EditTestPlan() {
     active: boolean;
   }
   const [modules, setModules] = useState<Modulo[]>([]);
-  const [selectedModulo, setSelectedModulo] = useState<string | null>(null);
+  const [selectedModulo, setSelectedModulo] = useState<number | null>(null);
 
   interface Tester {
     id: number;
@@ -50,7 +50,7 @@ function EditTestPlan() {
     active: boolean;
   }
   const [testers, setTesters] = useState<Tester[]>([]);
-  const [selectedTester, setSelectedTester] = useState<string | null>(null);
+  const [selectedTester, setSelectedTester] = useState<number | null>(null);
 
   interface Developer {
     id: number;
@@ -59,23 +59,53 @@ function EditTestPlan() {
     technologyIds: number[];
   }
   const [developers, setDevelopers] = useState<Developer[]>([]);
-  const [selectedDeveloper, setSelectedDeveloper] = useState<string | null>(null);
+  const [selectedDeveloper, setSelectedDeveloper] = useState<number | null>(null);
 
   const navigate = useNavigate();
+
+  // Função para converter datas no formato DD/MM/YYYY para Date
+  const parseDate = (dateString) => {
+    if (!dateString) return null;
+    const [day, month, year] = dateString.split('/');
+    return new Date(`${year}-${month}-${day}`);
+  };
+
+  // Função para buscar o último codeSuite
+  const fetchLastCodeSuite = async () => {
+    try {
+      const lastCodeSuiteResponse = await axios.get(`http://localhost:8081/testplans/${id}/last-code-suite`);
+      const { codeSuite, testPlanId } = lastCodeSuiteResponse.data;
+
+      if (testPlanId === parseInt(id) && codeSuite !== null && codeSuite !== 0) {
+        return codeSuite + 1;
+      } else {
+        console.warn("O codeSuite retornado é inválido. Usando valor padrão para nextCode.");
+        return 1;
+      }
+    } catch (error) {
+      console.warn("Erro ao buscar lastCodeSuite. Usando valor padrão para nextCode:", error);
+      return 1;
+    }
+  };
 
   // Carrega os dados do plano de teste e as suites existentes
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true); // Inicia o carregamento
+        setLoading(true);
 
         // Carrega os dados do plano de teste
         const testPlanResponse = await axios.get(`http://localhost:8081/testplans/${id}`);
         const testPlan = testPlanResponse.data;
+        console.log('Dados do plano de teste:', testPlan);
 
-        // Atualiza as datas apenas se não forem nulas
-        if (testPlan.data) setStartDate(new Date(testPlan.data));
-        if (testPlan.deliveryData) setDeliveryDate(new Date(testPlan.deliveryData));
+        if (!testPlan) {
+          throw new Error("TestPlan não encontrado.");
+        }
+
+        // Atualiza as datas
+        if (testPlan.data) setStartDate(parseDate(testPlan.data));
+        if (testPlan.deliveryData) setDeliveryDate(parseDate(testPlan.deliveryData));
 
         // Atualiza os outros campos
         setSelectedStatus(testPlan.status || "EM_PROGRESSO");
@@ -87,24 +117,16 @@ function EditTestPlan() {
         setJira(testPlan.jira || "Sem JIRA");
         setCallNumber(testPlan.callNumber || "Sem número");
         setObservations(testPlan.observation || "Sem observações");
-        setSelectedDeveloper(testPlan.developerId || "");
-        setSelectedModulo(testPlan.systemModuleId || "");
-        setSelectedTester(testPlan.testerId || "");
+        setSelectedDeveloper(testPlan.developerId || null);
+        setSelectedModulo(testPlan.systemModuleId || null);
+        setSelectedTester(testPlan.testerId || null);
 
-        // Busca o último codeSuite gerado para o testPlanId
-        const lastCodeSuiteResponse = await axios.get(`http://localhost:8081/testplans/${id}/last-code-suite`);
-        const { codeSuite, testPlanId } = lastCodeSuiteResponse.data;
-        if (testPlanId === parseInt(id)) {
-          setNextCode(codeSuite + 1); // Próximo código será codeSuite + 1
-        } else {
-          console.error("O codeSuite retornado não pertence ao testPlanId informado.");
-        }
-
-        // Carrega as suites existentes para o plano de teste
+        // Carrega as suites existentes
         const suitesResponse = await axios.get(`http://localhost:8081/test-suites/testplan/${id}`);
+        console.log('Suites carregadas:', suitesResponse.data);
         setSuites(suitesResponse.data);
 
-        // Carrega os módulos, testers e desenvolvedores
+        // Carrega módulos, testers e desenvolvedores
         const modulesResponse = await axios.get<Modulo[]>("http://localhost:8081/modules");
         const activeModulo = modulesResponse.data.filter((modulo) => modulo.active);
         setModules(activeModulo);
@@ -117,11 +139,11 @@ function EditTestPlan() {
         const activeDevelopers = developersResponse.data.filter((dev) => dev.active);
         setDevelopers(activeDevelopers);
 
-        setLoading(false); // Finaliza o carregamento
+        setLoading(false);
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
         setError("Erro ao carregar dados. Tente novamente mais tarde.");
-        setLoading(false); // Finaliza o carregamento mesmo em caso de erro
+        setLoading(false);
       }
     };
 
@@ -129,18 +151,19 @@ function EditTestPlan() {
   }, [id]);
 
   // Função para formatar a data no formato DD/MM/YYYY
-  const formatDateToDDMMYYYY = (date: Date) => {
+  const formatDateToDDMMYYYY = (date) => {
+    if (!date) return "";
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   };
 
-  // Função para enviar os dados do formulário para o backend
+  // Função para enviar os dados do formulário
   const handleSubmit = (e) => {
     e.preventDefault();
-    const formattedStartDate = formatDateToDDMMYYYY(startDate); // Formato DD/MM/YYYY
-    const formattedDeliveryDate = formatDateToDDMMYYYY(deliveryDate); // Formato DD/MM/YYYY
+    const formattedStartDate = formatDateToDDMMYYYY(startDate);
+    const formattedDeliveryDate = formatDateToDDMMYYYY(deliveryDate);
     const testPlanData = {
       name: name || "Sem nome",
       created: isTaskCreated,
@@ -156,7 +179,7 @@ function EditTestPlan() {
       systemModuleId: selectedModulo || 1,
       testerId: selectedTester || 1,
       password: password || "Sem senha",
-      testeSuiteId: suites.map((suite) => suite.id), // IDs das suites associadas
+      testeSuiteId: suites.map((suite) => suite.id),
     };
 
     axios.put(`http://localhost:8081/testplans/${id}`, testPlanData)
@@ -172,20 +195,19 @@ function EditTestPlan() {
 
   // Função para criar uma nova suite
   const handleCreateSuite = async () => {
+    const nextCodeSuite = await fetchLastCodeSuite();
     const newSuite = {
       status: "EM_PROGRESSO",
-      data: formatDateToDDMMYYYY(new Date()), // Formato DD/MM/YYYY
-      testPlanId: id, // ID do plano de teste
-      codeSuite: nextCode, // Código incremental gerado pelo frontend
+      data: formatDateToDDMMYYYY(new Date()),
+      testPlanId: id,
+      codeSuite: nextCodeSuite,
     };
 
     try {
       const response = await axios.post('http://localhost:8081/test-suites', newSuite);
       console.log('Suite criada com sucesso:', response.data);
-      // Atualiza a lista de suites com a nova suite
       setSuites([...suites, response.data]);
-      // Incrementa o próximo código
-      setNextCode(nextCode + 1);
+      setNextCode(nextCodeSuite + 1);
     } catch (error) {
       console.error('Erro ao criar suite:', error);
     }
@@ -197,6 +219,10 @@ function EditTestPlan() {
 
   if (error) {
     return <div>{error}</div>;
+  }
+
+  if (!startDate || !deliveryDate) {
+    return <div>Datas não carregadas.</div>;
   }
 
   return (
@@ -222,7 +248,7 @@ function EditTestPlan() {
                   />
                 </Form.Group>
               </Col>
-              <Col md={4}>
+              <Col md={6}>
                 <Form.Group controlId="formData">
                   <Form.Label>Data</Form.Label>
                   <DatePicker
@@ -236,13 +262,13 @@ function EditTestPlan() {
             </Row>
             <Row>
               <Col md={4}>
-                <Form.Group controlId="formUserName">
+                <Form.Group controlId="formMatriz">
                   <Form.Label>Matriz</Form.Label>
                   <Form.Control
                     type="text"
                     value={matriz}
                     onChange={(e) => setMatriz(e.target.value)}
-                    placeholder="50000101 "
+                    placeholder="50000101"
                   />
                 </Form.Group>
               </Col>
@@ -279,15 +305,6 @@ function EditTestPlan() {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Título da UL"
                     required
-                    onInvalid={(e) => {
-                      const target = e.target as HTMLInputElement;
-                      target.setCustomValidity("Por favor, Informe a descrição da UL.");
-                    }}
-                    onInput={(e) => {
-                      const target = e.target as HTMLInputElement;
-                      target.setCustomValidity("");
-                    }}
-                    isInvalid={!name}
                   />
                 </Form.Group>
               </Col>
@@ -300,15 +317,6 @@ function EditTestPlan() {
                     onChange={(e) => setJira(e.target.value)}
                     placeholder="Número da UL-"
                     required
-                    onInvalid={(e) => {
-                      const target = e.target as HTMLInputElement;
-                      target.setCustomValidity("Por favor, Informe o número da UL.");
-                    }}
-                    onInput={(e) => {
-                      const target = e.target as HTMLInputElement;
-                      target.setCustomValidity("");
-                    }}
-                    isInvalid={!jira}
                   />
                 </Form.Group>
               </Col>
@@ -333,15 +341,6 @@ function EditTestPlan() {
                     value={selectedTester || ""}
                     onChange={(e) => setSelectedTester(e.target.value)}
                     required
-                    onInvalid={(e) => {
-                      const target = e.target as HTMLSelectElement;
-                      target.setCustomValidity("Por favor, selecione um tester antes de continuar.");
-                    }}
-                    onInput={(e) => {
-                      const target = e.target as HTMLSelectElement;
-                      target.setCustomValidity("");
-                    }}
-                    isInvalid={!selectedTester}
                   >
                     <option value="">Selecione um testador</option>
                     {testers.map((tester) => (
@@ -360,15 +359,6 @@ function EditTestPlan() {
                     value={selectedDeveloper || ""}
                     onChange={(e) => setSelectedDeveloper(e.target.value)}
                     required
-                    onInvalid={(e) => {
-                      const target = e.target as HTMLSelectElement;
-                      target.setCustomValidity("Por favor, selecione um desenvolvedor antes de continuar.");
-                    }}
-                    onInput={(e) => {
-                      const target = e.target as HTMLSelectElement;
-                      target.setCustomValidity("");
-                    }}
-                    isInvalid={!selectedDeveloper}
                   >
                     <option value="">Selecione um desenvolvedor</option>
                     {developers.map((dev) => (
@@ -387,15 +377,6 @@ function EditTestPlan() {
                     value={selectedModulo || ""}
                     onChange={(e) => setSelectedModulo(e.target.value)}
                     required
-                    onInvalid={(e) => {
-                      const target = e.target as HTMLSelectElement;
-                      target.setCustomValidity("Por favor, selecione um Módulo antes de continuar.");
-                    }}
-                    onInput={(e) => {
-                      const target = e.target as HTMLSelectElement;
-                      target.setCustomValidity("");
-                    }}
-                    isInvalid={!selectedModulo}
                   >
                     <option value="">Selecione um módulo</option>
                     {modules.map((modulo) => (
@@ -490,28 +471,26 @@ function EditTestPlan() {
               Nova Suite
             </Button>
             <ListGroup>
-      {suites.map((suite) => (
-        <ListGroup.Item key={suite.id}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div>
-              <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
-            </div>
-            <div>
-              {/* Ícone de Editar */}
-              <FaEdit
-                style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }}
-                onClick={() => navigate(`/plan/${id}/suite/${suite.id}`)} // Redireciona para /case/:id
-              />
-              {/* Ícone de Duplicar */}
-              <HiOutlineDuplicate
-                style={{ color: "#6c757d", cursor: "pointer" }}
-                onClick={() => alert(`Duplicar suite ${suite.codeSuite}`)}
-              />
-            </div>
-          </div>
-        </ListGroup.Item>
-      ))}
-    </ListGroup>
+              {suites.map((suite) => (
+                <ListGroup.Item key={suite.id}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div>
+                      <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+                    </div>
+                    <div>
+                      <FaEdit
+                        style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }}
+                        onClick={() => navigate(`/plan/${id}/suite/${suite.id}`)}
+                      />
+                      <HiOutlineDuplicate
+                        style={{ color: "#6c757d", cursor: "pointer" }}
+                        onClick={() => alert(`Duplicar suite ${suite.codeSuite}`)}
+                      />
+                    </div>
+                  </div>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
           </div>
         </Tab>
       </Tabs>

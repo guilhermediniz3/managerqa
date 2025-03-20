@@ -1,36 +1,34 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import Button from "react-bootstrap/Button";
-import ListGroup from "react-bootstrap/ListGroup";
-import Form from "react-bootstrap/Form";
+import { useParams, useNavigate } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
+import { ListGroup, Form, Button, Row, Col, Spinner, Toast, ToastContainer } from "react-bootstrap";
 
 // Interface para representar um TestCase
 interface TestCase {
-  id: number;
-  codeCase: number;
+  id?: number;
+  codeCase: number | null;
   scenario: string;
   expectedResult: string;
   obtainedResult: string;
-  videoEvidence: string; // Link do Vimeo (ex.: https://vimeo.com/manage/videos/983128257/a66f38d337)
-  status: "EM_PROGRESSO" | "CONCLUIDA" | "IMPEDIMENTO";
-  data: Date;
+  videoEvidence: string;
+  status: "EM_PROGRESSO" | "CONCLUIDA" | "RETORNO";
+  data: string; // A data é uma string no formato "dd/MM/yyyy"
+  testSuiteId: number;
+  testPlanId: number;
 }
 
 // Função para formatar a URL do Vimeo
 function formatVimeoUrl(url: string): string {
-  // Verifica se a URL corresponde ao formato https://vimeo.com/manage/videos/{id}/{token}
   const matchManage = url.match(/vimeo\.com\/manage\/videos\/(\d+)\/([^?]+)/);
   if (matchManage) {
     const videoId = matchManage[1];
     const token = matchManage[2];
     return `https://player.vimeo.com/video/${videoId}?h=${token}`;
   }
-  
-  // Verifica se a URL corresponde ao formato https://vimeo.com/{id}/{token}
+
   const matchRegular = url.match(/vimeo\.com\/(\d+)\/([^?]+)/);
   if (matchRegular) {
     const videoId = matchRegular[1];
@@ -38,69 +36,93 @@ function formatVimeoUrl(url: string): string {
     return `https://player.vimeo.com/video/${videoId}?h=${token}`;
   }
 
-  return url; // Retorna a URL original se não corresponder a nenhum dos formatos
+  return url;
+}
+
+// Função para converter uma string no formato "dd/MM/yyyy" para um objeto Date
+function parseDate(dateString: string): Date | null {
+  if (!dateString) return null;
+  const [day, month, year] = dateString.split("/");
+  return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
 }
 
 const Case = () => {
-  // Recupera os IDs da URL
   const { testPlanId, testSuiteId } = useParams<{ testPlanId: string; testSuiteId: string }>();
-
-  // Estado para armazenar a lista de casos
   const [testCases, setTestCases] = useState<TestCase[]>([]);
-  const [nextCode, setNextCode] = useState(1); // Próximo código incremental
+  const [nextTempId, setNextTempId] = useState(-1); // ID temporário para novos casos
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [selectedVideoUrl, setSelectedVideoUrl] = useState("");
+  const [loading, setLoading] = useState(false); // Estado de carregamento
+  const [showToast, setShowToast] = useState(false); // Estado para controlar o Toast
+  const [toastMessage, setToastMessage] = useState(""); // Mensagem do Toast
+  const navigate = useNavigate();
 
-  // Função para buscar os casos da API
+  // Busca o último codeCase do backend
+  const fetchLastCodeCase = async () => {
+    if (!testPlanId || !testSuiteId) return 0; // Retorna 0 se os IDs não estiverem definidos
+
+    try {
+      const response = await axios.get(
+        `http://localhost:8081/testcases/last-code?testPlanId=${testPlanId}&testSuiteId=${testSuiteId}`
+      );
+      return response.data || 0; // Retorna o último codeCase ou 0 se não houver
+    } catch (error) {
+      console.log("Nenhum codeCase encontrado. Iniciando do 1.");
+      return 0; // Retorna 0 se não houver codeCase no banco
+    }
+  };
+
+  // Busca os TestCases do backend
   const fetchTestCases = async () => {
+    if (!testPlanId || !testSuiteId) return; // Verifica se os IDs estão definidos
+
+    setLoading(true); // Ativa o estado de carregamento
     try {
       const response = await axios.get(
         `http://localhost:8081/testcases/plan/${testPlanId}/suite/${testSuiteId}`
       );
       const data = response.data;
 
-      // Mapear os dados da API para o formato esperado pelo componente
-      const mappedTestCases = data.map((item: any) => ({
-        id: item.id,
-        codeCase: item.codeCase || 0, // Use 0 como valor padrão se codeCase for null
-        scenario: item.scenario,
-        expectedResult: item.expectedResult,
-        obtainedResult: item.obtainedResult,
-        videoEvidence: item.videoEvidence,
-        status: item.status,
-        data: new Date(item.data),
+      const mappedTestCases = data.map((item: TestCase) => ({
+        ...item,
+        data: item.data, // Mantém a data como string
       }));
 
       setTestCases(mappedTestCases);
     } catch (error) {
       console.error("Erro ao buscar os casos:", error);
+      setToastMessage("Erro ao buscar os casos. Verifique o console para mais detalhes.");
+      setShowToast(true);
+    } finally {
+      setLoading(false); // Desativa o estado de carregamento
     }
   };
 
-  // Carregar os casos ao montar o componente
+  // Efeito para buscar os dados iniciais
   useEffect(() => {
-    if (testPlanId && testSuiteId) {
-      fetchTestCases();
-    }
-  }, [testPlanId, testSuiteId]);
+    fetchTestCases(); // Busca os casos ao carregar o componente
+  }, [testPlanId, testSuiteId]); // Executa quando testPlanId ou testSuiteId mudam
 
-  // Adicionar um novo TestCase
-  const handleCreateCase = () => {
+  // Adiciona um novo TestCase em modo de edição
+  const handleCreateCase = async () => {
     const newCase: TestCase = {
-      id: Date.now(), // ID único baseado no timestamp
-      codeCase: nextCode,
-      scenario: "",
+      id: nextTempId, // Usa um ID temporário
+      codeCase: null, // Inicialmente, o codeCase é null
+      scenario: "", // O campo de cenário começa vazio
       expectedResult: "",
       obtainedResult: "",
       videoEvidence: "",
       status: "EM_PROGRESSO",
-      data: new Date(),
+      data: new Date().toLocaleDateString("pt-BR"), // Formata a data como "dd/MM/yyyy"
+      testSuiteId: parseInt(testSuiteId),
+      testPlanId: parseInt(testPlanId),
     };
+
     setTestCases([...testCases, newCase]);
-    setNextCode(nextCode + 1); // Incrementa o próximo código
+    setNextTempId(nextTempId - 1); // Decrementa o ID temporário para o próximo caso
   };
 
-  // Atualizar um campo específico de um TestCase
+  // Atualiza um campo específico de um TestCase
   const handleUpdateCase = (id: number, field: string, value: any) => {
     setTestCases((prev) =>
       prev.map((testCase) =>
@@ -109,176 +131,306 @@ const Case = () => {
     );
   };
 
-  // Salvar um TestCase no backend
+  // Salva um TestCase (POST para novos casos, PUT para existentes)
   const handleSaveCase = async (id: number) => {
     try {
       const testCase = testCases.find((tc) => tc.id === id);
       if (!testCase) {
-        alert("TestCase não encontrado.");
+        setToastMessage("TestCase não encontrado.");
+        setShowToast(true);
         return;
       }
 
-      // Monta o DTO para enviar ao backend
+      // Busca o último codeCase antes de salvar
+      const lastCodeCase = await fetchLastCodeCase();
+      const newCodeCase = lastCodeCase + 1;
+
       const testCaseDTO = {
-        id: testCase.id,
-        codeCase: testCase.codeCase,
-        scenario: testCase.scenario,
-        expectedResult: testCase.expectedResult,
-        obtainedResult: testCase.obtainedResult,
-        videoEvidence: testCase.videoEvidence,
-        status: testCase.status,
-        data: testCase.data.toISOString(), // Converte a data para ISO
+        ...testCase,
+        codeCase: newCodeCase, // Define o novo codeCase
+        data: testCase.data, // Mantém a data como string
       };
 
-      // Envia a requisição PUT para o backend
-      const response = await axios.put(
-        `http://localhost:8081/testcases/${id}`,
-        testCaseDTO
-      );
+      let response;
 
-      console.log("TestCase atualizado com sucesso:", response.data);
+      if (testCase.id && testCase.id < 0) {
+        // Se o TestCase tem um ID temporário, é um novo caso (POST)
+        response = await axios.post(
+          `http://localhost:8081/testcases/plan/${testPlanId}/suite/${testSuiteId}`,
+          testCaseDTO
+        );
 
-      // Atualiza a lista de TestCases após salvar
-      fetchTestCases();
+        // Atualiza o estado com o novo TestCase retornado pelo backend
+        setTestCases((prev) =>
+          prev.map((tc) =>
+            tc.id === id ? { ...tc, id: response.data.id, codeCase: response.data.codeCase } : tc
+          )
+        );
+      } else {
+        // Se o TestCase tem um ID real, é uma atualização (PUT)
+        response = await axios.put(
+          `http://localhost:8081/testcases/${id}`,
+          testCaseDTO
+        );
 
-      alert("TestCase salvo com sucesso!");
+        // Atualiza o estado com o TestCase atualizado
+        setTestCases((prev) =>
+          prev.map((tc) => (tc.id === id ? response.data : tc))
+        );
+      }
+
+      setToastMessage("TestCase salvo com sucesso!");
+      setShowToast(true);
+
+      // Atualiza a lista de TestCases após o salvamento
+      await fetchTestCases();
     } catch (error) {
       console.error("Erro ao salvar TestCase:", error);
-      alert("Erro ao salvar TestCase. Verifique o console para mais detalhes.");
+      setToastMessage("Erro ao salvar TestCase. Verifique o console para mais detalhes.");
+      setShowToast(true);
     }
   };
 
-  // Abrir modal de vídeo
+  // Deleta um TestCase
+  const handleDeleteCase = async (id: number) => {
+    try {
+      if (id && id < 0) {
+        // Se o ID for temporário (negativo), apenas remove do estado local
+        setTestCases((prev) => prev.filter((tc) => tc.id !== id));
+        setToastMessage("TestCase removido com sucesso!");
+        setShowToast(true);
+      } else {
+        // Se o ID for real (positivo), faz a requisição DELETE ao backend
+        await axios.delete(`http://localhost:8081/testcases/${id}`);
+        setTestCases((prev) => prev.filter((tc) => tc.id !== id)); // Remove o caso do estado local
+        setToastMessage("TestCase deletado com sucesso!");
+        setShowToast(true);
+      }
+
+      // Atualiza a lista de TestCases após a exclusão
+      await fetchTestCases();
+    } catch (error) {
+      console.error("Erro ao deletar TestCase:", error);
+      setToastMessage("Erro ao deletar TestCase. Verifique o console para mais detalhes.");
+      setShowToast(true);
+    }
+  };
+
+  // Abre o modal de vídeo
   const handleVideoClick = (url: string) => {
     if (url) {
-      setSelectedVideoUrl(formatVimeoUrl(url)); // Usa a URL formatada
+      setSelectedVideoUrl(formatVimeoUrl(url));
       setShowVideoModal(true);
     } else {
-      alert("URL do vídeo não disponível.");
+      setToastMessage("URL do vídeo não disponível.");
+      setShowToast(true);
     }
   };
 
-  // Fechar modal de vídeo
+  // Fecha o modal de vídeo
   const handleCloseVideoModal = () => {
     setShowVideoModal(false);
     setSelectedVideoUrl("");
   };
 
+  // Mostra um spinner enquanto os dados estão sendo carregados
+  if (loading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", marginTop: "20px" }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Carregando...</span>
+        </Spinner>
+      </div>
+    );
+  }
+
   return (
     <div style={{ margin: "20px" }}>
-      {/* Botão para criar um novo TestCase */}
-      <Button onClick={handleCreateCase} variant="success" style={{ marginBottom: "20px" }}>
-        Novo Case
-      </Button>
+      {/* Toast para exibir mensagens */}
+      <ToastContainer position="top-end" className="p-3">
+        <Toast
+          onClose={() => setShowToast(false)}
+          show={showToast}
+          delay={3000}
+          autohide
+          bg="success"
+        >
+          <Toast.Header>
+            <strong className="me-auto">Sucesso</strong>
+          </Toast.Header>
+          <Toast.Body>{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
+
+      {/* Botão "Novo Case" alinhado à direita */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
+        <Button onClick={handleCreateCase} variant="success">
+          Novo Case
+        </Button>
+      </div>
+
+      {/* Botão "Voltar" */}
+      <div style={{ marginBottom: "20px" }}>
+        <Button
+          onClick={() => navigate("/planoTeste/editar/7")} // Redireciona para a URL especificada
+          variant="secondary"
+        >
+          Voltar
+        </Button>
+      </div>
 
       {/* Lista de TestCases */}
       <ListGroup>
         {testCases.map((testCase) => {
           return (
             <ListGroup.Item key={testCase.id}>
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                {/* Campos Editáveis */}
-                <Form.Group controlId={`formScenario-${testCase.id}`}>
-                  <Form.Label>Cenário</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={testCase.scenario}
-                    onChange={(e) => handleUpdateCase(testCase.id, "scenario", e.target.value)}
-                    placeholder="Digite o cenário"
-                  />
-                </Form.Group>
+              <Row>
+                {/* Coluna 1: Cenário, Resultado Esperado, Resultado Obtido */}
+                <Col md={6}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                    <Form.Group controlId={`formScenario-${testCase.id}`}>
+                      <Form.Label>
+                        {testCase.codeCase ? `Cenário ${testCase.codeCase}` : "Cenário"}
+                      </Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={1}
+                        value={testCase.scenario}
+                        onChange={(e) => handleUpdateCase(testCase.id!, "scenario", e.target.value)}
+                        placeholder="Digite o cenário"
+                        style={{ width: '100%' }}
+                      />
+                    </Form.Group>
 
-                <Form.Group controlId={`formExpectedResult-${testCase.id}`}>
-                  <Form.Label>Resultado Esperado</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={testCase.expectedResult}
-                    onChange={(e) => handleUpdateCase(testCase.id, "expectedResult", e.target.value)}
-                    placeholder="Digite o resultado esperado"
-                  />
-                </Form.Group>
+                    <Form.Group controlId={`formExpectedResult-${testCase.id}`}>
+                      <Form.Label>Resultado Esperado</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={1}
+                        value={testCase.expectedResult}
+                        onChange={(e) => handleUpdateCase(testCase.id!, "expectedResult", e.target.value)}
+                        placeholder="Digite o resultado esperado"
+                        style={{ width: '100%' }}
+                      />
+                    </Form.Group>
 
-                <Form.Group controlId={`formObtainedResult-${testCase.id}`}>
-                  <Form.Label>Resultado Obtido</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={testCase.obtainedResult}
-                    onChange={(e) => handleUpdateCase(testCase.id, "obtainedResult", e.target.value)}
-                    placeholder="Digite o resultado obtido"
-                  />
-                </Form.Group>
+                    <Form.Group controlId={`formObtainedResult-${testCase.id}`}>
+                      <Form.Label>Resultado Obtido</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={1}
+                        value={testCase.obtainedResult}
+                        onChange={(e) => handleUpdateCase(testCase.id!, "obtainedResult", e.target.value)}
+                        placeholder="Digite o resultado obtido"
+                        style={{ width: '100%' }}
+                      />
+                    </Form.Group>
+                  </div>
+                </Col>
 
-                <Form.Group controlId={`formVideoEvidence-${testCase.id}`}>
-                  <Form.Label>Vídeo (URL)</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={testCase.videoEvidence}
-                    onChange={(e) => handleUpdateCase(testCase.id, "videoEvidence", e.target.value)}
-                    placeholder="Insira o link do vídeo do Vimeo"
-                  />
-                </Form.Group>
+                {/* Coluna 2: Vídeo, Status, Data, Botão Salvar e Deletar */}
+                <Col md={4}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                    <Form.Group controlId={`formVideoEvidence-${testCase.id}`}>
+                      <Form.Label>Vídeo (URL)</Form.Label>
+                      <div style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: "1px" }}>
+                        <Form.Control
+                          type="text"
+                          value={testCase.videoEvidence}
+                          onChange={(e) => handleUpdateCase(testCase.id!, "videoEvidence", e.target.value)}
+                          placeholder="Insira o link do vídeo do Vimeo"
+                          style={{ width: '70%', marginTop: "-45px" }}
+                        />
 
-                <Form.Group controlId={`formStatus-${testCase.id}`}>
-                  <Form.Label>Status</Form.Label>
-                  <Form.Select
-                    value={testCase.status}
-                    onChange={(e) => handleUpdateCase(testCase.id, "status", e.target.value)}
-                  >
-                    <option value="EM_PROGRESSO">Em Progresso</option>
-                    <option value="CONCLUIDA">Concluída</option>
-                    <option value="IMPEDIMENTO">Impedimento</option>
-                  </Form.Select>
-                </Form.Group>
+                        <div
+                          style={{
+                            width: "90px",
+                            height: "90px",
+                            borderRadius: "8px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            overflow: "hidden",
+                            position: "relative",
+                          }}
+                          onClick={() => handleVideoClick(testCase.videoEvidence)}
+                        >
+                          {testCase.videoEvidence ? (
+                            <img
+                              src={`https://vumbnail.com/${testCase.videoEvidence.split("/").pop()}.jpg`}
+                              alt="Thumbnail"
+                              style={{
+                                width: "60px",
+                                height: "44px",
+                                position: "absolute",
+                                top: "50%",
+                                left: "40%",
+                                transform: "translate(-50%, -100%)",
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <span>Sem vídeo</span>
+                          )}
+                        </div>
+                      </div>
+                    </Form.Group>
 
-                <Form.Group controlId={`formData-${testCase.id}`}>
-                  <Form.Label>Data</Form.Label>
-                  <DatePicker
-                    selected={testCase.data}
-                    onChange={(date) => handleUpdateCase(testCase.id, "data", date || new Date())}
-                    dateFormat="dd/MM/yyyy"
-                    className="form-control"
-                  />
-                </Form.Group>
+                    <div style={{ display: "flex", flexDirection: "row", gap: "5px" }}>
+                      <Form.Group controlId={`formStatus-${testCase.id}`} style={{ flex: 1 }}>
+                        <Form.Label>Status</Form.Label>
+                        <Form.Select
+                          value={testCase.status}
+                          onChange={(e) => handleUpdateCase(testCase.id!, "status", e.target.value)}
+                          style={{ width: '75%', height: "46px" }}
+                        >
+                          <option value="EM_PROGRESSO">Em Progresso</option>
+                          <option value="CONCLUIDA">Concluída</option>
+                          <option value="RETORNO">Retorno</option>
+                        </Form.Select>
+                      </Form.Group>
 
-                {/* Botão Salvar */}
-                <Button
-                  variant="primary"
-                  onClick={() => handleSaveCase(testCase.id)}
-                  style={{ width: "100%" }}
-                >
-                  Salvar
-                </Button>
+                      <Form.Group controlId={`formData-${testCase.id}`} style={{ flex: 1 }}>
+                        <Form.Label>Data</Form.Label>
+                        <div className="custom-datepicker">
+                          <DatePicker
+                            selected={parseDate(testCase.data)} // Converte a string para Date
+                            onChange={(date) => {
+                              if (date) {
+                                const day = String(date.getUTCDate()).padStart(2, "0");
+                                const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Mês é base 0
+                                const year = date.getUTCFullYear();
+                                const formattedDate = `${day}/${month}/${year}`; // Formata a data para "dd/MM/yyyy"
+                                handleUpdateCase(testCase.id!, "data", formattedDate); // Atualiza o estado com a nova data
+                              }
+                            }}
+                            dateFormat="dd/MM/yyyy"
+                            className="form-control"
+                          />
+                        </div>
+                      </Form.Group>
+                    </div>
 
-                {/* Miniatura do Vídeo */}
-                <div
-                  style={{
-                    width: "100px",
-                    height: "100px",
-                    border: "1px solid #ccc",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    overflow: "hidden",
-                  }}
-                  onClick={() => handleVideoClick(testCase.videoEvidence)}
-                >
-                  {testCase.videoEvidence ? (
-                    <img
-                      src={`https://vumbnail.com/${testCase.videoEvidence.split("/").pop()}.jpg`}
-                      alt="Thumbnail"
-                      style={{ width: "100%", height: "auto" }}
-                      onError={(e) => {
-                        // Caso a miniatura não carregue, exibe "Sem vídeo"
-                        e.currentTarget.style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <span>Sem vídeo</span>
-                  )}
-                </div>
-              </div>
+                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeleteCase(testCase.id!)}
+                      >
+                        Deletar
+                      </Button>
+                      <Button
+                        variant="primary"
+                        onClick={() => handleSaveCase(testCase.id!)}
+                      >
+                        Salvar
+                      </Button>
+                    </div>
+                  </div>
+                </Col>
+              </Row>
             </ListGroup.Item>
           );
         })}
