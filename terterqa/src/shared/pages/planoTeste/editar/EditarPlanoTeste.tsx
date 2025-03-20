@@ -1,24 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
+import { Tab, Tabs, Form, Button, Row, Col, Container, ListGroup, OverlayTrigger, Tooltip, ProgressBar } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Container from 'react-bootstrap/Container';
-import ListGroup from 'react-bootstrap/ListGroup';
 import axios from 'axios';
+import { FaEdit } from 'react-icons/fa'; // Ícone do FontAwesome
+import { HiOutlineDuplicate } from 'react-icons/hi'; // Ícone do Heroicons
+import { FiAlertCircle } from 'react-icons/fi'; // Ícone do Feather Icons
+import { useNavigate, useParams } from 'react-router-dom';
 import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
 import NavVertical from "../../../components/navs/vertical/NavVertical";
-import { useNavigate, useParams } from 'react-router-dom';
-import { FaEdit } from 'react-icons/fa';
-import { HiOutlineDuplicate } from 'react-icons/hi';
 import './styless.css';
 
+// Componente StackedProgressBar
+function StackedProgressBar({ testCases }) {
+  const totalCases = testCases.length;
+  const completedCases = testCases.filter(caseItem => caseItem.status === 'CONCLUIDA').length;
+  const inProgressCases = testCases.filter(caseItem => caseItem.status === 'EM_PROGRESSO').length;
+  const returnCases = testCases.filter(caseItem => caseItem.status === 'RETORNO').length;
+
+  const completedPercentage = totalCases > 0 ? (completedCases / totalCases) * 100 : 0;
+  const inProgressPercentage = totalCases > 0 ? (inProgressCases / totalCases) * 100 : 0;
+  const returnPercentage = totalCases > 0 ? (returnCases / totalCases) * 100 : 0;
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <ProgressBar style={{ height: '10px', flex: 1 }}>
+        <ProgressBar variant="success" now={completedPercentage} key={1} label={`${completedPercentage.toFixed(1)}%`} />
+        <ProgressBar variant="info" now={inProgressPercentage} key={2} label={`${inProgressPercentage.toFixed(1)}%`} />
+        <ProgressBar variant="danger" now={returnPercentage} key={3} label={`${returnPercentage.toFixed(1)}%`} />
+      </ProgressBar>
+      <div style={{ fontSize: '0.9em', whiteSpace: 'nowrap' }}>Total: {totalCases}</div>
+    </div>
+  );
+}
+
 function EditTestPlan() {
-  const { id } = useParams(); // Obtém o ID do plano de teste da URL
+  const { id } = useParams();
   const [startDate, setStartDate] = useState(null);
   const [deliveryDate, setDeliveryDate] = useState(null);
   const [selectedStatus, setSelectedStatus] = useState("EM_PROGRESSO");
@@ -31,10 +48,11 @@ function EditTestPlan() {
   const [jira, setJira] = useState("");
   const [callNumber, setCallNumber] = useState("");
   const [observations, setObservations] = useState("");
-  const [suites, setSuites] = useState([]); // Lista de suites
-  const [nextCode, setNextCode] = useState(1); // Estado para o próximo código incremental
-  const [loading, setLoading] = useState(true); // Estado para indicar carregamento
-  const [error, setError] = useState(null); // Estado para tratar erros
+  const [suites, setSuites] = useState([]);
+  const [testCases, setTestCases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [createdBy, setCreatedBy] = useState(null);
 
   interface Modulo {
     id: number;
@@ -63,6 +81,17 @@ function EditTestPlan() {
 
   const navigate = useNavigate();
 
+  // Função para buscar quem criou o TestPlan
+  const fetchCreatedBy = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8081/testplans/${id}/created-by`);
+      setCreatedBy(response.data.created_by);
+    } catch (err) {
+      console.error("Erro ao buscar quem criou o TestPlan:", err);
+      setCreatedBy(null);
+    }
+  };
+
   // Função para converter datas no formato DD/MM/YYYY para Date
   const parseDate = (dateString) => {
     if (!dateString) return null;
@@ -73,18 +102,87 @@ function EditTestPlan() {
   // Função para buscar o último codeSuite
   const fetchLastCodeSuite = async () => {
     try {
-      const lastCodeSuiteResponse = await axios.get(`http://localhost:8081/testplans/${id}/last-code-suite`);
-      const { codeSuite, testPlanId } = lastCodeSuiteResponse.data;
+      const response = await axios.get(`http://localhost:8081/testplans/${id}/last-code-suite`);
+      const { codeSuite, testPlanId } = response.data;
 
       if (testPlanId === parseInt(id) && codeSuite !== null && codeSuite !== 0) {
-        return codeSuite + 1;
+        return codeSuite + 1; // Incrementa o último codeSuite
       } else {
         console.warn("O codeSuite retornado é inválido. Usando valor padrão para nextCode.");
-        return 1;
+        return 1; // Valor padrão
       }
     } catch (error) {
       console.warn("Erro ao buscar lastCodeSuite. Usando valor padrão para nextCode:", error);
-      return 1;
+      return 1; // Valor padrão em caso de erro
+    }
+  };
+
+  // Função para buscar casos de teste de uma suite
+  const fetchTestCases = async (suiteId) => {
+    try {
+      const response = await axios.get(`http://localhost:8081/testcases/plan/${id}/suite/${suiteId}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar casos de teste:", error);
+      return [];
+    }
+  };
+
+  // Função para clonar uma suite
+  const handleCloneSuite = async (suiteId) => {
+    try {
+      const nextCodeSuite = await fetchLastCodeSuite(); // Obtém o próximo codeSuite
+      const response = await axios.post(
+        `http://localhost:8081/test-suites/clone/${suiteId}`,
+        { 
+          codeSuite: nextCodeSuite,
+          status: "EM_PROGRESSO", // Envia o status como string correspondente ao enum
+          data: formatDateToDDMMYYYY(new Date()),
+          testPlanId: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Envia o token de autenticação, se necessário
+          },
+        }
+      );
+      console.log('Suite clonada com sucesso:', response.data);
+
+      // Atualiza o estado das suites com a nova suite clonada
+      setSuites((prevSuites) => [...prevSuites, response.data]);
+
+      // Se a clonagem também clonar os casos de teste, atualize o estado testCases
+      const clonedTestCases = await fetchTestCases(response.data.id); // Busca os casos de teste da nova suite
+      setTestCases((prevTestCases) => [...prevTestCases, ...clonedTestCases]);
+    } catch (error) {
+      console.error('Erro ao clonar suite:', error);
+      alert('Erro ao clonar suite. Verifique o console para mais detalhes.');
+    }
+  };
+
+  // Função para criar uma nova suite
+  const handleCreateSuite = async () => {
+    const nextCodeSuite = await fetchLastCodeSuite(); // Obtém o próximo codeSuite
+    const newSuite = {
+      status: "EM_PROGRESSO",
+      data: formatDateToDDMMYYYY(new Date()),
+      testPlanId: id,
+      codeSuite: nextCodeSuite, // Usa o próximo codeSuite
+    };
+
+    try {
+      const response = await axios.post('http://localhost:8081/test-suites', newSuite);
+      console.log('Suite criada com sucesso:', response.data);
+
+      // Atualiza o estado das suites com a nova suite criada
+      setSuites((prevSuites) => [...prevSuites, response.data]);
+
+      // Se a criação também gerar casos de teste, atualize o estado testCases
+      const newTestCases = await fetchTestCases(response.data.id); // Busca os casos de teste da nova suite
+      setTestCases((prevTestCases) => [...prevTestCases, ...newTestCases]);
+    } catch (error) {
+      console.error('Erro ao criar suite:', error);
+      alert('Erro ao criar suite. Verifique o console para mais detalhes.');
     }
   };
 
@@ -126,6 +224,14 @@ function EditTestPlan() {
         console.log('Suites carregadas:', suitesResponse.data);
         setSuites(suitesResponse.data);
 
+        // Carrega os casos de teste para todas as suites
+        const allTestCases = [];
+        for (const suite of suitesResponse.data) {
+          const cases = await fetchTestCases(suite.id);
+          allTestCases.push(...cases);
+        }
+        setTestCases(allTestCases);
+
         // Carrega módulos, testers e desenvolvedores
         const modulesResponse = await axios.get<Modulo[]>("http://localhost:8081/modules");
         const activeModulo = modulesResponse.data.filter((modulo) => modulo.active);
@@ -138,6 +244,9 @@ function EditTestPlan() {
         const developersResponse = await axios.get<Developer[]>('http://localhost:8081/developers');
         const activeDevelopers = developersResponse.data.filter((dev) => dev.active);
         setDevelopers(activeDevelopers);
+
+        // Busca quem criou o TestPlan
+        await fetchCreatedBy();
 
         setLoading(false);
       } catch (error) {
@@ -191,26 +300,6 @@ function EditTestPlan() {
         console.error("Erro ao atualizar Plano de Teste:", error);
         alert("Erro ao atualizar Plano de Teste. Verifique o console para mais detalhes.");
       });
-  };
-
-  // Função para criar uma nova suite
-  const handleCreateSuite = async () => {
-    const nextCodeSuite = await fetchLastCodeSuite();
-    const newSuite = {
-      status: "EM_PROGRESSO",
-      data: formatDateToDDMMYYYY(new Date()),
-      testPlanId: id,
-      codeSuite: nextCodeSuite,
-    };
-
-    try {
-      const response = await axios.post('http://localhost:8081/test-suites', newSuite);
-      console.log('Suite criada com sucesso:', response.data);
-      setSuites([...suites, response.data]);
-      setNextCode(nextCodeSuite + 1);
-    } catch (error) {
-      console.error('Erro ao criar suite:', error);
-    }
   };
 
   if (loading) {
@@ -420,13 +509,28 @@ function EditTestPlan() {
               </Col>
               <Col md={4}>
                 <Form.Group controlId="formTaskSwitch">
-                  <Form.Label>Criada</Form.Label>
+                  <Form.Label>
+                    Criada{' '}
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={
+                        <Tooltip id="tooltip-criada">
+                          {createdBy ? `Criado por ${createdBy}` : "N/A"}
+                        </Tooltip>
+                      }
+                    >
+                      <span>
+                        <FiAlertCircle style={{ cursor: 'pointer', marginLeft: '5px' }} />
+                      </span>
+                    </OverlayTrigger>
+                  </Form.Label>
                   <Form.Check
                     type="switch"
                     id="custom-switch"
                     label=""
                     checked={isTaskCreated}
                     onChange={(e) => setIsTaskCreated(e.target.checked)}
+                    disabled
                   />
                 </Form.Group>
               </Col>
@@ -471,25 +575,29 @@ function EditTestPlan() {
               Nova Suite
             </Button>
             <ListGroup>
-              {suites.map((suite) => (
-                <ListGroup.Item key={suite.id}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div>
-                      <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+              {suites.map((suite) => {
+                const suiteTestCases = testCases.filter(caseItem => caseItem.testSuiteId === suite.id);
+                return (
+                  <ListGroup.Item key={suite.id}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div>
+                        <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+                      </div>
+                      <div>
+                        <FaEdit
+                          style={{ color: "#0d6efd", cursor: "pointer", marginRight: '15px' }}
+                          onClick={() => navigate(`/plan/${id}/suite/${suite.id}`)}
+                        />
+                        <HiOutlineDuplicate
+                          style={{ color: "#6c757d", cursor: "pointer" }}
+                          onClick={() => handleCloneSuite(suite.id)}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <FaEdit
-                        style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }}
-                        onClick={() => navigate(`/plan/${id}/suite/${suite.id}`)}
-                      />
-                      <HiOutlineDuplicate
-                        style={{ color: "#6c757d", cursor: "pointer" }}
-                        onClick={() => alert(`Duplicar suite ${suite.codeSuite}`)}
-                      />
-                    </div>
-                  </div>
-                </ListGroup.Item>
-              ))}
+                    <StackedProgressBar testCases={suiteTestCases} />
+                  </ListGroup.Item>
+                );
+              })}
             </ListGroup>
           </div>
         </Tab>

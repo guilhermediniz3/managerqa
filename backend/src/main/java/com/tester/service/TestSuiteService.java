@@ -13,6 +13,7 @@ import com.tester.dto.TestSuiteDTO;
 import com.tester.entity.TestCaseEntity;
 import com.tester.entity.TestPlan;
 import com.tester.entity.TestSuite;
+import com.tester.enuns.Status;
 import com.tester.repository.TestCaseRepository;
 import com.tester.repository.TestPlanRepository;
 import com.tester.repository.TestSuiteRepository;
@@ -103,51 +104,47 @@ public class TestSuiteService {
 		}
 		testSuiteRepository.deleteById(id);
 	}
+	public TestSuiteDTO clone(Long id, TestSuiteDTO dto) {
+	    // Buscar o TestSuite original
+	    TestSuite originalTestSuite = testSuiteRepository.findById(id)
+	            .orElseThrow(() -> new RuntimeException("TestSuite não encontrado com ID: " + id));
 
-	public TestSuiteDTO clone(Long id) {
-		// Buscar o TestSuite original
-		TestSuite originalTestSuite = testSuiteRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("TestSuite não encontrado com ID: " + id));
+	    // Criar um novo TestSuite
+	    TestSuite clonedTestSuite = new TestSuite();
+	    clonedTestSuite.setStatus(dto.getStatus()); // Usa o status diretamente do DTO
+	    clonedTestSuite.setData(dto.getData()); // Usa a data diretamente do DTO
+	    clonedTestSuite.setCodeSuite(dto.getCodeSuite()); // Usa o codeSuite diretamente do DTO
+	    clonedTestSuite.setTestPlan(originalTestSuite.getTestPlan()); // Mantém o mesmo testPlan
 
-		// Criar um novo TestSuite
-		TestSuite clonedTestSuite = new TestSuite();
-		clonedTestSuite.setStatus(originalTestSuite.getStatus());
-		clonedTestSuite.setData(originalTestSuite.getData());
-		clonedTestSuite.setCodeSuite(originalTestSuite.getCodeSuite());
-		clonedTestSuite.setCodeSuite(clonedTestSuite.getCodeSuite());
-		// Buscar o TestPlan associado ao TestSuite original e associá-lo ao novo
-		// TestSuite
-		TestPlan originalTestPlan = originalTestSuite.getTestPlan();
-		clonedTestSuite.setTestPlan(originalTestPlan);
+	    // Clonar os TestCases associados ao TestSuite original
+	    Set<TestCaseEntity> clonedTestCases = new HashSet<>();
+	    for (TestCaseEntity testCase : originalTestSuite.getCases()) {
+	        // Criar um novo TestCase
+	        TestCaseEntity clonedTestCase = new TestCaseEntity();
+	        clonedTestCase.setScenario(testCase.getScenario());
+	        clonedTestCase.setExpectedResult(testCase.getExpectedResult());
+	        clonedTestCase.setObtainedResult(testCase.getObtainedResult());
+	       // clonedTestCase.setVideoEvidence(testCase.getVideoEvidence());
+	        clonedTestCase.setStatus(Status.EM_PROGRESSO);
+	        clonedTestCase.setData(testCase.getData());
 
-		// Clonar os TestCases associados ao TestSuite original
-		Set<TestCaseEntity> clonedTestCases = new HashSet<>();
-		for (TestCaseEntity testCase : originalTestSuite.getCases()) {
-			// Criar um novo TestCase
-			TestCaseEntity clonedTestCase = new TestCaseEntity();
-			clonedTestCase.setScenario(testCase.getScenario());
-			clonedTestCase.setExpectedResult(testCase.getExpectedResult());
-			clonedTestCase.setObtainedResult(testCase.getObtainedResult());
-			clonedTestCase.setVideoEvidence(testCase.getVideoEvidence());
-			clonedTestCase.setStatus(testCase.getStatus());
-			clonedTestCase.setData(testCase.getData());
+	        // Adicionar o TestCase à coleção de TestCases clonados
+	        clonedTestCases.add(clonedTestCase);
+	    }
 
-			// Adicionar o TestCase à coleção de TestCases clonados
-			clonedTestCases.add(clonedTestCase);
-		}
+	    // Salvar o novo TestSuite
+	    TestSuite finalClonedTestSuite = testSuiteRepository.save(clonedTestSuite);
 
-		// Salvar o novo TestSuite
-		TestSuite finalClonedTestSuite = testSuiteRepository.save(clonedTestSuite);
+	    // Associar o TestSuite recém-criado aos TestCases clonados
+	    clonedTestCases.forEach(testCase -> testCase.setTestSuite(finalClonedTestSuite));
 
-		// Associar o TestSuite recém-criado aos TestCases clonados
-		clonedTestCases.forEach(testCase -> testCase.setTestSuite(finalClonedTestSuite));
+	    // Salvar todos os TestCases clonados
+	    testCaseRepository.saveAll(clonedTestCases);
 
-		// Salvar todos os TestCases clonados
-		testCaseRepository.saveAll(clonedTestCases);
-
-		// Retornar o DTO do TestSuite clonado
-		return new TestSuiteDTO(finalClonedTestSuite);
+	    // Retornar o DTO do TestSuite clonado
+	    return new TestSuiteDTO(finalClonedTestSuite);
 	}
+
 	
 	  public List<TestSuiteDTO> getTestSuitesByTestPlanId(Long testPlanId) {
 	        return testSuiteRepository.findAllTestSuitesByTestPlanId(testPlanId);

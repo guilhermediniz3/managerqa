@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tester.dto.CreatedByDTO;
 import com.tester.dto.LastCodeSuiteDTO;
 import com.tester.dto.TestPlanDTO;
 import com.tester.dto.TestPlanListagemDTO;
@@ -107,5 +108,12 @@ public class TestPlanController {
 	        LastCodeSuiteDTO lastCodeSuiteDTO = testPlanService.getLastCodeSuiteByTestPlanId(testPlanId);
 	        return ResponseEntity.ok(lastCodeSuiteDTO);
 	    }
-		
+	  
+	  
+	    @GetMapping("/{testPlanId}/created-by")
+	    public CreatedByDTO getCreatedByByTestPlanId(@PathVariable Long testPlanId) {
+	        return testPlanService.getCreatedByByTestPlanId(testPlanId);
+	    }
+	  
+ 
 }
