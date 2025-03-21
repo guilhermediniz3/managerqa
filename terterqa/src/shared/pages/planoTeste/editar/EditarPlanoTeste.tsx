@@ -10,6 +10,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
 import NavVertical from "../../../components/navs/vertical/NavVertical";
 import './styless.css';
+import ExportSuites from '../../../components/ExportSuite/ExportSuites ';
 
 // Componente StackedProgressBar
 function StackedProgressBar({ testCases }) {
@@ -314,6 +315,8 @@ function EditTestPlan() {
     return <div>Datas não carregadas.</div>;
   }
 
+
+
   return (
     <Container style={{ marginTop: '20px', marginBottom: '20px' }}>
       <NavHorizontal />
@@ -580,9 +583,12 @@ function EditTestPlan() {
                 return (
                   <ListGroup.Item key={suite.id}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <ExportSuites testSuiteId={suite.id} /> 
                       <div>
                         <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+                    
                       </div>
+                 
                       <div>
                         <FaEdit
                           style={{ color: "#0d6efd", cursor: "pointer", marginRight: '15px' }}
@@ -591,8 +597,11 @@ function EditTestPlan() {
                         <HiOutlineDuplicate
                           style={{ color: "#6c757d", cursor: "pointer" }}
                           onClick={() => handleCloneSuite(suite.id)}
+                          
                         />
+                          
                       </div>
+               
                     </div>
                     <StackedProgressBar testCases={suiteTestCases} />
                   </ListGroup.Item>

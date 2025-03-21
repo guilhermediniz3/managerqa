@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @Configuration
 @EnableWebSecurity
@@ -93,9 +94,11 @@ public class SecurityConfig {
 	                        .requestMatchers(HttpMethod.GET, "/testplan/*/created-by").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/relatorios/excel").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/relatorios/pdf").permitAll() 
-	                        
-	                
-
+	                        .requestMatchers(HttpMethod.GET, "/relatorio-jira").permitAll()
+	                        .requestMatchers(HttpMethod.GET, "/relatorio-jira/pdf").permitAll()
+		                    
+	                   
+	               
                         
                         .anyRequest().authenticated()
                 )

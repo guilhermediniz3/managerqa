@@ -10,6 +10,7 @@ import { FiAlertCircle } from "react-icons/fi";
 import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
 import NavVertical from "../../../components/navs/vertical/NavVertical";
 import './styless.css';
+import ExportSuites from '../../../components/ExportSuite/ExportSuites ';  
 
 // Definindo a interface para Suite
 interface TestSuite {
@@ -579,6 +580,7 @@ function CreateTestPlan() {
                 return (
                   <ListGroup.Item key={suite.id}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <ExportSuites testSuiteId={suite.id} /> 
                       <div>
                         <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
                       </div>
