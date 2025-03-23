@@ -96,8 +96,9 @@ public class SecurityConfig {
 	                        .requestMatchers(HttpMethod.GET, "/relatorios/pdf").permitAll() 
 	                        .requestMatchers(HttpMethod.GET, "/relatorio-jira").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/relatorio-jira/pdf").permitAll()
+	                        .requestMatchers(HttpMethod.GET, "/search**").permitAll()
 		                    
-	                   
+	                 
 	               
                         
                         .anyRequest().authenticated()

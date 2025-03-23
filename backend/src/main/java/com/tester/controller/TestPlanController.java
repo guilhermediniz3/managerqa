@@ -1,6 +1,5 @@
 package com.tester.controller;
 
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -25,6 +24,7 @@ import com.tester.dto.CreatedByDTO;
 import com.tester.dto.LastCodeSuiteDTO;
 import com.tester.dto.TestPlanDTO;
 import com.tester.dto.TestPlanListagemDTO;
+
 import com.tester.service.TestPlanService;
 
 import jakarta.validation.Valid;
@@ -43,7 +43,8 @@ public class TestPlanController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<TestPlanDTO> updateTestPlan(@PathVariable Long id, @Valid  @RequestBody TestPlanDTO testPlanDTO) {
+	public ResponseEntity<TestPlanDTO> updateTestPlan(@PathVariable Long id,
+			@Valid @RequestBody TestPlanDTO testPlanDTO) {
 		TestPlanDTO updatedTestPlan = testPlanService.updateTestPlan(id, testPlanDTO);
 		return ResponseEntity.ok(updatedTestPlan);
 	}
@@ -65,55 +66,50 @@ public class TestPlanController {
 		TestPlanDTO testPlan = testPlanService.getTestPlanById(id);
 		return ResponseEntity.ok(testPlan);
 	}
-	
-	 @GetMapping("/all")
-	    public ResponseEntity<Page<TestPlanListagemDTO>> getAllTestPlansDetails(
-	            @RequestParam(required = false) String name,
-	            @RequestParam(required = false) String observation,
-	            @RequestParam(required = false) String status,
-	            @RequestParam(required = false) String taskStatus,
-	            @RequestParam(required = false) String jira,
-	            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
-	            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
-	            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryDataInicio,
-	            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryDataFim,
-	            @RequestParam(required = false) String matriz,
-	            @RequestParam(required = false) String userName,
-	            @RequestParam(required = false) String callNumber,
-	            @RequestParam(required = false) String developerName,
-	            @RequestParam(required = false) String systemModuleName,
-	            @RequestParam(required = false) String testerQAName,
-	            @PageableDefault(size = 50, page = 0) Pageable pageable) {
 
-	        Page<TestPlanListagemDTO> testPlans = testPlanService.findAllTestPlans(
-	                name, observation, status, taskStatus, jira,
-	                dataInicio, dataFim, deliveryDataInicio, deliveryDataFim,
-	                matriz, userName, callNumber, developerName, systemModuleName, testerQAName,
-	                pageable
-	        );
+	@GetMapping("/all")
+	public ResponseEntity<Page<TestPlanListagemDTO>> getAllTestPlansDetails(@RequestParam(required = false) String name,
+			@RequestParam(required = false) String observation, @RequestParam(required = false) String status,
+			@RequestParam(required = false) String taskStatus, @RequestParam(required = false) String jira,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryDataInicio,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate deliveryDataFim,
+			@RequestParam(required = false) String matriz, @RequestParam(required = false) String userName,
+			@RequestParam(required = false) String callNumber, @RequestParam(required = false) String developerName,
+			@RequestParam(required = false) String systemModuleName,
+			@RequestParam(required = false) String testerQAName,
+			@PageableDefault(size = 50, page = 0) Pageable pageable) {
 
-	        return ResponseEntity.ok(testPlans);
-	    }
-	 
-	 
-	  @PatchMapping("/{id}")
-	    public ResponseEntity<TestPlanDTO> patchTestPlan(@PathVariable Long id, @RequestBody TestPlanDTO testPlanDTO) {
-	        TestPlanDTO updatedTestPlan = testPlanService.patchTestPlan(id, testPlanDTO);
-	        return ResponseEntity.ok(updatedTestPlan);
-	    }
-	  
-	  
-	  @GetMapping("/{testPlanId}/last-code-suite")
-	    public ResponseEntity<LastCodeSuiteDTO> getLastCodeSuiteByTestPlanId(@PathVariable Long testPlanId) {
-	        LastCodeSuiteDTO lastCodeSuiteDTO = testPlanService.getLastCodeSuiteByTestPlanId(testPlanId);
-	        return ResponseEntity.ok(lastCodeSuiteDTO);
-	    }
-	  
-	  
-	    @GetMapping("/{testPlanId}/created-by")
-	    public CreatedByDTO getCreatedByByTestPlanId(@PathVariable Long testPlanId) {
-	        return testPlanService.getCreatedByByTestPlanId(testPlanId);
-	    }
-	  
- 
+		Page<TestPlanListagemDTO> testPlans = testPlanService.findAllTestPlans(name, observation, status, taskStatus,
+				jira, dataInicio, dataFim, deliveryDataInicio, deliveryDataFim, matriz, userName, callNumber,
+				developerName, systemModuleName, testerQAName, pageable);
+
+		return ResponseEntity.ok(testPlans);
+	}
+
+	@PatchMapping("/{id}")
+	public ResponseEntity<TestPlanDTO> patchTestPlan(@PathVariable Long id, @RequestBody TestPlanDTO testPlanDTO) {
+		TestPlanDTO updatedTestPlan = testPlanService.patchTestPlan(id, testPlanDTO);
+		return ResponseEntity.ok(updatedTestPlan);
+	}
+
+	@GetMapping("/{testPlanId}/last-code-suite")
+	public ResponseEntity<LastCodeSuiteDTO> getLastCodeSuiteByTestPlanId(@PathVariable Long testPlanId) {
+		LastCodeSuiteDTO lastCodeSuiteDTO = testPlanService.getLastCodeSuiteByTestPlanId(testPlanId);
+		return ResponseEntity.ok(lastCodeSuiteDTO);
+	}
+
+	@GetMapping("/{testPlanId}/created-by")
+	public CreatedByDTO getCreatedByByTestPlanId(@PathVariable Long testPlanId) {
+		return testPlanService.getCreatedByByTestPlanId(testPlanId);
+	}
+
+	// endoint teste para deletar se nao funcionar
+
+	@GetMapping("/search")
+	public Page<TestPlanListagemDTO> searchTestPlans(@RequestParam(required = false) String searchValue,
+			Pageable pageable) {
+		return testPlanService.searchTestPlans(searchValue, pageable);
+	}
 }

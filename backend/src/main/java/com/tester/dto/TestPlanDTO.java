@@ -51,8 +51,8 @@ public class TestPlanDTO {
     }
 
     // Construtor com todos os campos
-    public TestPlanDTO(Long id, @NotBlank(message = "Informe a descrição da UL") String name,Boolean created,String created_by,String observation,
-                       Status status, TaskStatus taskStatus, @NotBlank(message = "Informe o número da UL") String jira,
+    public TestPlanDTO(Long id,  String name,Boolean created,String created_by,String observation,
+                       Status status, TaskStatus taskStatus,  String jira,
                        LocalDate data, LocalDate deliveryData, String matriz, String userName, String callNumber,
                        Long developerId, Long systemModuleId, Long testerId, String password, Set<Long> testeSuiteId) {
         this.id = id;
@@ -106,6 +106,37 @@ public class TestPlanDTO {
                 ? testPlan.getTesteSuite().stream().map(testSuite -> testSuite.getId()).collect(Collectors.toSet())
                 : null;
     }
+    
+    
+    public TestPlanDTO(
+    	    Long id, String name, Boolean created, String created_by, String observation,
+    	    Status status, TaskStatus taskStatus, String jira,
+    	    LocalDate data, LocalDate deliveryData, String matriz, String userName, String callNumber,
+    	    Long developerId, Long systemModuleId, Long testerId, String password
+    	) {
+    	    this.id = id;
+    	    this.name = name;
+    	    this.created = created;
+    	    this.created_by = created_by;
+    	    this.observation = observation;
+    	    this.status = status;
+    	    this.taskStatus = taskStatus;
+    	    this.jira = jira;
+    	    this.data = data;
+    	    this.deliveryData = deliveryData;
+    	    this.matriz = matriz;
+    	    this.userName = userName;
+    	    this.callNumber = callNumber;
+    	    this.developerId = developerId;
+    	    this.systemModuleId = systemModuleId;
+    	    this.testerId = testerId;
+    	    this.password = password;
+    	    this.testeSuiteId = null; // Ou inicialize com um Set vazio: this.testeSuiteId = new HashSet<>();
+    	}
+    
+    
+    
+   
 
     // Getters e Setters
     public Long getId() {
