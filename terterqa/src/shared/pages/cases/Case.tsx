@@ -272,12 +272,12 @@ const Case = () => {
       {/* Botão "Voltar" */}
       <div style={{ marginBottom: "20px" }}>
         <Button
-          onClick={() => navigate("/planoTeste/editar/7")} // Redireciona para a URL especificada
+          onClick={() => navigate(`/planoTeste/editar/${testPlanId}`)} // Redireciona para a URL especificada
           variant="secondary"
         >
           Voltar
         </Button>
-      </div>
+      </div>  
 
       {/* Lista de TestCases */}
       <ListGroup>

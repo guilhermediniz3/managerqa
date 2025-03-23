@@ -64,6 +64,7 @@ public class SecurityConfig {
 	                        .requestMatchers(HttpMethod.GET,"/test-suites/**").permitAll()
 	                        .requestMatchers(HttpMethod.DELETE,"/test-suites/**").permitAll()
 	                        .requestMatchers(HttpMethod.PUT,"/test-suites/**").permitAll()
+	                        .requestMatchers(HttpMethod.POST, "/test-suites/clone/{id}").permitAll()
 	                        .requestMatchers(HttpMethod.POST,"/testcases").permitAll()
 	                        .requestMatchers(HttpMethod.DELETE,"/testcases/**").permitAll()
 	                        .requestMatchers(HttpMethod.PUT,"/testcases/**").permitAll()
@@ -89,7 +90,10 @@ public class SecurityConfig {
 	                        .requestMatchers(HttpMethod.DELETE, "/testcases/plan/{testPlanId}/suite/{testSuiteId}").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/testcases/plan/{testPlanId}/suite/{testSuiteId}").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/plan/{testPlanId}/suite/{testSuiteId}/last-code-case").permitAll()
-	            
+	                        .requestMatchers(HttpMethod.GET, "/testplan/*/created-by").permitAll()
+	                   
+	                        
+	                
 
                         
                         .anyRequest().authenticated()

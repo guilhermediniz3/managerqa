@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.tester.dto.CreatedByDTO;
 import com.tester.dto.LastCodeSuiteDTO;
 import com.tester.dto.TestPlanDTO;
 import com.tester.dto.TestPlanListagemDTO;
@@ -301,6 +302,13 @@ public class TestPlanService {
         TestSuite testSuite = testSuiteOptional.get();
         LastCodeSuiteDTO lastCodeSuiteDTO = new LastCodeSuiteDTO(testSuite);
         return lastCodeSuiteDTO;
+    }
+
+    
+    
+    // EXIBIR QUEM CRIOU A TAREFA (UL)
+    public CreatedByDTO getCreatedByByTestPlanId(Long testPlanId) {
+        return testPlanRepository.findCreatedByByTestPlanId(testPlanId);
     }
     
 
