@@ -3,9 +3,6 @@ package com.tester.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.http.HttpStatus;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tester.dto.TestSuiteDTO;
@@ -66,14 +64,19 @@ public class TestSuiteController {
 
 	    
 	    @PostMapping("/clone/{id}")
-	    public ResponseEntity<TestSuiteDTO> cloneTestSuite(@PathVariable Long id) {
-	        try {
-	            TestSuiteDTO clonedTestSuite = testSuiteService.clone(id); // Chamando o método de clonagem
-	            return new ResponseEntity<>(clonedTestSuite, HttpStatus.CREATED); // Retorna o TestSuite clonado com status 201
-	        } catch (RuntimeException e) {
-	            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND); // Caso não encontre o TestSuite
-	        }
+	    public ResponseEntity<TestSuiteDTO> cloneTestSuite(
+	            @PathVariable Long id,
+	            @RequestBody TestSuiteDTO dto) { // Recebe o DTO no corpo da requisição
+	        TestSuiteDTO clonedTestSuite = testSuiteService.clone(id, dto);
+	        return ResponseEntity.ok(clonedTestSuite);
+	    }
+	    
+	    @GetMapping("/testplan/{testPlanId}")
+	    public ResponseEntity<List<TestSuiteDTO>> getTestSuitesByTestPlanId(@PathVariable Long testPlanId) {
+	        List<TestSuiteDTO> testSuites = testSuiteService.getTestSuitesByTestPlanId(testPlanId);
+	        return ResponseEntity.ok(testSuites);
 	    }
 
+	    
 
 }

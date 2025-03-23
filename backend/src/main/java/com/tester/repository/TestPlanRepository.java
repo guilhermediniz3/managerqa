@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.tester.dto.TestPlanListagemDTO;
+import com.tester.dto.CreatedByDTO;
 import com.tester.entity.TestPlan;
 @Repository
 
@@ -55,7 +55,10 @@ public interface TestPlanRepository extends JpaRepository<TestPlan, Long> {
 		    @Param("systemModuleName") String systemModuleName,
 		    @Param("testerQAName") String testerQAName,
 		    Pageable pageable);
-
 	
-
+	   // retorna quem criou a ul
+    
+	  @Query("SELECT new com.tester.dto.CreatedByDTO(t.created_by) FROM TestPlan t WHERE t.id = :testPlanId")
+	    CreatedByDTO findCreatedByByTestPlanId(@Param("testPlanId") Long testPlanId);
+	
 }
