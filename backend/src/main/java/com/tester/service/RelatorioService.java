@@ -1,23 +1,19 @@
 package com.tester.service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import com.tester.entity.TestPlan;
+import com.tester.enuns.Status;
+import com.tester.repository.TestPlanRepository;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.tester.entity.TestPlan;
-import com.tester.enuns.Status;
-import com.tester.repository.TestPlanRepository;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class RelatorioService {
@@ -25,20 +21,16 @@ public class RelatorioService {
     @Autowired
     private TestPlanRepository repository;
 
-    /**
-     * Gera um relatório Excel com base na data e no nome do tester.
-     *
-     * @param data       Data para filtrar os registros
-     * @param testerName Nome do tester (opcional)
-     * @return Byte array contendo o arquivo Excel
-     * @throws IOException Se ocorrer um erro ao gerar o arquivo
-     */
     public byte[] gerarRelatorioExcel(LocalDate data, String testerName) throws IOException {
         // Consulta os dados no banco
         List<TestPlan> dados;
-        if (testerName != null) {
-            dados = repository.findByCreatedByAndData(testerName, data);
+        if (testerName != null && !testerName.isEmpty() && !testerName.equals("Todos os testers")) {
+            // Busca tarefas do tester específico (incluindo criadas por ele)
+            dados = repository.findByTesterNameAndData(testerName, data);
+            List<TestPlan> criadas = repository.findCriadasByCreatedByAndData(testerName, data);
+            dados.addAll(criadas); // Adiciona as tarefas criadas pelo tester
         } else {
+            // Busca todas as tarefas da data
             dados = repository.findByData(data);
         }
 
@@ -60,10 +52,11 @@ public class RelatorioService {
             headerFont.setBold(true);
             headerStyle.setFont(headerFont);
 
-            // Agrupa os dados por tester (created_by), ignorando registros com created_by nulo
+            // Agrupa os dados por tester (tester.name ou created_by)
             Map<String, List<TestPlan>> dadosAgrupadosPorTester = dados.stream()
-                    .filter(item -> item.getCreated_by() != null) // Filtra registros com created_by nulo
-                    .collect(Collectors.groupingBy(TestPlan::getCreated_by));
+                    .filter(item -> item.getTester() != null || item.getCreated_by() != null) // Filtra registros com tester ou created_by nulo
+                    .collect(Collectors.groupingBy(item -> 
+                        item.getTester() != null ? item.getTester().getName() : item.getCreated_by()));
 
             int rowNum = 0; // Inicia na linha 0
 
@@ -99,7 +92,7 @@ public class RelatorioService {
                 // Preenche os dados da tabela principal
                 for (TestPlan item : dadosTabelaPrincipal) {
                     Row row = sheet.createRow(rowNum++);
-                    row.createCell(0).setCellValue(item.getCreated_by());
+                    row.createCell(0).setCellValue(testerAtual); // Usa o nome do tester ou created_by
                     row.createCell(1).setCellValue(item.getData().toString());
                     row.createCell(2).setCellValue(item.getJira());
                     row.createCell(3).setCellValue(item.getCallNumber());
@@ -134,8 +127,7 @@ public class RelatorioService {
     }
 
     private void adicionarSecaoNaoEntregues(Sheet sheet, LocalDate data, String testerName, Workbook workbook, int rowNum) {
-        // Filtra os registros com status EM_PROGRESSO e created_by igual ao testerName
-        List<TestPlan> naoEntregues = repository.findByCreatedByAndDataAndStatus(testerName, data, Status.EM_PROGRESSO);
+        List<TestPlan> naoEntregues = repository.findByTesterNameAndDataAndStatus(testerName, data, Status.EM_PROGRESSO);
         if (naoEntregues != null && !naoEntregues.isEmpty()) {
             Row tituloRow = sheet.createRow(rowNum++);
             Cell tituloCell = tituloRow.createCell(0);
@@ -149,7 +141,12 @@ public class RelatorioService {
 
             for (TestPlan item : naoEntregues) {
                 Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(item.getCreated_by());
+                // Verifica se a tarefa foi criada pelo tester (created_by preenchido)
+                if (item.getCreated_by() != null && !item.getCreated_by().isEmpty()) {
+                    row.createCell(0).setCellValue(testerName); // Adiciona uma coluna "Criada"
+                } else {
+                    row.createCell(0).setCellValue(testerName); // Usa o nome do tester
+                }
                 row.createCell(1).setCellValue(item.getData().toString());
                 row.createCell(2).setCellValue(item.getJira());
                 row.createCell(3).setCellValue(item.getCallNumber());
@@ -159,8 +156,7 @@ public class RelatorioService {
     }
 
     private void adicionarSecaoImpedimentos(Sheet sheet, LocalDate data, String testerName, Workbook workbook, int rowNum) {
-        // Filtra os registros com status IMPEDIMENTO e created_by igual ao testerName
-        List<TestPlan> impedimentos = repository.findByCreatedByAndDataAndStatus(testerName, data, Status.IMPEDIMENTO);
+        List<TestPlan> impedimentos = repository.findByTesterNameAndDataAndStatus(testerName, data, Status.IMPEDIMENTO);
         if (impedimentos != null && !impedimentos.isEmpty()) {
             Row tituloRow = sheet.createRow(rowNum++);
             Cell tituloCell = tituloRow.createCell(0);
@@ -174,7 +170,7 @@ public class RelatorioService {
 
             for (TestPlan item : impedimentos) {
                 Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(item.getCreated_by());
+                row.createCell(0).setCellValue(testerName); // Usa o nome do tester
                 row.createCell(1).setCellValue(item.getData().toString());
                 row.createCell(2).setCellValue(item.getJira());
                 row.createCell(3).setCellValue(item.getCallNumber());
@@ -184,8 +180,7 @@ public class RelatorioService {
     }
 
     private void adicionarSecaoCriadas(Sheet sheet, LocalDate data, String testerName, Workbook workbook, int rowNum) {
-        // Filtra os registros criados pelo tester (usando created_by)
-        List<TestPlan> criadas = repository.findByCreatedByAndData(testerName, data);
+        List<TestPlan> criadas = repository.findCriadasByCreatedByAndData(testerName, data);
         if (criadas != null && !criadas.isEmpty()) {
             Row tituloRow = sheet.createRow(rowNum++);
             Cell tituloCell = tituloRow.createCell(0);
@@ -199,7 +194,7 @@ public class RelatorioService {
 
             for (TestPlan item : criadas) {
                 Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(item.getCreated_by());
+                row.createCell(0).setCellValue(testerName); // Usa o nome do tester
                 row.createCell(1).setCellValue(item.getData().toString());
                 row.createCell(2).setCellValue(item.getJira());
                 row.createCell(3).setCellValue(item.getCallNumber());
@@ -221,14 +216,14 @@ public class RelatorioService {
 
         // Contagem de status
         for (Status status : Status.values()) {
-            Long count = repository.countByCreatedByAndDataAndStatus(testerName, data, status);
+            Long count = repository.countByTesterNameAndDataAndStatus(testerName, data, status);
             Row statusRow = sheet.createRow(rowNum++);
-            statusRow.createCell(0).setCellValue(status.toString()); // Exibe o nome do status
-            statusRow.createCell(1).setCellValue(count != null ? count : 0); // Evita NullPointerException
+            statusRow.createCell(0).setCellValue(status.toString());
+            statusRow.createCell(1).setCellValue(count != null ? count : 0);
         }
 
-        // Contagem de "Criadas"
-        Long criadasCount = repository.countByCreatedByAndData(testerName, data);
+        // Contagem de "Criadas" (usando created_by)
+        Long criadasCount = repository.countCriadasByCreatedByAndData(testerName, data);
         Row criadasRow = sheet.createRow(rowNum++);
         criadasRow.createCell(0).setCellValue("CRIADAS");
         criadasRow.createCell(1).setCellValue(criadasCount != null ? criadasCount : 0);

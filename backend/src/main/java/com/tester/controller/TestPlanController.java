@@ -1,5 +1,9 @@
 package com.tester.controller;
 
+import java.awt.PageAttributes.MediaType;
+
+import java.io.IOException;
+import java.net.http.HttpHeaders;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -20,11 +24,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
 import com.tester.dto.CreatedByDTO;
 import com.tester.dto.LastCodeSuiteDTO;
 import com.tester.dto.TestPlanDTO;
 import com.tester.dto.TestPlanListagemDTO;
-
+import com.tester.service.ExportSprintExcelService;
+import com.tester.service.ExportSprintPDFService;
 import com.tester.service.TestPlanService;
 
 import jakarta.validation.Valid;
@@ -35,6 +41,8 @@ public class TestPlanController {
 
 	@Autowired
 	private TestPlanService testPlanService;
+	
+
 
 	@PostMapping
 	public ResponseEntity<TestPlanDTO> createTestPlan(@Valid @RequestBody TestPlanDTO testPlanDTO) {
@@ -112,4 +120,50 @@ public class TestPlanController {
 			Pageable pageable) {
 		return testPlanService.searchTestPlans(searchValue, pageable);
 	}
+	
+	// endpoints dashboard -------------------------------------------------------------------------
+	
+	
+	
+	 // Endpoint para contar tarefas CONCLUÍDAS
+    @GetMapping("/count-concluidas")
+    public Long countConcluidas(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataDe,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAte) {
+        return testPlanService.getCountConcluidas(dataDe, dataAte);
+    }
+
+    // Endpoint para contar tarefas com RETORNO
+    @GetMapping("/count-retorno")
+    public Long countRetorno(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataDe,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAte) {
+        return testPlanService.getCountRetorno(dataDe, dataAte);
+    }
+
+    // Endpoint para contar tarefas com IMPEDIMENTO
+    @GetMapping("/count-impedimento")
+    public Long countImpedimento(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataDe,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAte) {
+        return testPlanService.getCountImpedimento(dataDe, dataAte);
+    }
+
+    // Endpoint para contar tarefas EM PROGRESSO
+    @GetMapping("/count-em-progresso")
+    public Long countEmProgresso(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataDe,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAte) {
+        return testPlanService.getCountEmProgresso(dataDe, dataAte);
+    }
+
+    // Endpoint para contar registros onde created = TRUE dentro de um intervalo de datas
+    @GetMapping("/count-created-true")
+    public Long countCreatedTrue(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataDe,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataAte) {
+        return testPlanService.getCountCreatedTrue(dataDe, dataAte);
+    }
+    
+   
 }

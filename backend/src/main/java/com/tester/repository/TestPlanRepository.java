@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.tester.dto.CreatedByDTO;
-
+import com.tester.dto.TestPlanByTechnologyDTO;
 import com.tester.entity.TestPlan;
 import com.tester.enuns.Status;
 
@@ -56,33 +56,113 @@ public interface TestPlanRepository extends JpaRepository<TestPlan, Long> {
 			+ "       LOWER(systemModule.name) LIKE LOWER(CONCAT('%', :searchValue, '%'))) " + "ORDER BY tp.data DESC")
 	Page<TestPlan> searchTestPlans(@Param("searchValue") String searchValue, Pageable pageable);
 	
+	
+	// querys referente a exportacao de pdf e xls
+	
 	// retorna quem criou a ul
+
 
 	@Query("SELECT new com.tester.dto.CreatedByDTO(t.created_by) FROM TestPlan t WHERE t.id = :testPlanId")
 	CreatedByDTO findCreatedByByTestPlanId(@Param("testPlanId") Long testPlanId);
+	
+	// ------------------------------------------------------------------------------------------------------------
 
-	// relatorios
 
-	@Query("SELECT t FROM TestPlan t WHERE t.created_by = :testerName AND t.data = :data")
-	List<TestPlan> findByCreatedByAndData(@Param("testerName") String testerName, @Param("data") LocalDate data);
+     
+	 // Busca tarefas criadas pelo created_by e data
+    @Query("SELECT t FROM TestPlan t WHERE t.created_by = :createdBy AND t.data = :data")
+    List<TestPlan> findCriadasByCreatedByAndData(@Param("createdBy") String createdBy, @Param("data") LocalDate data);
 
-	@Query("SELECT t FROM TestPlan t WHERE t.data = :data")
-	List<TestPlan> findByData(@Param("data") LocalDate data);
+    // Busca tarefas pelo nome do tester (tester.name) e data
+    @Query("SELECT t FROM TestPlan t JOIN t.tester c WHERE c.name = :testerName AND t.data = :data")
+    List<TestPlan> findByTesterNameAndData(@Param("testerName") String testerName, @Param("data") LocalDate data);
 
-	@Query("SELECT t FROM TestPlan t WHERE t.data = :data AND t.status = :status")
-	List<TestPlan> findByDataAndStatus(@Param("data") LocalDate data, @Param("status") Status status);
+    // Busca tarefas pelo nome do tester (tester.name), data e status
+    @Query("SELECT t FROM TestPlan t JOIN t.tester c WHERE c.name = :testerName AND t.data = :data AND t.status = :status")
+    List<TestPlan> findByTesterNameAndDataAndStatus(@Param("testerName") String testerName, @Param("data") LocalDate data, @Param("status") Status status);
 
-	@Query("SELECT t FROM TestPlan t WHERE t.created_by = :testerName AND t.data = :data AND t.status = :status")
-	List<TestPlan> findByCreatedByAndDataAndStatus(@Param("testerName") String testerName,
-			@Param("data") LocalDate data, @Param("status") Status status);
+    // Busca todas as tarefas pela data
+    @Query("SELECT t FROM TestPlan t WHERE t.data = :data")
+    List<TestPlan> findByData(@Param("data") LocalDate data);
 
-	@Query("SELECT COUNT(t) FROM TestPlan t WHERE t.created_by = :testerName AND t.data = :data AND t.status = :status")
-	Long countByCreatedByAndDataAndStatus(@Param("testerName") String testerName, @Param("data") LocalDate data,
-			@Param("status") Status status);
+    // Conta tarefas pelo nome do tester (tester.name), data e status
+    @Query("SELECT COUNT(t) FROM TestPlan t JOIN t.tester c WHERE c.name = :testerName AND t.data = :data AND t.status = :status")
+    Long countByTesterNameAndDataAndStatus(@Param("testerName") String testerName, @Param("data") LocalDate data, @Param("status") Status status);
 
-	@Query("SELECT COUNT(t) FROM TestPlan t WHERE t.data = :data AND t.status = :status")
-	Long countByDataAndStatus(@Param("data") LocalDate data, @Param("status") Status status);
+    // Conta tarefas pela data e status
+    @Query("SELECT COUNT(t) FROM TestPlan t WHERE t.data = :data AND t.status = :status")
+    Long countByDataAndStatus(@Param("data") LocalDate data, @Param("status") Status status);
 
-	@Query("SELECT COUNT(t) FROM TestPlan t WHERE t.created_by = :testerName AND t.data = :data")
-	Long countByCreatedByAndData(@Param("testerName") String testerName, @Param("data") LocalDate data);
+    // Conta tarefas criadas pelo created_by e data
+    @Query("SELECT COUNT(t) FROM TestPlan t WHERE t.created_by = :createdBy AND t.data = :data")
+    Long countCriadasByCreatedByAndData(@Param("createdBy") String createdBy, @Param("data") LocalDate data);
+    
+    
+    // querys referente ao dashboard
+    
+ // Query para contar tarefas CONCLUÍDAS
+    @Query("SELECT COUNT(t) FROM TestPlan t " +
+           "WHERE t.deliveryData BETWEEN :dataDe AND :dataAte " +
+           "AND t.status = 'CONCLUIDA'")
+    Long countConcluidas(@Param("dataDe") LocalDate dataDe, @Param("dataAte") LocalDate dataAte);
+
+    // Query para contar tarefas com RETORNO
+    @Query("SELECT COUNT(t) FROM TestPlan t " +
+           "WHERE t.deliveryData BETWEEN :dataDe AND :dataAte " +
+           "AND t.status = 'RETORNO'")
+    Long countRetorno(@Param("dataDe") LocalDate dataDe, @Param("dataAte") LocalDate dataAte);
+
+    // Query para contar tarefas com IMPEDIMENTO
+    @Query("SELECT COUNT(t) FROM TestPlan t " +
+           "WHERE t.deliveryData BETWEEN :dataDe AND :dataAte " +
+           "AND t.status = 'IMPEDIMENTO'")
+    Long countImpedimento(@Param("dataDe") LocalDate dataDe, @Param("dataAte") LocalDate dataAte);
+
+    // Query para contar tarefas EM PROGRESSO
+    @Query("SELECT COUNT(t) FROM TestPlan t " +
+           "WHERE t.deliveryData BETWEEN :dataDe AND :dataAte " +
+           "AND t.status = 'EM_PROGRESSO'")
+    Long countEmProgresso(@Param("dataDe") LocalDate dataDe, @Param("dataAte") LocalDate dataAte);
+
+    // Query para contar registros onde created = TRUE dentro de um intervalo de datas
+    @Query("SELECT COUNT(t) FROM TestPlan t " +
+           "WHERE t.deliveryData BETWEEN :dataDe AND :dataAte " +
+           "AND t.created = TRUE")
+    Long countCreatedTrueByDeliveryDataBetween(
+            @Param("dataDe") LocalDate dataDe,
+            @Param("dataAte") LocalDate dataAte);
+
+// dashboard exportar excel e pdf ---------------------------------------------------------------------------------------------------------------
+    
+
+    @Query("""
+            SELECT NEW com.tester.dto.TestPlanByTechnologyDTO(
+                tp.deliveryData,
+                tp.jira,
+                tp.callNumber,
+                tp.name,
+                dev.name,
+                tester.name,
+                sm.name,
+                tech.name,
+                tp.status
+            )
+            FROM TestPlan tp
+            LEFT JOIN tp.developer dev
+            LEFT JOIN dev.technologies tech
+            LEFT JOIN tp.systemModule sm
+            LEFT JOIN tp.tester tester
+            WHERE (COALESCE(:dataInicio, null) IS NULL OR tp.deliveryData >= :dataInicio)
+              AND (COALESCE(:dataFim, null) IS NULL OR tp.deliveryData <= :dataFim)
+              AND (COALESCE(:tecnologia, null) IS NULL OR tech.name = :tecnologia)
+              AND (COALESCE(:status, null) IS NULL OR tp.status = :status)
+              AND (COALESCE(:developerName, null) IS NULL OR dev.name LIKE %:developerName%)
+            ORDER BY tp.status, tp.deliveryData DESC, dev.name
+        """)
+        List<TestPlanByTechnologyDTO> findForExport(
+            @Param("dataInicio") LocalDate dataInicio,
+            @Param("dataFim") LocalDate dataFim,
+            @Param("tecnologia") String tecnologia,
+            @Param("status") Status status,
+            @Param("developerName") String developerName);
 }

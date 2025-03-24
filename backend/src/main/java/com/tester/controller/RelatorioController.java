@@ -1,22 +1,18 @@
 package com.tester.controller;
 
-import java.io.IOException;
-import java.time.LocalDate;
-
+import com.tester.service.ExportSprintExcelService;
+import com.tester.service.ExportSprintPDFService;
+import com.tester.service.RelatorioPdfService;
+import com.tester.service.RelatorioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import com.itextpdf.text.DocumentException;
-import com.tester.service.RelatorioPdfService;
-import com.tester.service.RelatorioService;
+import java.io.IOException;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/relatorios")
@@ -27,6 +23,11 @@ public class RelatorioController {
 
     @Autowired
     private RelatorioPdfService relatorioPdfService;
+    @Autowired
+    private ExportSprintExcelService exportSprintExcelService;
+    
+    @Autowired
+    private ExportSprintPDFService exportSprintPDFService;
 
     @GetMapping(value = "/excel", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<byte[]> gerarRelatorioExcel(
@@ -53,10 +54,45 @@ public class RelatorioController {
                     .headers(headers)
                     .contentType(MediaType.APPLICATION_PDF)
                     .body(relatorio);
-        } catch (DocumentException | IOException e) {
-            System.err.println("Erro ao gerar o PDF: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(("Erro ao gerar o PDF: " + e.getMessage()).getBytes());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(("Erro ao gerar o PDF: " + e.getMessage()).getBytes());
         }
+    }
+    
+    
+    
+    // dashboard excel e pdf -----------------------------------------------------------------------------------
+    @GetMapping("/sprint-excel")
+    public ResponseEntity<byte[]> gerarSprintExcel(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
+            @RequestParam(required = false) String tecnologia,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String desenvolvedor) throws IOException {
+        
+        byte[] excelBytes = exportSprintExcelService.exportToExcel(
+            dataInicio, dataFim, tecnologia, status, desenvolvedor);
+        
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sprints.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(excelBytes);
+    }
+
+    @GetMapping("/sprint-pdf")
+    public ResponseEntity<byte[]> gerarSprintPDF(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
+            @RequestParam(required = false) String tecnologia,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String desenvolvedor) throws IOException, DocumentException { // Adicione DocumentException aqui
+        
+        byte[] pdfBytes = exportSprintPDFService.exportToPdf(
+            dataInicio, dataFim, tecnologia, status, desenvolvedor);
+        
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=sprints.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
     }
 }

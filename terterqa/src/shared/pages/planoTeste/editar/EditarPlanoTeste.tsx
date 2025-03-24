@@ -82,6 +82,13 @@ function EditTestPlan() {
 
   const navigate = useNavigate();
 
+  // Função para ajustar a data para o fuso horário local
+  const adjustForTimezone = (date) => {
+    if (!date) return null;
+    const timezoneOffset = date.getTimezoneOffset() * 60000; // Converte o offset para milissegundos
+    return new Date(date.getTime() + timezoneOffset);
+  };
+
   // Função para buscar quem criou o TestPlan
   const fetchCreatedBy = async () => {
     try {
@@ -202,9 +209,9 @@ function EditTestPlan() {
           throw new Error("TestPlan não encontrado.");
         }
 
-        // Atualiza as datas
-        if (testPlan.data) setStartDate(parseDate(testPlan.data));
-        if (testPlan.deliveryData) setDeliveryDate(parseDate(testPlan.deliveryData));
+        // Ajusta as datas para o fuso horário local
+        if (testPlan.data) setStartDate(adjustForTimezone(parseDate(testPlan.data)));
+        if (testPlan.deliveryData) setDeliveryDate(adjustForTimezone(parseDate(testPlan.deliveryData)));
 
         // Atualiza os outros campos
         setSelectedStatus(testPlan.status || "EM_PROGRESSO");
@@ -315,8 +322,6 @@ function EditTestPlan() {
     return <div>Datas não carregadas.</div>;
   }
 
-
-
   return (
     <Container style={{ marginTop: '20px', marginBottom: '20px' }}>
       <NavHorizontal />
@@ -331,10 +336,10 @@ function EditTestPlan() {
             <Row>
               <Col md={4}>
                 <Form.Group controlId="formDeliveryDate">
-                  <Form.Label>Data de Entrega</Form.Label>
+                  <Form.Label>Data Sprint</Form.Label>
                   <DatePicker
                     selected={deliveryDate}
-                    onChange={(date) => setDeliveryDate(date || new Date())}
+                    onChange={(date) => setDeliveryDate(adjustForTimezone(date))}
                     dateFormat="dd/MM/yyyy"
                     className="form-control"
                   />
@@ -345,7 +350,7 @@ function EditTestPlan() {
                   <Form.Label>Data</Form.Label>
                   <DatePicker
                     selected={startDate}
-                    onChange={(date) => setStartDate(date || new Date())}
+                    onChange={(date) => setStartDate(adjustForTimezone(date))}
                     dateFormat="dd/MM/yyyy"
                     className="form-control"
                   />
@@ -583,12 +588,10 @@ function EditTestPlan() {
                 return (
                   <ListGroup.Item key={suite.id}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <ExportSuites testSuiteId={suite.id} /> 
+                      <ExportSuites testSuiteId={suite.id} />
                       <div>
                         <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
-                    
                       </div>
-                 
                       <div>
                         <FaEdit
                           style={{ color: "#0d6efd", cursor: "pointer", marginRight: '15px' }}
@@ -597,11 +600,8 @@ function EditTestPlan() {
                         <HiOutlineDuplicate
                           style={{ color: "#6c757d", cursor: "pointer" }}
                           onClick={() => handleCloneSuite(suite.id)}
-                          
                         />
-                          
                       </div>
-               
                     </div>
                     <StackedProgressBar testCases={suiteTestCases} />
                   </ListGroup.Item>

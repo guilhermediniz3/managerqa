@@ -310,4 +310,31 @@ public class TestPlanService {
 	        Page<TestPlan> testPlans = testPlanRepository.searchTestPlans(searchValue, pageable);
 	        return testPlans.map(TestPlanListagemDTO::new);
 	    }
+	  
+	  //  Dashboard ------------------------------------------------------------------------------------
+	  
+	// Método para contar tarefas CONCLUÍDAS
+	    public Long getCountConcluidas(LocalDate dataDe, LocalDate dataAte) {
+	        return testPlanRepository.countConcluidas(dataDe, dataAte);
+	    }
+
+	    // Método para contar tarefas com RETORNO
+	    public Long getCountRetorno(LocalDate dataDe, LocalDate dataAte) {
+	        return testPlanRepository.countRetorno(dataDe, dataAte);
+	    }
+
+	    // Método para contar tarefas com IMPEDIMENTO
+	    public Long getCountImpedimento(LocalDate dataDe, LocalDate dataAte) {
+	        return testPlanRepository.countImpedimento(dataDe, dataAte);
+	    }
+
+	    // Método para contar tarefas EM PROGRESSO
+	    public Long getCountEmProgresso(LocalDate dataDe, LocalDate dataAte) {
+	        return testPlanRepository.countEmProgresso(dataDe, dataAte);
+	    }
+
+	    // Método para contar registros onde created = TRUE dentro de um intervalo de datas
+	    public Long getCountCreatedTrue(LocalDate dataDe, LocalDate dataAte) {
+	        return testPlanRepository.countCreatedTrueByDeliveryDataBetween(dataDe, dataAte);
+	    }
 }

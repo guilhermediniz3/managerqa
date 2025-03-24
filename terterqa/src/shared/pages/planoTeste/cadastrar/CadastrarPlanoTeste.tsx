@@ -271,7 +271,7 @@ function CreateTestPlan() {
             <Row>
               <Col md={6}>
                 <Form.Group controlId="formDeliveryDate">
-                  <Form.Label>Data de Entrega</Form.Label>
+                  <Form.Label>Data Sprint</Form.Label>
                   <DatePicker
                     selected={deliveryDate}
                     onChange={(date) => setDeliveryDate(date || new Date())}

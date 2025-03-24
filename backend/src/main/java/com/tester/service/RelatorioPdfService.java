@@ -1,12 +1,5 @@
 package com.tester.service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -17,26 +10,29 @@ import com.tester.repository.TestPlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 public class RelatorioPdfService {
 
     @Autowired
     private TestPlanRepository repository;
 
-    /**
-     * Gera um relatório PDF com base na data e no nome do tester.
-     *
-     * @param data       Data para filtrar os registros
-     * @param testerName Nome do tester (opcional)
-     * @return Byte array contendo o arquivo PDF
-     * @throws IOException Se ocorrer um erro ao gerar o arquivo
-     */
     public byte[] gerarRelatorioPdf(LocalDate data, String testerName) throws IOException, DocumentException {
         // Consulta os dados no banco
         List<TestPlan> dados;
-        if (testerName != null) {
-            dados = repository.findByCreatedByAndData(testerName, data);
+        if (testerName != null && !testerName.isEmpty() && !testerName.equals("Todos os testers")) {
+            // Busca tarefas do tester específico (incluindo criadas por ele)
+            dados = repository.findByTesterNameAndData(testerName, data);
+            List<TestPlan> criadas = repository.findCriadasByCreatedByAndData(testerName, data);
+            dados.addAll(criadas); // Adiciona as tarefas criadas pelo tester
         } else {
+            // Busca todas as tarefas da data
             dados = repository.findByData(data);
         }
 
@@ -51,10 +47,26 @@ public class RelatorioPdfService {
         PdfWriter.getInstance(document, outputStream);
         document.open();
 
-        // Agrupa os dados por tester (created_by), ignorando registros com created_by nulo
+        // Adiciona um título ao documento
+        Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
+        Paragraph title = new Paragraph("Relatório de Testes", titleFont);
+        title.setAlignment(Element.ALIGN_CENTER);
+        document.add(title);
+
+        // Adiciona a data ao documento
+        Font dateFont = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL);
+        Paragraph dateParagraph = new Paragraph("Data: " + data.toString(), dateFont);
+        dateParagraph.setAlignment(Element.ALIGN_CENTER);
+        document.add(dateParagraph);
+
+        // Adiciona espaço entre o título e a tabela
+        document.add(new Paragraph(" "));
+
+        // Agrupa os dados por tester (tester.name ou created_by)
         Map<String, List<TestPlan>> dadosAgrupadosPorTester = dados.stream()
-                .filter(item -> item.getCreated_by() != null)
-                .collect(Collectors.groupingBy(TestPlan::getCreated_by));
+                .filter(item -> item.getTester() != null || item.getCreated_by() != null) // Filtra registros com tester ou created_by nulo
+                .collect(Collectors.groupingBy(item -> 
+                    item.getTester() != null ? item.getTester().getName() : item.getCreated_by()));
 
         // Itera sobre cada tester e seus registros
         for (Map.Entry<String, List<TestPlan>> entry : dadosAgrupadosPorTester.entrySet()) {
@@ -68,7 +80,7 @@ public class RelatorioPdfService {
             PdfPTable tabelaPrincipal = new PdfPTable(5); // 5 colunas
             tabelaPrincipal.setWidthPercentage(100);
 
-            // Define os cabeçalhos da tabela (apenas em negrito, sem fundo cinza e sem bordas)
+            // Define os cabeçalhos da tabela
             String[] headers = {"Tester", "Data", "Jira", "Call Number", "Status"};
             for (String header : headers) {
                 PdfPCell cell = new PdfPCell(new Phrase(header, new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD)));
@@ -84,7 +96,7 @@ public class RelatorioPdfService {
 
             // Preenche os dados da tabela principal
             for (TestPlan item : dadosTabelaPrincipal) {
-                tabelaPrincipal.addCell(createCell(item.getCreated_by()));
+                tabelaPrincipal.addCell(createCell(testerAtual)); // Usa o nome do tester ou created_by
                 tabelaPrincipal.addCell(createCell(item.getData().toString()));
                 tabelaPrincipal.addCell(createCell(item.getJira()));
                 tabelaPrincipal.addCell(createCell(item.getCallNumber()));
@@ -130,7 +142,7 @@ public class RelatorioPdfService {
     }
 
     private void adicionarSecaoNaoEntregues(Document document, LocalDate data, String testerName) throws DocumentException {
-        List<TestPlan> naoEntregues = repository.findByCreatedByAndDataAndStatus(testerName, data, Status.EM_PROGRESSO);
+        List<TestPlan> naoEntregues = repository.findByTesterNameAndDataAndStatus(testerName, data, Status.EM_PROGRESSO);
         if (naoEntregues != null && !naoEntregues.isEmpty()) {
             adicionarTitulo(document, "Não Entregues");
 
@@ -138,7 +150,12 @@ public class RelatorioPdfService {
             tabela.setWidthPercentage(100);
 
             for (TestPlan item : naoEntregues) {
-                tabela.addCell(createCell(item.getCreated_by()));
+                // Verifica se a tarefa foi criada pelo tester (created_by preenchido)
+                if (item.getCreated_by() != null && !item.getCreated_by().isEmpty()) {
+                    tabela.addCell(createCell(testerName)); // Adiciona uma coluna "Criada"
+                } else {
+                    tabela.addCell(createCell(testerName)); // Usa o nome do tester
+                }
                 tabela.addCell(createCell(item.getData().toString()));
                 tabela.addCell(createCell(item.getJira()));
                 tabela.addCell(createCell(item.getCallNumber()));
@@ -151,7 +168,7 @@ public class RelatorioPdfService {
     }
 
     private void adicionarSecaoImpedimentos(Document document, LocalDate data, String testerName) throws DocumentException {
-        List<TestPlan> impedimentos = repository.findByCreatedByAndDataAndStatus(testerName, data, Status.IMPEDIMENTO);
+        List<TestPlan> impedimentos = repository.findByTesterNameAndDataAndStatus(testerName, data, Status.IMPEDIMENTO);
         if (impedimentos != null && !impedimentos.isEmpty()) {
             adicionarTitulo(document, "Impedimentos");
 
@@ -159,7 +176,7 @@ public class RelatorioPdfService {
             tabela.setWidthPercentage(100);
 
             for (TestPlan item : impedimentos) {
-                tabela.addCell(createCell(item.getCreated_by()));
+                tabela.addCell(createCell(testerName)); // Usa o nome do tester
                 tabela.addCell(createCell(item.getData().toString()));
                 tabela.addCell(createCell(item.getJira()));
                 tabela.addCell(createCell(item.getCallNumber()));
@@ -172,7 +189,7 @@ public class RelatorioPdfService {
     }
 
     private void adicionarSecaoCriadas(Document document, LocalDate data, String testerName) throws DocumentException {
-        List<TestPlan> criadas = repository.findByCreatedByAndData(testerName, data);
+        List<TestPlan> criadas = repository.findCriadasByCreatedByAndData(testerName, data);
         if (criadas != null && !criadas.isEmpty()) {
             adicionarTitulo(document, "Criadas");
 
@@ -180,7 +197,7 @@ public class RelatorioPdfService {
             tabela.setWidthPercentage(100);
 
             for (TestPlan item : criadas) {
-                tabela.addCell(createCell(item.getCreated_by()));
+                tabela.addCell(createCell(testerName)); // Usa o nome do tester
                 tabela.addCell(createCell(item.getData().toString()));
                 tabela.addCell(createCell(item.getJira()));
                 tabela.addCell(createCell(item.getCallNumber()));
@@ -199,13 +216,15 @@ public class RelatorioPdfService {
         tabela.setWidthPercentage(50); // Tabela mais estreita
         tabela.setHorizontalAlignment(Element.ALIGN_CENTER); // Centralizada na página
 
+        // Contagem de status
         for (Status status : Status.values()) {
-            Long count = repository.countByCreatedByAndDataAndStatus(testerName, data, status);
+            Long count = repository.countByTesterNameAndDataAndStatus(testerName, data, status);
             tabela.addCell(createCell(status.toString()));
             tabela.addCell(createCell(String.valueOf(count != null ? count : 0)));
         }
 
-        Long criadasCount = repository.countByCreatedByAndData(testerName, data);
+        // Contagem de "Criadas" (usando created_by)
+        Long criadasCount = repository.countCriadasByCreatedByAndData(testerName, data);
         tabela.addCell(createCell("CRIADAS"));
         tabela.addCell(createCell(String.valueOf(criadasCount != null ? criadasCount : 0)));
 

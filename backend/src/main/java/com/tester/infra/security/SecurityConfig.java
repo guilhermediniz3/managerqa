@@ -97,9 +97,13 @@ public class SecurityConfig {
 	                        .requestMatchers(HttpMethod.GET, "/relatorio-jira").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/relatorio-jira/pdf").permitAll()
 	                        .requestMatchers(HttpMethod.GET, "/search**").permitAll()
-		                    
-	                 
-	               
+	                        .requestMatchers(HttpMethod.GET, "/testplans/count-concluidas**").permitAll()
+	                        .requestMatchers(HttpMethod.GET, "/testplans/count-retorno**").permitAll()
+	                        .requestMatchers(HttpMethod.GET, "/testplans/count-impedimento**").permitAll()
+	                        .requestMatchers(HttpMethod.GET, "/testplans/count-em-progresso**").permitAll()
+	                        .requestMatchers(HttpMethod.GET, "/testplans/count-created-true**").permitAll()
+	                        .requestMatchers(HttpMethod.GET, "relatorios/sprint-excel**").permitAll()
+	                        .requestMatchers(HttpMethod.GET, "relatorios/sprint-pdf**").permitAll()
                         
                         .anyRequest().authenticated()
                 )
