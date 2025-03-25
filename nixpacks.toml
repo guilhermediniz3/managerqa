@@ -1,18 +1,12 @@
 [phases.setup]
 cmds = [
-  # Frontend (React/Vite)
   "cd testerqa && yarn install",
-  
-  # Backend (Spring Boot)
   "cd backend && ./mvnw clean package -DskipTests"
 ]
 
 [phases.build]
 cmds = [
-  # Build de produção do frontend
   "cd testerqa && yarn build",
-  
-  # Empacotar o backend
   "cd backend && ./mvnw package -DskipTests"
 ]
 
@@ -20,15 +14,6 @@ cmds = [
 cmd = "cd backend && java -jar target/*.jar --server.port=$PORT"
 
 [env]
-# Configurações obrigatórias
-PORT = "8081"                          # Porta do Spring Boot
-NODE_ENV = "production"                # Ambiente do React
-SPRING_PROFILES_ACTIVE = "prod"        # Perfil Spring ativo
-
-# Configurações do banco de dados (serão injetadas automaticamente pelo Railway)
-DATABASE_URL = ""                      # Auto-preenchido pelo PostgreSQL addon
-DB_USERNAME = ""                       # Auto-preenchido
-DB_PASSWORD = ""                       # Auto-preenchido
-
-# Segurança (defina manualmente no Railway)
-TOKEN_SECRET = "sua-chave-secreta-forte"  # Para JWT (use openssl rand -base64 64)
+PORT = "8081"
+NODE_ENV = "production"
+SPRING_PROFILES_ACTIVE = "prod"
