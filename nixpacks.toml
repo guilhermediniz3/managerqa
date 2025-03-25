@@ -1,17 +1,23 @@
 [phases.setup]
 cmds = [
-  "cd testerqa && yarn install",
-  "cd backend && ./mvnw clean package -DskipTests"
+  # Frontend (React/Vite)
+  "cd testerqa && yarn install --frozen-lockfile",
+  
+  # Backend (Spring Boot)
+  "cd backend && chmod +x mvnw && ./mvnw clean package -DskipTests"
 ]
 
 [phases.build]
 cmds = [
+  # Build do frontend
   "cd testerqa && yarn build",
+  
+  # Build do backend
   "cd backend && ./mvnw package -DskipTests"
 ]
 
 [phases.start]
-cmd = "cd backend && java -jar target/*.jar --server.port=$PORT"
+cmd = "cd backend && java -Dserver.port=$PORT -jar target/*.jar"
 
 [env]
 PORT = "8081"
