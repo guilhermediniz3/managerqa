@@ -1,6 +1,6 @@
 [phases.setup]
 cmds = [
-  # Frontend (React/Vite)
+  # Frontend (React/Vite/TypeScript)
   "cd testerqa && yarn install --frozen-lockfile",
   
   # Backend (Spring Boot)
