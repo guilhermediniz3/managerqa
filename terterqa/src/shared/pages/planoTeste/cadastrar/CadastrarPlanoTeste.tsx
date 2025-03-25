@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import Tab from 'react-bootstrap/Tab';
-import Tabs from 'react-bootstrap/Tabs';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
+import { Tab, Tabs, Form, Button, Row, Col, Container, ListGroup, OverlayTrigger, Tooltip, ProgressBar } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Container from 'react-bootstrap/Container';
-import ListGroup from 'react-bootstrap/ListGroup';
 import axios from 'axios';
-import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
-import NavVertical from "../../../components/navs/vertical/NavVertical";
 import { useNavigate } from 'react-router-dom';
-import './styless.css';
 import { HiOutlineDuplicate } from "react-icons/hi";
 import { FaEdit } from "react-icons/fa";
+import { FiAlertCircle } from "react-icons/fi";
+import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
+import NavVertical from "../../../components/navs/vertical/NavVertical";
+import './styless.css';
+import ExportSuites from '../../../components/ExportSuite/ExportSuites ';  
 
 // Definindo a interface para Suite
 interface TestSuite {
@@ -23,7 +18,36 @@ interface TestSuite {
   status: string;
   data: string;
   testPlanId: number;
-  codeSuite: number; // Novo campo para o código incremental
+  codeSuite: number;
+}
+
+interface TestCase {
+  id: number;
+  status: string;
+  testSuiteId: number;
+}
+
+// Componente StackedProgressBar
+function StackedProgressBar({ testCases }: { testCases: TestCase[] }) {
+  const totalCases = testCases.length;
+  const completedCases = testCases.filter(caseItem => caseItem.status === 'CONCLUIDA').length;
+  const inProgressCases = testCases.filter(caseItem => caseItem.status === 'EM_PROGRESSO').length;
+  const returnCases = testCases.filter(caseItem => caseItem.status === 'RETORNO').length;
+
+  const completedPercentage = totalCases > 0 ? (completedCases / totalCases) * 100 : 0;
+  const inProgressPercentage = totalCases > 0 ? (inProgressCases / totalCases) * 100 : 0;
+  const returnPercentage = totalCases > 0 ? (returnCases / totalCases) * 100 : 0;
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <ProgressBar style={{ height: '10px', flex: 1 }}>
+        <ProgressBar variant="success" now={completedPercentage} key={1} label={`${completedPercentage.toFixed(1)}%`} />
+        <ProgressBar variant="info" now={inProgressPercentage} key={2} label={`${inProgressPercentage.toFixed(1)}%`} />
+        <ProgressBar variant="danger" now={returnPercentage} key={3} label={`${returnPercentage.toFixed(1)}%`} />
+      </ProgressBar>
+      <div style={{ fontSize: '0.9em', whiteSpace: 'nowrap' }}>Total: {totalCases}</div>
+    </div>
+  );
 }
 
 function CreateTestPlan() {
@@ -39,9 +63,10 @@ function CreateTestPlan() {
   const [jira, setJira] = useState("");
   const [callNumber, setCallNumber] = useState("");
   const [observations, setObservations] = useState("");
-  const [suites, setSuites] = useState<TestSuite[]>([]); // Tipando o estado suites
-  const [testPlanId, setTestPlanId] = useState<number | null>(null); // Armazenando o ID do TestPlan
-  const [nextCode, setNextCode] = useState<number>(1); // Estado para o próximo código incremental
+  const [suites, setSuites] = useState<TestSuite[]>([]);
+  const [testPlanId, setTestPlanId] = useState<number | null>(null);
+  const [nextCode, setNextCode] = useState<number>(1);
+  const [testCases, setTestCases] = useState<TestCase[]>([]);
 
   interface Modulo {
     id: number;
@@ -112,8 +137,8 @@ function CreateTestPlan() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const formattedStartDate = formatDateToDDMMYYYY(startDate); // Formato DD/MM/YYYY
-    const formattedDeliveryDate = formatDateToDDMMYYYY(deliveryDate); // Formato DD/MM/YYYY
+    const formattedStartDate = formatDateToDDMMYYYY(startDate);
+    const formattedDeliveryDate = formatDateToDDMMYYYY(deliveryDate);
 
     const testPlanData = {
       name: name || "Sem nome",
@@ -130,9 +155,20 @@ function CreateTestPlan() {
       systemModuleId: selectedModulo ? Number(selectedModulo) : 1,
       testerId: selectedTester ? Number(selectedTester) : 1,
       password: password || "Sem senha",
-      testeSuiteId: [], // Array vazio por padrão
+      testeSuiteId: [],
     };
 
+    if (testPlanId) {
+      // Se o testPlanId já existe, atualize o registro
+      await handleUpdate(testPlanId, testPlanData);
+    } else {
+      // Caso contrário, crie um novo registro
+      await handleCreate(testPlanData);
+    }
+  };
+
+  // Função para criar um novo registro
+  const handleCreate = async (testPlanData: any) => {
     try {
       const response = await axios.post('http://localhost:8081/testplans', testPlanData);
       console.log("Plano de Teste Criado:", response.data);
@@ -141,6 +177,18 @@ function CreateTestPlan() {
     } catch (error) {
       console.error("Erro ao criar Plano de Teste:", error);
       alert("Erro ao criar Plano de Teste. Verifique o console para mais detalhes.");
+    }
+  };
+
+  // Função para atualizar um registro existente
+  const handleUpdate = async (id: number, testPlanData: any) => {
+    try {
+      const response = await axios.put(`http://localhost:8081/testplans/${id}`, testPlanData);
+      console.log("Plano de Teste Atualizado:", response.data);
+      alert("Plano de Teste atualizado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao atualizar Plano de Teste:", error);
+      alert("Erro ao atualizar Plano de Teste. Verifique o console para mais detalhes.");
     }
   };
 
@@ -172,6 +220,39 @@ function CreateTestPlan() {
     }
   };
 
+  // Função para clonar uma suite
+  const handleCloneSuite = async (suiteId: number) => {
+    try {
+      // Busca os dados da suite que será clonada
+      const suiteToClone = suites.find((suite) => suite.id === suiteId);
+      if (!suiteToClone) {
+        alert("Suite não encontrada para clonar.");
+        return;
+      }
+
+      // Cria a nova suite com o próximo código disponível
+      const newSuite = {
+        status: "EM_PROGRESSO", // Status padrão para a nova suite
+        data: formatDateToDDMMYYYY(new Date()), // Data atual
+        testPlanId: testPlanId!, // ID do TestPlan atual
+        codeSuite: nextCode, // Próximo código incremental
+      };
+
+      // Envia a nova suite para o backend
+      const response = await axios.post<TestSuite>('http://localhost:8081/test-suites', newSuite);
+      console.log('Suite clonada com sucesso:', response.data);
+
+      // Atualiza o estado das suites com a nova suite clonada
+      setSuites((prevSuites) => [...prevSuites, response.data]);
+
+      // Incrementa o próximo código
+      setNextCode(nextCode + 1);
+    } catch (error) {
+      console.error('Erro ao clonar suite:', error);
+      alert('Erro ao clonar suite. Verifique o console para mais detalhes.');
+    }
+  };
+
   return (
     <Container style={{ marginTop: '20px', marginBottom: '20px' }}>
       {/* Menus */}
@@ -190,7 +271,7 @@ function CreateTestPlan() {
             <Row>
               <Col md={6}>
                 <Form.Group controlId="formDeliveryDate">
-                  <Form.Label>Data de Entrega</Form.Label>
+                  <Form.Label>Data Sprint</Form.Label>
                   <DatePicker
                     selected={deliveryDate}
                     onChange={(date) => setDeliveryDate(date || new Date())}
@@ -402,7 +483,6 @@ function CreateTestPlan() {
                     onChange={(e) => setSelectedStatus(e.target.value)}
                   >
                     <option value="EM_PROGRESSO">Em Progresso</option>
-                    <option value="CRIADA">Criada</option>
                     <option value="CONCLUIDA">Concluída</option>
                     <option value="IMPEDIMENTO">Impedimento</option>
                     <option value="RETORNO">Retorno</option>
@@ -425,7 +505,21 @@ function CreateTestPlan() {
               </Col>
               <Col md={4}>
                 <Form.Group controlId="formTaskSwitch">
-                  <Form.Label>Criada</Form.Label>
+                  <Form.Label>
+                    Criada{' '}
+                    <OverlayTrigger
+                      placement="top"
+                      overlay={
+                        <Tooltip id="tooltip-criada">
+                          Ao marcar o switch será contabilizado como UL criada apenas na criação e não será possível editar posteriormente.
+                        </Tooltip>
+                      }
+                    >
+                      <span>
+                        <FiAlertCircle style={{color: 'red', cursor: 'pointer', marginLeft: '5px' }} />
+                      </span>
+                    </OverlayTrigger>
+                  </Form.Label>
                   <Form.Check
                     type="switch"
                     id="custom-switch"
@@ -454,9 +548,9 @@ function CreateTestPlan() {
             </Row>
             <Row>
               <Col md={10}>
-                {/* Botão Salvar */}
+                {/* Botão Voltar */}
                 <div style={{ textAlign: 'right', marginTop: '20px' }}>
-                  <Button type="submit" variant="secondary" onClick={() => navigate('/planoTeste/listagem')} >
+                  <Button type="button" variant="secondary" onClick={() => navigate('/planoTeste/listagem')} >
                     Voltar
                   </Button>
                 </div>
@@ -481,34 +575,35 @@ function CreateTestPlan() {
             </Button>
 
             <ListGroup>
-              {suites.map((suite) => (
-                <ListGroup.Item key={suite.id}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div>
-                      <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+              {suites.map((suite) => {
+                const suiteTestCases = testCases.filter(caseItem => caseItem.testSuiteId === suite.id);
+                return (
+                  <ListGroup.Item key={suite.id}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <ExportSuites testSuiteId={suite.id} /> 
+                      <div>
+                        <strong>Suite #{suite.codeSuite}</strong> - Data: {suite.data}
+                      </div>
+                      <div>
+                        <FaEdit
+                          style={{ color: "#0d6efd", cursor: "pointer", marginRight: '15px' }}
+                          onClick={() => navigate(`/plan/${testPlanId}/suite/${suite.id}`)}
+                        />
+                        <HiOutlineDuplicate
+                          style={{ color: "#6c757d", cursor: "pointer" }}
+                          onClick={() => handleCloneSuite(suite.id)}
+                        />
+                      </div>
                     </div>
-                    <div>
-                      {/* Ícone de Editar */}
-                      <FaEdit
-                        className="icon-edit"
-                        style={{ color: "#0d6efd", cursor: "pointer", marginRight: "15px" }}
-                        onClick={() => navigate(`/edit-suite/${suite.id}`)}
-                      />
-                      {/* Ícone de Duplicar */}
-                      <HiOutlineDuplicate
-                        className="icon-duplicate"
-                        style={{ color: "#6c757d", cursor: "pointer" }}
-                        onClick={() => alert(`Duplicar suite ${suite.codeSuite}`)} // Adicione a lógica de duplicação aqui
-                      />
-                    </div>
-                  </div>
-                </ListGroup.Item>
-              ))}
+                    <StackedProgressBar testCases={suiteTestCases} />
+                  </ListGroup.Item>
+                );
+              })}
             </ListGroup>
           </div>
         </Tab>
       </Tabs>
-    </Container>
+    </Container >
   );
 }
 

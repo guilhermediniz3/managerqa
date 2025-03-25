@@ -4,8 +4,10 @@ import java.time.LocalDate;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tester.enuns.Status;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -23,13 +25,16 @@ public class TestCaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@NotBlank(message = "O nome não pode ser vazio")	
+	@Column(name = "code_case")
+	private Long codeCase;
+	@NotBlank(message = "O nome não pode ser vazio")
 	private String scenario;
 	private String expectedResult;
 	private String obtainedResult;
 	private String videoEvidence;
 	@Enumerated(EnumType.STRING)
 	private Status status;
+	@JsonFormat(pattern = "dd/MM/yyyy")
 	@DateTimeFormat(pattern = "dd/MM/yyyy")
 	private LocalDate data;
 	@ManyToOne
@@ -42,11 +47,12 @@ public class TestCaseEntity {
 	
 
 
-	public TestCaseEntity(Long id,String scenario,
+	public TestCaseEntity(Long id,Long codeCase,String scenario,
 			String expectedResult, String obtainedResult, String videoEvidence, Status status, LocalDate data,
 			TestSuite testSuite) {
 		
 		this.id = id;
+		this.codeCase = codeCase;
 		this.scenario = scenario;
 		this.expectedResult = expectedResult;
 		this.obtainedResult = obtainedResult;
@@ -119,6 +125,18 @@ public class TestCaseEntity {
 
 	public void setTestSuite(TestSuite testSuite) {
 		this.testSuite = testSuite;
+	}
+
+
+
+	public Long getCodeCase() {
+		return codeCase;
+	}
+
+
+
+	public void setCodeCase(Long codeCase) {
+		this.codeCase = codeCase;
 	}
 
 }

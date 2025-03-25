@@ -1,5 +1,10 @@
 package com.tester.enuns;
 
+import java.util.stream.Stream;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum Status {
 
 	EM_PROGRESSO("em progresso"), CONCLUIDA("Concluída"), IMPEDIMENTO("Impedimento"), RETORNO("Retorno");
@@ -16,4 +21,5 @@ public enum Status {
 		return descricao;
 	}
 
+	
 }

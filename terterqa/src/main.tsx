@@ -27,7 +27,7 @@ import EditarTecnologia from './shared/pages/tecnologia/editar/EditarTecnologia'
 import ListaPlanoTeste from './shared/pages/planoTeste/listagem/ListaPlanoTeste'
 import CadastrarPlanoTeste from'./shared/pages/planoTeste/cadastrar/CadastrarPlanoTeste';
 import EditarPlanoTeste from './shared/pages/planoTeste/editar/EditarPlanoTeste';
-
+import Case from './shared/pages/cases/Case';
 ReactDOM.createRoot(document.getElementById('root')!).render(
 
   <React.StrictMode>
@@ -61,7 +61,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           <Route path="/tecnologia/editar/:id" element={<EditarTecnologia/>} />
           <Route path="/planoTeste/listagem" element={<ListaPlanoTeste/>} />
           <Route path="/planoTeste/cadastrar" element={<CadastrarPlanoTeste/>} />
+          <Route path="/planoTeste/cadastrar/:id" element={<CadastrarPlanoTeste/>} />
           <Route path="/planoTeste/editar/:id" element={<EditarPlanoTeste/>} />
+          <Route path="/plan/:testPlanId/suite/:testSuiteId" element={<Case />} />
     
    
         </Route>

@@ -10,8 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/pro-components": "^2.8.6",
+    "@ant-design/pro-layout": "^7.22.3",
     "@tanstack/react-query": "^5.66.9",
     "@types/react-router-dom": "5.3.3",
+    "antd": "^5.24.4",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
     "jwt-decode": "^4.0.0",
@@ -21,10 +24,12 @@
     "react-datepicker": "^8.1.0",
     "react-dom": "^18.3.1",
     "react-icons": "^5.4.0",
-    "react-router-dom": "6.4.1"
+    "react-router-dom": "6.4.1",
+    "recharts": "^2.15.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@types/node": "^22.13.13",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",

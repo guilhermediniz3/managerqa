@@ -3,16 +3,21 @@ package com.tester.service;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.tester.dto.CreatedByDTO;
+import com.tester.dto.LastCodeSuiteDTO;
 import com.tester.dto.TestPlanDTO;
 import com.tester.dto.TestPlanListagemDTO;
+
 import com.tester.entity.Developer;
 import com.tester.entity.SystemModule;
 import com.tester.entity.TestPlan;
@@ -42,6 +47,8 @@ public class TestPlanService {
 
 	@Autowired
 	private TesterQARepository testerRepository;
+	@Autowired
+	private TestSuiteRepository TestSuiteRepository;
 
 	public TestPlanDTO createTestPlan(TestPlanDTO testPlanDTO) {
 		// Criando a entidade a partir do DTO
@@ -102,6 +109,7 @@ public class TestPlanService {
 
 		// Atualizando os campos
 		testPlan.setName(testPlanDTO.getName());
+		testPlan.setCreated(testPlanDTO.getCreated()); // Certifique-se de que isso está presente
 		testPlan.setObservation(testPlanDTO.getObservation());
 		testPlan.setStatus(testPlanDTO.getStatus());
 		testPlan.setTaskStatus(testPlanDTO.getTaskStatus());
@@ -139,7 +147,16 @@ public class TestPlanService {
 				throw new ResourceNotFoundException("Uma ou mais TestSuites não foram encontradas");
 			}
 
-			testPlan.setTesteSuite(testSuites);
+			// Limpa a coleção existente
+			testPlan.getTesteSuite().clear();
+
+			// Adiciona as novas TestSuites
+			testPlan.getTesteSuite().addAll(testSuites);
+
+			// Atualiza o lado inverso do relacionamento (TestSuite -> TestPlan)
+			for (TestSuite suite : testSuites) {
+				suite.setTestPlan(testPlan);
+			}
 		}
 
 		// Salvando atualização
@@ -163,103 +180,161 @@ public class TestPlanService {
 				.orElseThrow(() -> new ResourceNotFoundException("Plano de teste não encontrado"));
 		return new TestPlanDTO(testPlan);
 	}
-	
-	
 
-    public Page<TestPlanListagemDTO> findAllTestPlans(
-            String name, String observation, String status, String taskStatus,
-            String jira, LocalDate dataInicio, LocalDate dataFim,
-            LocalDate deliveryDataInicio, LocalDate deliveryDataFim,
-            String matriz, String userName, String callNumber,
-            String developerName, String systemModuleName, String testerQAName,
-            Pageable pageable) {
+	public Page<TestPlanListagemDTO> findAllTestPlans(String name, String observation, String status, String taskStatus,
+			String jira, LocalDate dataInicio, LocalDate dataFim, LocalDate deliveryDataInicio,
+			LocalDate deliveryDataFim, String matriz, String userName, String callNumber, String developerName,
+			String systemModuleName, String testerQAName, Pageable pageable) {
 
-        // Busca os TestPlans do banco de dados
-        Page<TestPlan> testPlans = testPlanRepository.findAllTestPlans(
-                name, observation, status, taskStatus, jira,
-                dataInicio, dataFim, deliveryDataInicio, deliveryDataFim,
-                matriz, userName, callNumber, developerName, systemModuleName, testerQAName,
-                pageable
-        );
+		// Busca os TestPlans do banco de dados
+		Page<TestPlan> testPlans = testPlanRepository.findAllTestPlans(name, observation, status, taskStatus, jira,
+				dataInicio, dataFim, deliveryDataInicio, deliveryDataFim, matriz, userName, callNumber, developerName,
+				systemModuleName, testerQAName, pageable);
 
-        // Mapeia os TestPlans para TestPlanListagemDTO
-        return testPlans.map(testPlan -> new TestPlanListagemDTO(testPlan));
-    }
-    
-    
-    public TestPlanDTO patchTestPlan(Long id, TestPlanDTO testPlanDTO) {
-        // Buscando o TestPlan pelo ID
-        TestPlan testPlan = testPlanRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Plano de teste não encontrado"));
+		// Mapeia os TestPlans para TestPlanListagemDTO
+		return testPlans.map(testPlan -> new TestPlanListagemDTO(testPlan));
+	}
 
-        // Atualizando os campos apenas se não forem nulos no DTO
-        if (testPlanDTO.getName() != null) {
-            testPlan.setName(testPlanDTO.getName());
-        }
-        if (testPlanDTO.getObservation() != null) {
-            testPlan.setObservation(testPlanDTO.getObservation());
-        }
-        if (testPlanDTO.getStatus() != null) {
-            testPlan.setStatus(testPlanDTO.getStatus());
-        }
-        if (testPlanDTO.getTaskStatus() != null) {
-            testPlan.setTaskStatus(testPlanDTO.getTaskStatus());
-        }
-        if (testPlanDTO.getJira() != null) {
-            testPlan.setJira(testPlanDTO.getJira());
-        }
-        if (testPlanDTO.getData() != null) {
-            testPlan.setData(testPlanDTO.getData());
-        }
-        if (testPlanDTO.getDeliveryData() != null) {
-            testPlan.setDeliveryData(testPlanDTO.getDeliveryData());
-        }
-        if (testPlanDTO.getMatriz() != null) {
-            testPlan.setMatriz(testPlanDTO.getMatriz());
-        }
-        if (testPlanDTO.getUserName() != null) {
-            testPlan.setUserName(testPlanDTO.getUserName());
-        }
-        if (testPlanDTO.getPassword() != null) {
-            testPlan.setPassword(testPlanDTO.getPassword());
-        }
-        if (testPlanDTO.getCallNumber() != null) {
-            testPlan.setCallNumber(testPlanDTO.getCallNumber());
-        }
+	public TestPlanDTO patchTestPlan(Long id, TestPlanDTO testPlanDTO) {
+		// Buscando o TestPlan pelo ID
+		TestPlan testPlan = testPlanRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Plano de teste não encontrado"));
 
-        // Atualizando relacionamentos
-        if (testPlanDTO.getDeveloperId() != null) {
-            Developer developer = developerRepository.findById(testPlanDTO.getDeveloperId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Desenvolvedor não encontrado"));
-            testPlan.setDeveloper(developer);
-        }
+		// Atualizando os campos apenas se não forem nulos no DTO
+		if (testPlanDTO.getName() != null) {
+			testPlan.setName(testPlanDTO.getName());
+		}
+		if (testPlanDTO.getCreated() != null) { // Certifique-se de que isso está presente
+			testPlan.setCreated(testPlanDTO.getCreated());
+		}
+		if (testPlanDTO.getObservation() != null) {
+			testPlan.setObservation(testPlanDTO.getObservation());
+		}
+		if (testPlanDTO.getStatus() != null) {
+			testPlan.setStatus(testPlanDTO.getStatus());
+		}
+		if (testPlanDTO.getTaskStatus() != null) {
+			testPlan.setTaskStatus(testPlanDTO.getTaskStatus());
+		}
+		if (testPlanDTO.getJira() != null) {
+			testPlan.setJira(testPlanDTO.getJira());
+		}
+		if (testPlanDTO.getData() != null) {
+			testPlan.setData(testPlanDTO.getData());
+		}
+		if (testPlanDTO.getDeliveryData() != null) {
+			testPlan.setDeliveryData(testPlanDTO.getDeliveryData());
+		}
+		if (testPlanDTO.getMatriz() != null) {
+			testPlan.setMatriz(testPlanDTO.getMatriz());
+		}
+		if (testPlanDTO.getUserName() != null) {
+			testPlan.setUserName(testPlanDTO.getUserName());
+		}
+		if (testPlanDTO.getPassword() != null) {
+			testPlan.setPassword(testPlanDTO.getPassword());
+		}
+		if (testPlanDTO.getCallNumber() != null) {
+			testPlan.setCallNumber(testPlanDTO.getCallNumber());
+		}
 
-        if (testPlanDTO.getSystemModuleId() != null) {
-            SystemModule systemModule = systemModuleRepository.findById(testPlanDTO.getSystemModuleId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Módulo do sistema não encontrado"));
-            testPlan.setSystemModule(systemModule);
-        }
+		// Atualizando relacionamentos
+		if (testPlanDTO.getDeveloperId() != null) {
+			Developer developer = developerRepository.findById(testPlanDTO.getDeveloperId())
+					.orElseThrow(() -> new ResourceNotFoundException("Desenvolvedor não encontrado"));
+			testPlan.setDeveloper(developer);
+		}
 
-        if (testPlanDTO.getTesterId() != null) {
-            TesterQA tester = testerRepository.findById(testPlanDTO.getTesterId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Tester não encontrado"));
-            testPlan.setTester(tester);
-        }
+		if (testPlanDTO.getSystemModuleId() != null) {
+			SystemModule systemModule = systemModuleRepository.findById(testPlanDTO.getSystemModuleId())
+					.orElseThrow(() -> new ResourceNotFoundException("Módulo do sistema não encontrado"));
+			testPlan.setSystemModule(systemModule);
+		}
 
-        if (testPlanDTO.getTesteSuiteId() != null && !testPlanDTO.getTesteSuiteId().isEmpty()) {
-            Set<TestSuite> testSuites = new HashSet<>(testSuiteRepository.findAllById(testPlanDTO.getTesteSuiteId()));
+		if (testPlanDTO.getTesterId() != null) {
+			TesterQA tester = testerRepository.findById(testPlanDTO.getTesterId())
+					.orElseThrow(() -> new ResourceNotFoundException("Tester não encontrado"));
+			testPlan.setTester(tester);
+		}
 
-            if (testSuites.size() != testPlanDTO.getTesteSuiteId().size()) {
-                throw new ResourceNotFoundException("Uma ou mais TestSuites não foram encontradas");
-            }
+		if (testPlanDTO.getTesteSuiteId() != null && !testPlanDTO.getTesteSuiteId().isEmpty()) {
+			// Busca as novas TestSuites
+			Set<TestSuite> testSuites = new HashSet<>(testSuiteRepository.findAllById(testPlanDTO.getTesteSuiteId()));
 
-            testPlan.setTesteSuite(testSuites);
-        }
+			if (testSuites.size() != testPlanDTO.getTesteSuiteId().size()) {
+				throw new ResourceNotFoundException("Uma ou mais TestSuites não foram encontradas");
+			}
 
-        // Salvando atualização
-        TestPlan updatedTestPlan = testPlanRepository.save(testPlan);
-        return new TestPlanDTO(updatedTestPlan);
-    }
-    
+			// Limpa a coleção existente
+			testPlan.getTesteSuite().clear();
 
+			// Adiciona as novas TestSuites
+			testPlan.getTesteSuite().addAll(testSuites);
+
+			// Atualiza o lado inverso do relacionamento (TestSuite -> TestPlan)
+			for (TestSuite suite : testSuites) {
+				suite.setTestPlan(testPlan);
+			}
+		}
+
+		// Salvando atualização
+		TestPlan updatedTestPlan = testPlanRepository.save(testPlan);
+		return new TestPlanDTO(updatedTestPlan);
+	}
+
+	public LastCodeSuiteDTO getLastCodeSuiteByTestPlanId(Long testPlanId) {
+		// Busca o último TestSuite associado ao testPlanId
+		Optional<TestSuite> testSuiteOptional = testSuiteRepository.findLastTestSuiteByTestPlanId(testPlanId);
+
+		// Se não houver TestSuite, retorna um valor padrão
+		if (testSuiteOptional.isEmpty()) {
+			LastCodeSuiteDTO lastCodeSuiteDTO = new LastCodeSuiteDTO();
+			lastCodeSuiteDTO.setCodeSuite(0L); // Valor padrão
+			lastCodeSuiteDTO.setTestPlanId(testPlanId); // Define o testPlanId
+			return lastCodeSuiteDTO;
+		}
+
+		// Se houver TestSuite, retorna o DTO com os dados
+		TestSuite testSuite = testSuiteOptional.get();
+		LastCodeSuiteDTO lastCodeSuiteDTO = new LastCodeSuiteDTO(testSuite);
+		return lastCodeSuiteDTO;
+	}
+
+	// EXIBIR QUEM CRIOU A TAREFA (UL)
+	public CreatedByDTO getCreatedByByTestPlanId(Long testPlanId) {
+		return testPlanRepository.findCreatedByByTestPlanId(testPlanId);
+	}
+
+	// service para teste deletar se nao funcionar
+	  public Page<TestPlanListagemDTO> searchTestPlans(String searchValue, Pageable pageable) {
+	        Page<TestPlan> testPlans = testPlanRepository.searchTestPlans(searchValue, pageable);
+	        return testPlans.map(TestPlanListagemDTO::new);
+	    }
+	  
+	  //  Dashboard ------------------------------------------------------------------------------------
+	  
+	// Método para contar tarefas CONCLUÍDAS
+	    public Long getCountConcluidas(LocalDate dataDe, LocalDate dataAte) {
+	        return testPlanRepository.countConcluidas(dataDe, dataAte);
+	    }
+
+	    // Método para contar tarefas com RETORNO
+	    public Long getCountRetorno(LocalDate dataDe, LocalDate dataAte) {
+	        return testPlanRepository.countRetorno(dataDe, dataAte);
+	    }
+
+	    // Método para contar tarefas com IMPEDIMENTO
+	    public Long getCountImpedimento(LocalDate dataDe, LocalDate dataAte) {
+	        return testPlanRepository.countImpedimento(dataDe, dataAte);
+	    }
+
+	    // Método para contar tarefas EM PROGRESSO
+	    public Long getCountEmProgresso(LocalDate dataDe, LocalDate dataAte) {
+	        return testPlanRepository.countEmProgresso(dataDe, dataAte);
+	    }
+
+	    // Método para contar registros onde created = TRUE dentro de um intervalo de datas
+	    public Long getCountCreatedTrue(LocalDate dataDe, LocalDate dataAte) {
+	        return testPlanRepository.countCreatedTrueByDeliveryDataBetween(dataDe, dataAte);
+	    }
 }

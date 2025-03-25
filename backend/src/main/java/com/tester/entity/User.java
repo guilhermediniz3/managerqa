@@ -1,3 +1,4 @@
+
 package com.tester.entity;
 
 import jakarta.persistence.Entity;

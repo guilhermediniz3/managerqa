@@ -11,11 +11,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.tester.entity.TestSuite;
 import com.tester.enuns.Status;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+
 public class TestSuiteDTO {
 
 	private Long id;
 	private Long codeSuite;
-
+   @Enumerated(EnumType.STRING)
 	private Status status;
 
     @JsonFormat(pattern = "dd/MM/yyyy")
@@ -27,6 +30,16 @@ public class TestSuiteDTO {
 	public TestSuiteDTO() {
 		
 	}
+	
+	   // Construtor para a consulta JPQL
+    public TestSuiteDTO(Long id, Long codeSuite, Status status, LocalDate data, Long testPlanId) {
+        this.id = id;
+        this.codeSuite = codeSuite;
+        this.status = status;
+        this.data = data;
+        this.testPlanId = testPlanId;
+        this.TestCaseId = new HashSet<>(); // Inicializa o conjunto de IDs de casos de teste como vazio
+    }
 
 
 	public TestSuiteDTO(Long id,Long codeSuite, Status status, LocalDate data, Long testPlanId, Set<Long> testCaseId) {
