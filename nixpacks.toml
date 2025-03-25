@@ -16,8 +16,8 @@ cmds = [
   "cd backend && ./mvnw package -DskipTests"
 ]
 
-[phases.start]
-cmd = "cd backend && java -Dserver.port=$PORT -jar target/*.jar"
+[start]
+cmd = "cd backend && java -Dserver.port=${PORT:-8081} -jar $(find target -name '*.jar')"
 
 [env]
 PORT = "8081"
