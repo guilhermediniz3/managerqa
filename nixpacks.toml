@@ -1,7 +1,7 @@
 [phases.setup]
 cmds = [
   # Frontend (React/Vite/TypeScript)
-  "cd managerqa/testerqa && yarn install --frozen-lockfile",
+  "cd testerqa && yarn install --frozen-lockfile",
   
   # Backend (Spring Boot)
   "cd backend && chmod +x mvnw && ./mvnw clean package -DskipTests"
@@ -10,16 +10,11 @@ cmds = [
 [phases.build]
 cmds = [
   # Build do frontend
-  "cd managerqa/testerqa && yarn build",
+  "cd testerqa && yarn build",
   
   # Build do backend
   "cd backend && ./mvnw package -DskipTests"
 ]
 
-[start]
-cmd = "cd backend && java -Dserver.port=${PORT:-8081} -jar $(find target -name '*.jar')"
-
-[env]
-PORT = "8081"
-NODE_ENV = "production"
-SPRING_PROFILES_ACTIVE = "prod"
+[phases.start]
+cmd = "cd backend && java -Dserver.port=$PORT -jar target/*.jar"
