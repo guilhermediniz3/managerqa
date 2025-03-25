@@ -1,0 +1,24 @@
+[phases.setup]
+cmds = [
+  # Front-end (testerqa)
+  "cd testerqa && yarn install",
+  
+  # Back-end (backend)
+  "cd backend && ./mvnw clean package -DskipTests"
+]
+
+[phases.build]
+cmds = [
+  # Build do front-end
+  "cd testerqa && yarn build",
+  
+  # Build do back-end
+  "cd backend && ./mvnw package -DskipTests"
+]
+
+[phases.start]
+cmd = "cd backend && java -jar target/*.jar --server.port=$PORT"
+
+[env]
+PORT = "8081"
+NODE_ENV = "production"
