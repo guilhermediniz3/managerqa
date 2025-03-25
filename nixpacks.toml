@@ -1,7 +1,7 @@
 [phases.setup]
 cmds = [
   # Frontend (React/Vite/TypeScript)
-  "cd testerqa && yarn install --frozen-lockfile",
+  "cd managerqa/testerqa && yarn install --frozen-lockfile",
   
   # Backend (Spring Boot)
   "cd backend && chmod +x mvnw && ./mvnw clean package -DskipTests"
@@ -10,7 +10,7 @@ cmds = [
 [phases.build]
 cmds = [
   # Build do frontend
-  "cd testerqa && yarn build",
+  "cd managerqa/testerqa && yarn build",
   
   # Build do backend
   "cd backend && ./mvnw package -DskipTests"
