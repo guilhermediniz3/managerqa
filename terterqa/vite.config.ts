@@ -1,16 +1,19 @@
+// terterqa/vite.config.ts
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src')
+  server: {
+    proxy: {
+      // Configuração para redirecionar TUDO para o Spring Boot
+      '^/(?!(assets|src|node_modules|@vite)).*': {
+        target: 'http://localhost:8081', // Porta do Spring
+        changeOrigin: true,
+      }
     }
   },
-  server: {
-    port: 5173, // ← Porta padrão do Vite
-    host: true // ← Permite acesso externo
+  build: {
+    outDir: '../back-end/src/main/resources/static'
   }
 })
