@@ -17,6 +17,7 @@ cmds = [
 ]
 
 [phases.start]
+# Certifique-se de que o caminho para o arquivo JAR está correto.
 cmd = "cd backend && java -Dserver.port=${PORT:-8081} -jar target/demo-0.0.1-SNAPSHOT.jar"
 
 [env]
