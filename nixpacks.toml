@@ -31,3 +31,4 @@ DB_PASSWORD = ""
 
 # Chave JWT
 TOKEN_SECRET = "dGhpcy1lcy11bWEtY2hhdmUtc2Vnby1wYXJhLWp3dC1jb20tNjQtY2FyYWN0ZXJlcw=="
+
