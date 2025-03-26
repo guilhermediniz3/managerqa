@@ -1,16 +1,16 @@
 [phases.setup]
 cmds = [
-  # Instala Node.js e Yarn corretamente
+  # Garante que o Corepack e o Yarn estejam disponíveis
   "corepack enable",
   "corepack prepare yarn@stable --activate",
-  "corepack install",
+  "yarn set version stable",
   "yarn --version",
 
-  # Frontend
+  # Instala dependências do frontend
   "cd testerqa && yarn install --frozen-lockfile --production=false",
   "cd testerqa && yarn add vite",
 
-  # Backend
+  # Instala dependências do backend
   "cd backend && chmod +x mvnw && ./mvnw clean install -DskipTests"
 ]
 
@@ -27,15 +27,15 @@ cmds = [
 cmd = "cd backend && java -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar target/*.jar --server.port=${PORT}"
 
 [env]
-# Versões
-NODE_VERSION = "20"
+# Versões das tecnologias
+NODE_VERSION = "22"
 JAVA_VERSION = "21"
 
-# Configurações do Spring
+# Configurações do Spring Boot
 SPRING_PROFILES_ACTIVE = "prod"
 SPRING_DATASOURCE_URL = { from = "DATABASE_URL" }
 SPRING_DATASOURCE_USERNAME = { from = "PGUSER" }
 SPRING_DATASOURCE_PASSWORD = { from = "PGPASSWORD", secret = true }
 
-# Frontend
+# Configuração do Frontend
 NODE_ENV = "production"
