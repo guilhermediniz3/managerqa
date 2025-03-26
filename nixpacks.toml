@@ -1,11 +1,7 @@
 [phases.setup]
 cmds = [
-  # Configuração do Node/Yarn
-  "corepack enable && corepack prepare yarn@stable --activate",
-  
-  # Frontend
-  "cd testerqa && yarn install --frozen-lockfile --production=false",
-  "cd testerqa && yarn add vite @vitejs/plugin-react",
+  # Frontend (instalação local sem privilégios)
+  "cd testerqa && npm install -g yarn && yarn install --frozen-lockfile",
   
   # Backend
   "cd backend && chmod +x mvnw && ./mvnw clean install -DskipTests"
@@ -13,39 +9,16 @@ cmds = [
 
 [phases.build]
 cmds = [
-  # Build do frontend (os arquivos serão copiados para o backend depois)
+  # Build do frontend
   "cd testerqa && yarn build",
   
-  # Cria diretório de recursos estáticos do Spring
+  # Integração com Spring Boot
   "mkdir -p backend/src/main/resources/static",
-  
-  # Copia os arquivos do frontend para o backend
   "cp -R testerqa/dist/* backend/src/main/resources/static/",
   
-  # Build do backend
+  # Build final teste
   "cd backend && ./mvnw package -DskipTests"
 ]
 
 [phases.start]
-cmd = "java -Dserver.port=${PORT} -jar backend/target/*.jar"
-
-[env]
-# Versões
-NODE_VERSION = "22"
-JAVA_VERSION = "21"
-
-# Banco de dados (Render/Railway usa esses nomes)
-SPRING_DATASOURCE_URL = { from = "DATABASE_URL" }
-SPRING_DATASOURCE_USERNAME = { from = "PGUSER" }
-SPRING_DATASOURCE_PASSWORD = { from = "PGPASSWORD", secret = true }
-
-# Frontend
-NODE_ENV = "production"
-VITE_API_BASE = "/api"  # Frontend usará caminhos relativos
-
-# Segurança
-TOKEN_SECRET = { secret = true }
-
-# Configuração do Spring
-SPRING_PROFILES_ACTIVE = "prod"
-FRONTEND_URL = { from = "RAILWAY_STATIC_URL" }  # Ou RENDER_EXTERNAL_URL
+cmd = "cd backend && java -jar target/*.jar --server.port=${PORT}"
