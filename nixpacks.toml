@@ -1,26 +1,33 @@
 [phases.setup]
 cmds = [
-  # Frontend
-  "cd testerqa && yarn install --frozen-lockfile",
+  # Instala dependências do frontend
+  "cd managerqa/testerqa && yarn install --frozen-lockfile",
   
-  # Backend
+  # Instala e configura o backend
   "cd backend && chmod +x mvnw && ./mvnw clean package -DskipTests"
 ]
 
 [phases.build]
 cmds = [
-  "cd testerqa && yarn build",
+  # Build do frontend
+  "cd managerqa/testerqa && yarn build",
+  
+  # Build do backend
   "cd backend && ./mvnw package -DskipTests"
 ]
 
 [phases.start]
-cmd = "cd backend && java -jar target/demo-0.0.1-SNAPSHOT.jar --server.port=$PORT"
+cmd = "cd backend && java -Dserver.port=${PORT:-8081} -jar target/demo-0.0.1-SNAPSHOT.jar"
 
 [env]
 PORT = "8081"
 NODE_ENV = "production"
 SPRING_PROFILES_ACTIVE = "prod"
-DATABASE_URL = ""  # Auto-preenchido pelo PostgreSQL
-DB_USERNAME = ""   # Auto-preenchido
-DB_PASSWORD = ""   # Auto-preenchido
+
+# Configuração do banco de dados (preenchido automaticamente se for usado no deploy)
+DATABASE_URL = ""
+DB_USERNAME = ""
+DB_PASSWORD = ""
+
+# Chave JWT
 TOKEN_SECRET = "dGhpcy1lcy11bWEtY2hhdmUtc2Vnby1wYXJhLWp3dC1jb20tNjQtY2FyYWN0ZXJlcw=="
