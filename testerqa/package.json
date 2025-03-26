@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --emptyOutDir",
     "preview": "vite preview --port 5173",
     "start": "vite preview --port 5173",
     "lint": "eslint . --ext .ts,.tsx",
@@ -15,10 +15,11 @@
     "@ant-design/pro-components": "^2.8.6",
     "@ant-design/pro-layout": "^7.22.3",
     "@tanstack/react-query": "^5.66.9",
-    "@types/react-router-dom": "5.3.3",
+    "@types/react-router-dom": "^5.3.3",
     "antd": "^5.24.4",
     "axios": "^1.7.9",
     "bootstrap": "^5.3.3",
+    "@popperjs/core": "^2.11.8",  // Adicionado para o Bootstrap
     "jwt-decode": "^4.0.0",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.9",
@@ -26,8 +27,10 @@
     "react-datepicker": "^8.1.0",
     "react-dom": "^18.3.1",
     "react-icons": "^5.4.0",
-    "react-router-dom": "6.4.1",
-    "recharts": "^2.15.1"
+    "react-router-dom": "^6.4.1",
+    "recharts": "^2.15.1",
+    "rc-field-form": "^1.31.0",   // Adicionado para o Ant Design
+    "rc-util": "^5.38.1"          // Dependência comum do Ant Design
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -44,7 +47,12 @@
     "rollup-plugin-visualizer": "^5.14.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.18.2",
-    "vite": "^6.2.3"
+    "@typescript-eslint/parser": "^8.18.2",  // Corrigido de typescript-eslint
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "vite": "^6.2.3",
+    "vite-plugin-checker": "^0.8.3"  // Para verificação de tipos durante o desenvolvimento
+  },
+  "resolutions": {
+    "@ant-design/icons": "^5.3.7"  // Resolve conflitos de versão do Ant Design
   }
 }

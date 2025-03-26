@@ -1,6 +1,6 @@
 [phases.setup]
 cmds = [
-  # Frontend (instalação local sem privilégios)
+  # Frontend (instalação local sem privilégios) --
   "cd testerqa && npm install -g yarn && yarn install --frozen-lockfile",
   
   # Backend
