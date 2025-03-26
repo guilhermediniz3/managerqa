@@ -4,7 +4,7 @@ import { FaEdit, FaUserPlus, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import NavVertical from "../../../components/navs/vertical/NavVertical";
 import NavHorizontal from "../../../components/navs/horizontal/NavHorizontal";
-import "../Listagem/styless.css";
+import "../listagem/styless.css";
 
 interface Tester {
   id: number;
