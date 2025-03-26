@@ -1,7 +1,7 @@
 [phases.setup]
 cmds = [
   # Instala dependências do frontend
-  "cd managerqa/testerqa && yarn install --frozen-lockfile",
+  "cd testerqa && yarn install --frozen-lockfile",
   
   # Instala e configura o backend
   "cd backend && chmod +x mvnw && ./mvnw clean package -DskipTests"
@@ -10,14 +10,13 @@ cmds = [
 [phases.build]
 cmds = [
   # Build do frontend
-  "cd managerqa/testerqa && yarn build",
+  "cd testerqa && yarn build",
   
   # Build do backend
   "cd backend && ./mvnw package -DskipTests"
 ]
 
 [phases.start]
-# Certifique-se de que o caminho para o arquivo JAR está correto.
 cmd = "cd backend && java -Dserver.port=${PORT:-8081} -jar target/demo-0.0.1-SNAPSHOT.jar"
 
 [env]
@@ -30,5 +29,5 @@ DATABASE_URL = ""
 DB_USERNAME = ""
 DB_PASSWORD = ""
 
-# Chave JWT (se necessário para autenticação)
+# Chave JWT
 TOKEN_SECRET = "dGhpcy1lcy11bWEtY2hhdmUtc2Vnby1wYXJhLWp3dC1jb20tNjQtY2FyYWN0ZXJlcw=="
