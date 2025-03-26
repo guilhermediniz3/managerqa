@@ -1,34 +1,40 @@
+# Configuração do Nixpacks
+# Versão: 1.34.1
+
+# Fase de Setup (instalação das dependências)
 [phases.setup]
 cmds = [
-  # Instala dependências do frontend
+  # Instala dependências do frontend (se houver)
   "cd testerqa && yarn install --frozen-lockfile",
   
   # Instala e configura o backend
   "cd backend && chmod +x mvnw && ./mvnw clean package -DskipTests"
 ]
 
+# Fase de Build (construção do projeto)
 [phases.build]
 cmds = [
-  # Build do frontend
+  # Build do frontend (se houver)
   "cd testerqa && yarn build",
   
   # Build do backend
   "cd backend && ./mvnw package -DskipTests"
 ]
 
+# Fase de Start (inicialização do servidor)
 [phases.start]
-cmd = "cd backend && java -Dserver.port=${PORT:-8081} -jar target/demo-0.0.1-SNAPSHOT.jar"
+cmd = "cd backend && java -Dserver.port=${PORT} -jar target/demo-0.0.1-SNAPSHOT.jar"
 
+# Variáveis de Ambiente
 [env]
-PORT = "8081"
-NODE_ENV = "production"
-SPRING_PROFILES_ACTIVE = "prod"
+PORT = "${PORT}" # Porta será definida automaticamente pelo Railway
+NODE_ENV = "production" # Define o ambiente como produção
+SPRING_PROFILES_ACTIVE = "prod" # Ativa o perfil de produção do Spring Boot
 
-# Configuração do banco de dados (preenchido automaticamente se for usado no deploy)
-DATABASE_URL = ""
-DB_USERNAME = ""
-DB_PASSWORD = ""
-
-# Chave JWT
+# Chave JWT (usada para assinar e validar tokens)
 TOKEN_SECRET = "dGhpcy1lcy11bWEtY2hhdmUtc2Vnby1wYXJhLWp3dC1jb20tNjQtY2FyYWN0ZXJlcw=="
 
+# Configuração do Banco de Dados (será preenchida no Railway)
+DATABASE_URL = "${DATABASE_URL}" # URL do banco de dados gerenciado pelo Railway
+DB_USERNAME = "${DB_USERNAME}"   # Nome de usuário do banco de dados
+DB_PASSWORD = "${DB_PASSWORD}"   # Senha do banco de dados
