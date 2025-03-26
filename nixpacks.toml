@@ -4,7 +4,7 @@ cmds = [
   "corepack enable",
   "corepack prepare yarn@stable --activate",
   "yarn set version stable",
-  "yarn --version",
+  "yarn --version",  # Verifica a versão do Yarn
 
   # Instala dependências do frontend
   "cd testerqa && yarn install --frozen-lockfile --production=false",
