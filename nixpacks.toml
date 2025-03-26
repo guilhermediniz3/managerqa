@@ -1,21 +1,25 @@
 [phases.setup]
 cmds = [
-  # Configuração do ambiente Node.js e Yarn
-  "corepack enable && corepack prepare yarn@stable --activate",
-  
-  # Frontend (Vite/Node.js)
-  "cd testerqa && yarn install --frozen-lockfile --production=false && yarn add vite vite-plugin-imagemin @vitejs/plugin-react",
-  
-  # Backend (Spring Boot)
+  # Instala Node.js e Yarn corretamente
+  "corepack enable",
+  "corepack prepare yarn@stable --activate",
+  "corepack install",
+  "yarn --version",
+
+  # Frontend
+  "cd testerqa && yarn install --frozen-lockfile --production=false",
+  "cd testerqa && yarn add vite",
+
+  # Backend
   "cd backend && chmod +x mvnw && ./mvnw clean install -DskipTests"
 ]
 
 [phases.build]
 cmds = [
-  # Frontend - Build de produção com otimização
-  "cd testerqa && yarn build --emptyOutDir",
+  # Build do frontend
+  "cd testerqa && yarn build",
   
-  # Backend - Gerar .jar com Java 21
+  # Build do backend
   "cd backend && ./mvnw package -DskipTests"
 ]
 
@@ -23,24 +27,15 @@ cmds = [
 cmd = "cd backend && java -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -jar target/*.jar --server.port=${PORT}"
 
 [env]
-# Versões das linguagens
-NODE_VERSION = "22"  # Compatível com seu ambiente local
-JAVA_VERSION = "21"  # Usando sua versão LTS do Java (21.0.5)
+# Versões
+NODE_VERSION = "20"
+JAVA_VERSION = "21"
 
-# Configurações do Spring Boot 3.x
+# Configurações do Spring
 SPRING_PROFILES_ACTIVE = "prod"
 SPRING_DATASOURCE_URL = { from = "DATABASE_URL" }
 SPRING_DATASOURCE_USERNAME = { from = "PGUSER" }
 SPRING_DATASOURCE_PASSWORD = { from = "PGPASSWORD", secret = true }
-SERVER_SERVLET_CONTEXT_PATH = "/api"
 
-# Configurações do Frontend
+# Frontend
 NODE_ENV = "production"
-VITE_APP_API_BASE = "${RAILWAY_STATIC_URL}/api"
-
-# Segredos (configurar no painel do Railway)
-JWT_SECRET = { secret = true }
-SPRING_SECURITY_OAUTH2_CLIENT_SECRET = { secret = true }
-
-# Otimizações para Java 21
-JAVA_OPTS = "-XX:+UseZGC -Xmx512m"  # Garbage Collector moderno e limite de memória
